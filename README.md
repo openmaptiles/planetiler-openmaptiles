@@ -1,6 +1,6 @@
-# Planetiler Basemap Profile
+# Planetiler OpenMapTiles Profile
 
-This basemap profile is based on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles) v3.13.
+This OpenMapTiles profile is based on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles) v3.13.
 See [README.md](../README.md) in the parent directory for instructions on how to run.
 
 ## Differences from OpenMapTiles
@@ -14,25 +14,25 @@ See [README.md](../README.md) in the parent directory for instructions on how to
 
 ## Code Layout
 
-[Generate.java](./src/main/java/com/onthegomap/planetiler/basemap/Generate.java) generates code in
-the [generated](./src/main/java/com/onthegomap/planetiler/basemap/generated) package from an OpenMapTiles tag in GitHub:
+[Generate.java](./src/main/java/com/onthegomap/planetiler/openmaptiles/Generate.java) generates code in
+the [generated](./src/main/java/com/onthegomap/planetiler/openmaptiles/generated) package from an OpenMapTiles tag in GitHub:
 
-- [OpenMapTilesSchema](./src/main/java/com/onthegomap/planetiler/basemap/generated/OpenMapTilesSchema.java)
+- [OpenMapTilesSchema](./src/main/java/com/onthegomap/planetiler/openmaptiles/generated/OpenMapTilesSchema.java)
   contains an interface for each layer with constants for the name, attributes, and allowed values for each tag in that
   layer
-- [Tables](./src/main/java/com/onthegomap/planetiler/basemap/generated/Tables.java)
+- [Tables](./src/main/java/com/onthegomap/planetiler/openmaptiles/generated/Tables.java)
   contains a record for each table that OpenMapTiles [imposm3](https://github.com/omniscale/imposm3) configuration
   generates (along with the tag-filtering expression) so layers can listen on instances of those records instead of
   doing the tag filtering and parsing themselves
 
-The [layers](./src/main/java/com/onthegomap/planetiler/basemap/layers) package contains a port of the SQL logic to
+The [layers](./src/main/java/com/onthegomap/planetiler/openmaptiles/layers) package contains a port of the SQL logic to
 generate each layer from OpenMapTiles. Layers define how source features (or parsed imposm3 table rows) map to vector
 tile features, and logic for post-processing tile geometries.
 
-[BasemapProfile](./src/main/java/com/onthegomap/planetiler/basemap/BasemapProfile.java) dispatches source features to
+[OpenMapTilesProfile](./src/main/java/com/onthegomap/planetiler/openmaptiles/OpenMapTilesProfile.java) dispatches source features to
 layer handlers and merges the results.
 
-[BasemapMain](./src/main/java/com/onthegomap/planetiler/basemap/BasemapMain.java) is the main driver that registers
+[OpenMapTilesMain](./src/main/java/com/onthegomap/planetiler/openmaptiles/OpenMapTilesMain.java) is the main driver that registers
 source data and output location.
 
 ## Regenerating Code

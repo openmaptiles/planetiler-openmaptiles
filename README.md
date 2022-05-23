@@ -1,7 +1,7 @@
 # Planetiler OpenMapTiles Profile
 
-This OpenMapTiles profile is based on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles) v3.13.
-See [README.md](../README.md) in the parent directory for instructions on how to run.
+This OpenMapTiles profile is based on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles).
+See [README.md](https://github.com/onthegomap/planetiler/blob/main/README.md) in the parent repository for instructions on how to run.
 
 ## Differences from OpenMapTiles
 
@@ -37,7 +37,7 @@ source data and output location.
 
 ## Regenerating Code
 
-To run `Generate.java`, use [scripts/regenerate-openmaptiles.sh](../scripts/regenerate-openmaptiles.sh) script with the
+To run `Generate.java`, use [scripts/regenerate-openmaptiles.sh](https://github.com/onthegomap/planetiler/blob/main/scripts/regenerate-openmaptiles.sh) script with the
 OpenMapTiles release tag:
 
 ```bash

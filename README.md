@@ -52,13 +52,16 @@ If you want to regenerate from a different repository than the default openmapti
 ./scripts/regenerate-openmaptiles.sh v3.13 https://raw.githubusercontent.com/openmaptiles/openmaptiles/
 ```
 
-## License and Attribution
+## License
 
-OpenMapTiles code is licensed under the BSD 3-Clause License, which appears at the top of any file ported from
-OpenMapTiles.
+All code in this repository is under the [BSD license](./LICENSE.md) and the cartography decisions encoded in the schema and SQL are licensed under [CC-BY](./LICENSE.md).
 
-The OpenMapTiles schema (or "look and feel") is licensed under [CC-BY 4.0](http://creativecommons.org/licenses/by/4.0/),
-so any map derived from that schema
-must [visibly credit OpenMapTiles](https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md#design-license-cc-by-40)
-. It also uses OpenStreetMap data, so you
-must [visibly credit OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
+Products or services using maps derived from OpenMapTiles schema need to visibly credit "OpenMapTiles.org" or reference "OpenMapTiles" with a link to https://openmaptiles.org/. Exceptions to attribution requirement can be granted on request.
+
+For a browsable electronic map based on OpenMapTiles and OpenStreetMap data, the
+credit should appear in the corner of the map. For example:
+
+[© OpenMapTiles](https://openmaptiles.org/) [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright)
+
+For printed and static maps a similar attribution should be made in a textual
+description near the image, in the same fashion as if you cite a photograph.

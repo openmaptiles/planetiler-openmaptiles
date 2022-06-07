@@ -2,11 +2,11 @@ package com.onthegomap.planetiler.openmaptiles.layers;
 
 import static com.onthegomap.planetiler.TestUtils.newPoint;
 import static com.onthegomap.planetiler.TestUtils.rectangle;
+import static com.onthegomap.planetiler.collection.FeatureGroup.SORT_KEY_MAX;
+import static com.onthegomap.planetiler.collection.FeatureGroup.SORT_KEY_MIN;
 import static com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile.NATURAL_EARTH_SOURCE;
 import static com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile.OSM_SOURCE;
 import static com.onthegomap.planetiler.openmaptiles.layers.Place.getSortKey;
-import static com.onthegomap.planetiler.collection.FeatureGroup.SORT_KEY_MAX;
-import static com.onthegomap.planetiler.collection.FeatureGroup.SORT_KEY_MIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 

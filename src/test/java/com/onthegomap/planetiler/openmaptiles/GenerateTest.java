@@ -1,7 +1,7 @@
 package com.onthegomap.planetiler.openmaptiles;
 
-import static com.onthegomap.planetiler.openmaptiles.Generate.parseYaml;
 import static com.onthegomap.planetiler.expression.Expression.*;
+import static com.onthegomap.planetiler.openmaptiles.Generate.parseYaml;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 

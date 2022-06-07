@@ -39,14 +39,14 @@ import static com.onthegomap.planetiler.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.carrotsearch.hppc.LongObjectMap;
 import com.onthegomap.planetiler.FeatureCollector;
-import com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile;
-import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
-import com.onthegomap.planetiler.openmaptiles.generated.Tables;
-import com.onthegomap.planetiler.openmaptiles.util.LanguageUtils;
 import com.onthegomap.planetiler.collection.Hppc;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.geo.GeoUtils;
 import com.onthegomap.planetiler.geo.GeometryException;
+import com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile;
+import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
+import com.onthegomap.planetiler.openmaptiles.generated.Tables;
+import com.onthegomap.planetiler.openmaptiles.util.LanguageUtils;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Parse;

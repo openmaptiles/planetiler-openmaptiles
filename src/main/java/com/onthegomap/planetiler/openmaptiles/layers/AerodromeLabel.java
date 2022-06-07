@@ -39,12 +39,12 @@ import static com.onthegomap.planetiler.openmaptiles.util.Utils.nullIfEmpty;
 import static com.onthegomap.planetiler.openmaptiles.util.Utils.nullOrEmpty;
 
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.config.PlanetilerConfig;
+import com.onthegomap.planetiler.expression.MultiExpression;
 import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
 import com.onthegomap.planetiler.openmaptiles.generated.Tables;
 import com.onthegomap.planetiler.openmaptiles.util.LanguageUtils;
 import com.onthegomap.planetiler.openmaptiles.util.Utils;
-import com.onthegomap.planetiler.config.PlanetilerConfig;
-import com.onthegomap.planetiler.expression.MultiExpression;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
 

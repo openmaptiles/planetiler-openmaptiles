@@ -9,9 +9,9 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import com.onthegomap.planetiler.TestUtils;
 import com.onthegomap.planetiler.VectorTile;
-import com.onthegomap.planetiler.openmaptiles.util.VerifyMonaco;
 import com.onthegomap.planetiler.config.Arguments;
 import com.onthegomap.planetiler.mbtiles.Mbtiles;
+import com.onthegomap.planetiler.openmaptiles.util.VerifyMonaco;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;

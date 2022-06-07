@@ -39,9 +39,9 @@ package com.onthegomap.planetiler.openmaptiles.generated;
 
 import static com.onthegomap.planetiler.expression.Expression.*;
 
-import com.onthegomap.planetiler.openmaptiles.Layer;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.expression.MultiExpression;
+import com.onthegomap.planetiler.openmaptiles.Layer;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;

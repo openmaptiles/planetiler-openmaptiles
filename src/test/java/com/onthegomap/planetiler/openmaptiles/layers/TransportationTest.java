@@ -7,10 +7,10 @@ import static com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile.NATURAL
 import static com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile.OSM_SOURCE;
 
 import com.onthegomap.planetiler.FeatureCollector;
-import com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile;
 import com.onthegomap.planetiler.config.Arguments;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.geo.GeometryException;
+import com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile;
 import com.onthegomap.planetiler.reader.SimpleFeature;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.reader.osm.OsmElement;

@@ -1,8 +1,8 @@
 package com.onthegomap.planetiler.openmaptiles;
 
 import com.onthegomap.planetiler.Planetiler;
-import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
 import com.onthegomap.planetiler.config.Arguments;
+import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
 import java.nio.file.Path;
 
 /**

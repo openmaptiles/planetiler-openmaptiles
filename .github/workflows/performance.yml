@@ -1,0 +1,111 @@
+# This workflow builds a map using the base and branch commit of a PR and uploads
+# the logs as an artifact that update-pr.yml uses to add back as a comment.
+
+name: Performance
+
+on:
+  pull_request:
+    branches: [ main ]
+
+env:
+  # For performance tests, run this branch against main with:
+  AREA: rhode island
+  RAM: 4g
+  # Also pick up a good chunk of the atlantic ocean to catch any regressions in repeated tile performance
+  # Omit to infer from .osm.pbf bounds
+  BOUNDS_ARG: "--bounds=-74.07,21.34,-17.84,43.55"
+
+jobs:
+  performance:
+    name: Performance Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - name: 'Cancel previous runs'
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+      - name: 'Checkout parent Planetiler repo for branch'
+        uses: actions/checkout@v3
+        with:
+          repository: lazaa32/planetiler
+          ref: omt_submodule
+          path: branch/planetiler
+      - name: 'Checkout parent Planetiler repo for base'
+        uses: actions/checkout@v3
+        with:
+          repository: lazaa32/planetiler
+          ref: omt_submodule
+          path: base/planetiler
+
+      - name: 'Checkout PT-OMT PR branch'
+        uses: actions/checkout@v3
+        with:
+          path: branch/planetiler-openmaptiles
+      - name: 'Move planetiler-openmaptiles into planetiler for base'
+        run: mv branch/planetiler-openmaptiles branch/planetiler
+
+      - name: 'Checkout PT-OMT base'
+        uses: actions/checkout@v3
+        with:
+          path: base/planetiler-openmaptiles
+          ref: ${{ github.event.pull_request.base.sha }}
+      - name: 'Move planetiler-openmaptiles into planetiler for base'
+        run: mv base/planetiler-openmaptiles base/planetiler
+
+      - name: 'Cache data/sources'
+        uses: ./branch/planetiler/.github/cache-sources-action
+        with:
+          basedir: branch
+      - name: 'Set up JDK'
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+      - run: npm install -g strip-ansi-cli@3.0.2
+
+      - name: 'Build branch'
+        run: ./scripts/build.sh
+        working-directory: branch/planetiler
+      - name: 'Build base'
+        run: ./scripts/build.sh
+        working-directory: base/planetiler
+
+      - name: 'Download data'
+        run: |
+          set -eo pipefail
+          cp base/planetiler/planetiler-dist/target/*with-deps.jar run.jar && java -jar run.jar --only-download --area="${{ env.AREA }}"
+          cp branch/planetiler/planetiler-dist/target/*with-deps.jar run.jar && java -jar run.jar --only-download --area="${{ env.AREA }}"
+
+      - name: 'Store build info'
+        run: |
+          mkdir build-info
+          echo "${{ github.event.pull_request.base.sha }}" > build-info/base_sha
+          echo "${{ github.sha }}" > build-info/branch_sha
+          echo "${{ github.event.number }}" > build-info/pull_request_number
+
+      - name: 'Run branch'
+        run: |
+          rm -rf data/out.mbtiles data/tmp
+          cp branch/planetiler/planetiler-dist/target/*with-deps.jar run.jar
+          java -Xms${{ env.RAM }} -Xmx${{ env.RAM }} -jar run.jar --area="${{ env.AREA }}" "${{ env.BOUNDS_ARG }}" --mbtiles=data/out.mbtiles 2>&1 | tee log
+          ls -alh run.jar | tee -a log
+          cat log | strip-ansi > build-info/branchlogs.txt
+      - name: 'Run base'
+        run: |
+          rm -rf data/out.mbtiles data/tmp
+          cp base/planetiler/planetiler-dist/target/*with-deps.jar run.jar
+          java -Xms${{ env.RAM }} -Xmx${{ env.RAM }} -jar run.jar --area="${{ env.AREA }}" "${{ env.BOUNDS_ARG }}" --mbtiles=data/out.mbtiles 2>&1 | tee log
+          ls -alh run.jar | tee -a log
+          cat log | strip-ansi > build-info/baselogs.txt
+
+      - name: 'Upload build-info'
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-info
+          path: ./build-info

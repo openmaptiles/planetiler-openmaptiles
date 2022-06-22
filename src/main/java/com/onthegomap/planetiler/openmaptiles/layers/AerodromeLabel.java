@@ -35,18 +35,18 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
  */
 package com.onthegomap.planetiler.openmaptiles.layers;
 
-import static com.onthegomap.planetiler.openmaptiles.util.Utils.nullIfEmpty;
-import static com.onthegomap.planetiler.openmaptiles.util.Utils.nullOrEmpty;
+import static com.onthegomap.planetiler.util.Utils.nullIfEmpty;
+import static com.onthegomap.planetiler.util.Utils.nullOrEmpty;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.expression.MultiExpression;
 import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
 import com.onthegomap.planetiler.openmaptiles.generated.Tables;
-import com.onthegomap.planetiler.openmaptiles.util.LanguageUtils;
-import com.onthegomap.planetiler.openmaptiles.util.Utils;
+import com.onthegomap.planetiler.openmaptiles.util.OmtLanguageUtils;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
+import com.onthegomap.planetiler.util.Utils;
 
 /**
  * Defines the logic for generating map elements in the {@code aerodrome_label} layer from source features.
@@ -74,7 +74,7 @@ public class AerodromeLabel implements
     features.centroid(LAYER_NAME)
       .setBufferPixels(BUFFER_SIZE)
       .setMinZoom(important ? 8 : 10)
-      .putAttrs(LanguageUtils.getNames(element.source().tags(), translations))
+      .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
       .putAttrs(Utils.elevationTags(element.ele()))
       .setAttr(Fields.IATA, nullIfEmpty(element.iata()))
       .setAttr(Fields.ICAO, nullIfEmpty(element.icao()))

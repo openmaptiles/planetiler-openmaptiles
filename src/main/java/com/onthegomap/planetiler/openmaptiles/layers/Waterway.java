@@ -35,7 +35,7 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 */
 package com.onthegomap.planetiler.openmaptiles.layers;
 
-import static com.onthegomap.planetiler.openmaptiles.util.Utils.nullIfEmpty;
+import static com.onthegomap.planetiler.util.Utils.nullIfEmpty;
 
 import com.carrotsearch.hppc.LongObjectHashMap;
 import com.google.common.util.concurrent.AtomicDouble;
@@ -48,14 +48,14 @@ import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile;
 import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
 import com.onthegomap.planetiler.openmaptiles.generated.Tables;
-import com.onthegomap.planetiler.openmaptiles.util.LanguageUtils;
-import com.onthegomap.planetiler.openmaptiles.util.Utils;
+import com.onthegomap.planetiler.openmaptiles.util.OmtLanguageUtils;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmReader;
 import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
+import com.onthegomap.planetiler.util.Utils;
 import com.onthegomap.planetiler.util.ZoomFunction;
 import java.util.List;
 import java.util.Map;
@@ -148,7 +148,7 @@ public class Waterway implements
       synchronized (riverRelationLengths) {
         riverRelationLengths.put(relation.id(), new AtomicDouble());
       }
-      return List.of(new WaterwayRelation(relation.id(), LanguageUtils.getNames(relation.tags(), translations)));
+      return List.of(new WaterwayRelation(relation.id(), OmtLanguageUtils.getNames(relation.tags(), translations)));
     }
     return null;
   }
@@ -192,7 +192,7 @@ public class Waterway implements
     features.line(LAYER_NAME)
       .setBufferPixels(BUFFER_SIZE)
       .setAttr(Fields.CLASS, element.waterway())
-      .putAttrs(LanguageUtils.getNames(element.source().tags(), translations))
+      .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
       .setMinZoom(minzoom)
       // details only at higher zoom levels so that named rivers can be merged more aggressively
       .setAttrWithMinzoom(Fields.BRUNNEL, Utils.brunnel(element.isBridge(), element.isTunnel()), 12)

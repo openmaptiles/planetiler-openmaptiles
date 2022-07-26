@@ -35,7 +35,7 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 */
 package com.onthegomap.planetiler.openmaptiles.layers;
 
-import static com.onthegomap.planetiler.util.Utils.nullIfEmpty;
+import static com.onthegomap.planetiler.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.carrotsearch.hppc.LongObjectHashMap;
 import com.google.common.util.concurrent.AtomicDouble;
@@ -55,7 +55,7 @@ import com.onthegomap.planetiler.reader.osm.OsmReader;
 import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
-import com.onthegomap.planetiler.util.Utils;
+import com.onthegomap.planetiler.openmaptiles.util.Utils;
 import com.onthegomap.planetiler.util.ZoomFunction;
 import java.util.List;
 import java.util.Map;

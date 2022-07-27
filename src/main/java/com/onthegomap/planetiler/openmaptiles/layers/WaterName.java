@@ -46,7 +46,7 @@ import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile;
 import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
 import com.onthegomap.planetiler.openmaptiles.generated.Tables;
-import com.onthegomap.planetiler.openmaptiles.util.LanguageUtils;
+import com.onthegomap.planetiler.openmaptiles.util.OmtLanguageUtils;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Parse;
@@ -162,7 +162,7 @@ public class WaterName implements
       int minZoom = "ocean".equals(place) ? 0 : rank != null ? rank : 8;
       features.point(LAYER_NAME)
         .setBufferPixels(BUFFER_SIZE)
-        .putAttrs(LanguageUtils.getNames(source.tags(), translations))
+        .putAttrs(OmtLanguageUtils.getNames(source.tags(), translations))
         .setAttr(Fields.CLASS, place)
         .setAttr(Fields.INTERMITTENT, element.isIntermittent() ? 1 : 0)
         .setMinZoom(minZoom);
@@ -191,7 +191,7 @@ public class WaterName implements
         feature
           .setAttr(Fields.CLASS, FieldValues.CLASS_LAKE)
           .setBufferPixels(BUFFER_SIZE)
-          .putAttrs(LanguageUtils.getNames(element.source().tags(), translations))
+          .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
           .setAttr(Fields.INTERMITTENT, element.isIntermittent() ? 1 : 0)
           .setMinZoom(minzoom);
       } catch (GeometryException e) {

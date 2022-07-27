@@ -35,8 +35,8 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
  */
 package com.onthegomap.planetiler.openmaptiles.layers;
 
-import static com.onthegomap.planetiler.openmaptiles.Utils.nullOrEmpty;
 import static com.onthegomap.planetiler.openmaptiles.util.Utils.nullIfEmpty;
+import static com.onthegomap.planetiler.openmaptiles.util.Utils.nullOrEmpty;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
@@ -44,9 +44,9 @@ import com.onthegomap.planetiler.expression.MultiExpression;
 import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
 import com.onthegomap.planetiler.openmaptiles.generated.Tables;
 import com.onthegomap.planetiler.openmaptiles.util.OmtLanguageUtils;
-import com.onthegomap.planetiler.openmaptiles.util.Translations;
 import com.onthegomap.planetiler.openmaptiles.util.Utils;
 import com.onthegomap.planetiler.stats.Stats;
+import com.onthegomap.planetiler.util.Translations;
 
 /**
  * Defines the logic for generating map elements in the {@code aerodrome_label} layer from source features.

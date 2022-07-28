@@ -35,8 +35,8 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 */
 package com.onthegomap.planetiler.openmaptiles.util;
 
+import static com.onthegomap.planetiler.openmaptiles.util.Utils.coalesce;
 import static com.onthegomap.planetiler.util.LanguageUtils.*;
-import static com.onthegomap.planetiler.util.Utils.coalesce;
 
 import com.onthegomap.planetiler.util.LanguageUtils;
 import com.onthegomap.planetiler.util.Translations;

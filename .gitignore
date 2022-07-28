@@ -1,0 +1,21 @@
+.DS_Store
+
+target/
+*.jar
+!.mvn/wrapper/*.jar
+*.log
+
+# idea
+*/.idea
+.idea/
+.idea/*
+*.iml
+!.idea/codeStyles
+!.idea/vcs.xml
+!.idea/eclipseCodeFormatter.xml
+
+# eclipse
+.classpath
+.project
+.settings
+bin/

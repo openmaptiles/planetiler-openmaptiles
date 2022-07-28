@@ -35,15 +35,13 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 */
 package com.onthegomap.planetiler.openmaptiles.util;
 
-import static com.onthegomap.planetiler.openmaptiles.util.Utils.coalesce;
-import static com.onthegomap.planetiler.openmaptiles.util.Utils.nullIfEmpty;
+import static com.onthegomap.planetiler.util.LanguageUtils.*;
+import static com.onthegomap.planetiler.util.Utils.coalesce;
 
+import com.onthegomap.planetiler.util.LanguageUtils;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -53,62 +51,7 @@ import java.util.stream.Stream;
  * Ported from
  * <a href="https://github.com/openmaptiles/openmaptiles-tools/blob/master/sql/zzz_language.sql">openmaptiles-tools</a>.
  */
-public class LanguageUtils {
-  // Name tags that should be eligible for finding a latin name.
-  // See https://wiki.openstreetmap.org/wiki/Multilingual_names
-  private static final Predicate<String> VALID_NAME_TAGS =
-    Pattern
-      .compile("^name:[a-z]{2,3}(-[a-z]{4})?([-_](x-)?[a-z]{2,})?(-([a-z]{2}|[0-9]{3}))?$", Pattern.CASE_INSENSITIVE)
-      .asMatchPredicate();
-  // See https://github.com/onthegomap/planetiler/issues/86
-  // Match strings that only contain latin characters.
-  private static final Predicate<String> ONLY_LATIN = Pattern
-    .compile("^[\\P{IsLetter}[\\p{IsLetter}&&\\p{IsLatin}]]+$")
-    .asMatchPredicate();
-  // Match only latin letters
-  private static final Pattern LATIN_LETTER = Pattern.compile("[\\p{IsLetter}&&\\p{IsLatin}]+");
-  private static final Pattern EMPTY_PARENS = Pattern.compile("(\\([ -.]*\\)|\\[[ -.]*])");
-  private static final Pattern LEADING_TRAILING_JUNK = Pattern.compile("((^[\\s./-]*)|([\\s./-]*$))");
-  private static final Pattern WHITESPACE = Pattern.compile("\\s+");
-  private static final Set<String> EN_DE_NAME_KEYS = Set.of("name:en", "name:de");
-
-  private LanguageUtils() {}
-
-  private static void putIfNotEmpty(Map<String, Object> dest, String key, Object value) {
-    if (value != null && !value.equals("")) {
-      dest.put(key, value);
-    }
-  }
-
-  private static String string(Object obj) {
-    return nullIfEmpty(obj == null ? null : obj.toString());
-  }
-
-  static boolean containsOnlyLatinCharacters(String string) {
-    return string != null && ONLY_LATIN.test(string);
-  }
-
-  private static String transliteratedName(Map<String, Object> tags) {
-    return Translations.transliterate(string(tags.get("name")));
-  }
-
-  static String removeLatinCharacters(String name) {
-    if (name == null) {
-      return null;
-    }
-    var matcher = LATIN_LETTER.matcher(name);
-    if (matcher.find()) {
-      String result = matcher.replaceAll("");
-      // if the name was "<nonlatin text> (<latin description)"
-      // or "<nonlatin text> - <latin description>"
-      // then remove any of those extra characters now
-      result = EMPTY_PARENS.matcher(result).replaceAll("");
-      result = LEADING_TRAILING_JUNK.matcher(result).replaceAll("");
-      return WHITESPACE.matcher(result).replaceAll(" ");
-    }
-    return name.trim();
-  }
-
+public class OmtLanguageUtils {
   /**
    * Returns a map with default name attributes (name, name_en, name_de, name:latin, name:nonlatin, name_int) that every
    * element should have, derived from name, int_name, name:en, and name:de tags on the input element.

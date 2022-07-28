@@ -48,7 +48,7 @@ import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile;
 import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
 import com.onthegomap.planetiler.openmaptiles.generated.Tables;
-import com.onthegomap.planetiler.openmaptiles.util.LanguageUtils;
+import com.onthegomap.planetiler.openmaptiles.util.OmtLanguageUtils;
 import com.onthegomap.planetiler.openmaptiles.util.Utils;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.reader.osm.OsmElement;
@@ -148,7 +148,7 @@ public class Waterway implements
       synchronized (riverRelationLengths) {
         riverRelationLengths.put(relation.id(), new AtomicDouble());
       }
-      return List.of(new WaterwayRelation(relation.id(), LanguageUtils.getNames(relation.tags(), translations)));
+      return List.of(new WaterwayRelation(relation.id(), OmtLanguageUtils.getNames(relation.tags(), translations)));
     }
     return null;
   }
@@ -192,7 +192,7 @@ public class Waterway implements
     features.line(LAYER_NAME)
       .setBufferPixels(BUFFER_SIZE)
       .setAttr(Fields.CLASS, element.waterway())
-      .putAttrs(LanguageUtils.getNames(element.source().tags(), translations))
+      .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
       .setMinZoom(minzoom)
       // details only at higher zoom levels so that named rivers can be merged more aggressively
       .setAttrWithMinzoom(Fields.BRUNNEL, Utils.brunnel(element.isBridge(), element.isTunnel()), 12)

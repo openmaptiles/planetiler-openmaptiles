@@ -51,7 +51,7 @@ import com.onthegomap.planetiler.geo.GeometryType;
 import com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile;
 import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
 import com.onthegomap.planetiler.openmaptiles.generated.Tables;
-import com.onthegomap.planetiler.openmaptiles.util.LanguageUtils;
+import com.onthegomap.planetiler.openmaptiles.util.OmtLanguageUtils;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.SortKey;
 import com.onthegomap.planetiler.util.Translations;
@@ -113,14 +113,14 @@ public class Park implements
         double area = element.source().area();
         int minzoom = getMinZoomForArea(area);
 
-        var names = LanguageUtils.getNamesWithoutTranslations(element.source().tags());
+        var names = OmtLanguageUtils.getNamesWithoutTranslations(element.source().tags());
 
         outline.putAttrsWithMinzoom(names, 5);
 
         features.pointOnSurface(LAYER_NAME).setBufferPixels(256)
           .setAttr(Fields.CLASS, clazz)
           .putAttrs(names)
-          .putAttrs(LanguageUtils.getNames(element.source().tags(), translations))
+          .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
           .setPointLabelGridPixelSize(14, 100)
           .setSortKey(SortKey
             .orderByTruesFirst("national_park".equals(clazz))

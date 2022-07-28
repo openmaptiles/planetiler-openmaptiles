@@ -52,7 +52,7 @@ import com.onthegomap.planetiler.geo.PolygonIndex;
 import com.onthegomap.planetiler.openmaptiles.OpenMapTilesProfile;
 import com.onthegomap.planetiler.openmaptiles.generated.OpenMapTilesSchema;
 import com.onthegomap.planetiler.openmaptiles.generated.Tables;
-import com.onthegomap.planetiler.openmaptiles.util.LanguageUtils;
+import com.onthegomap.planetiler.openmaptiles.util.OmtLanguageUtils;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Parse;
@@ -200,10 +200,10 @@ public class Place implements
   public void process(Tables.OsmContinentPoint element, FeatureCollector features) {
     if (!nullOrEmpty(element.name())) {
       features.point(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
-        .putAttrs(LanguageUtils.getNames(element.source().tags(), translations))
+        .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
         .setAttr(Fields.CLASS, FieldValues.CLASS_CONTINENT)
         .setAttr(Fields.RANK, 1)
-        .putAttrs(LanguageUtils.getNames(element.source().tags(), translations))
+        .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
         .setZoomRange(0, 3);
     }
   }
@@ -226,7 +226,7 @@ public class Place implements
       // should be lower
       int rank = 7;
       NaturalEarthRegion country = countries.get(element.source().worldGeometry().getCentroid());
-      var names = LanguageUtils.getNames(element.source().tags(), translations);
+      var names = OmtLanguageUtils.getNames(element.source().tags(), translations);
 
       if (country != null) {
         if (nullOrEmpty(names.get(Fields.NAME_EN))) {
@@ -257,7 +257,7 @@ public class Place implements
       // use natural earth to filter out any spurious states, and to set the rank field
       NaturalEarthRegion state = states.getOnlyContaining(element.source().worldGeometry().getCentroid());
       if (state != null) {
-        var names = LanguageUtils.getNames(element.source().tags(), translations);
+        var names = OmtLanguageUtils.getNames(element.source().tags(), translations);
         if (nullOrEmpty(names.get(Fields.NAME_EN))) {
           names.put(Fields.NAME_EN, state.name);
         }
@@ -284,7 +284,7 @@ public class Place implements
       int minzoom = rank <= 3 ? 8 : rank <= 4 ? 9 : 10;
 
       features.pointOnSurface(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
-        .putAttrs(LanguageUtils.getNames(element.source().tags(), translations))
+        .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
         .setAttr(Fields.CLASS, "island")
         .setAttr(Fields.RANK, rank)
         .setMinZoom(minzoom)
@@ -298,7 +298,7 @@ public class Place implements
   @Override
   public void process(Tables.OsmIslandPoint element, FeatureCollector features) {
     features.point(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
-      .putAttrs(LanguageUtils.getNames(element.source().tags(), translations))
+      .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
       .setAttr(Fields.CLASS, "island")
       .setAttr(Fields.RANK, 7)
       .setMinZoom(12);
@@ -345,7 +345,7 @@ public class Place implements
       placeType.ordinal() <= PlaceType.SUBURB.ordinal() ? 11 : 14;
 
     var feature = features.point(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
-      .putAttrs(LanguageUtils.getNames(element.source().tags(), translations))
+      .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
       .setAttr(Fields.CLASS, element.place())
       .setAttr(Fields.RANK, rank)
       .setMinZoom(minzoom)

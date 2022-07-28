@@ -1,7 +1,7 @@
 package com.onthegomap.planetiler.openmaptiles.util;
 
 import static com.onthegomap.planetiler.TestUtils.assertSubmap;
-import static com.onthegomap.planetiler.openmaptiles.util.LanguageUtils.containsOnlyLatinCharacters;
+import static com.onthegomap.planetiler.util.LanguageUtils.containsOnlyLatinCharacters;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -15,7 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class LanguageUtilsTest {
+class OmtLanguageUtilsTest {
 
   private final Wikidata.WikidataTranslations wikidataTranslations = new Wikidata.WikidataTranslations();
   private final Translations translations = Translations.defaultProvider(List.of("en", "es", "de"))
@@ -27,7 +27,7 @@ class LanguageUtilsTest {
       "name", "name",
       "name_en", "english name",
       "name_de", "german name"
-    ), LanguageUtils.getNames(Map.of(
+    ), OmtLanguageUtils.getNames(Map.of(
       "name", "name",
       "name:en", "english name",
       "name:de", "german name"
@@ -37,7 +37,7 @@ class LanguageUtilsTest {
       "name", "name",
       "name_en", "name",
       "name_de", "german name"
-    ), LanguageUtils.getNames(Map.of(
+    ), OmtLanguageUtils.getNames(Map.of(
       "name", "name",
       "name:de", "german name"
     ), translations));
@@ -46,7 +46,7 @@ class LanguageUtilsTest {
       "name", "name",
       "name_en", "english name",
       "name_de", "name"
-    ), LanguageUtils.getNames(Map.of(
+    ), OmtLanguageUtils.getNames(Map.of(
       "name", "name",
       "name:en", "english name"
     ), translations));
@@ -72,7 +72,7 @@ class LanguageUtilsTest {
     if (!isLatin) {
       assertFalse(containsOnlyLatinCharacters(in));
     } else {
-      assertEquals(in, LanguageUtils.getNames(Map.of(
+      assertEquals(in, OmtLanguageUtils.getNames(Map.of(
         "name", in
       ), translations).get("name:latin"));
     }
@@ -90,7 +90,7 @@ class LanguageUtilsTest {
     "Japan / 日本 / Japan  , 日本",
   }, nullValues = "null")
   void testRemoveNonLatin(String in, String out) {
-    assertEquals(out, LanguageUtils.getNames(Map.of(
+    assertEquals(out, OmtLanguageUtils.getNames(Map.of(
       "name", in
     ), translations).get("name:nonlatin"));
   }
@@ -135,13 +135,13 @@ class LanguageUtilsTest {
     "name:gsw",
   })
   void testLatinFallbacks(String key) {
-    assertEquals("a", LanguageUtils.getNames(Map.of(
+    assertEquals("a", OmtLanguageUtils.getNames(Map.of(
       key, "a"
     ), translations).get("name:latin"));
-    assertNull(LanguageUtils.getNames(Map.of(
+    assertNull(OmtLanguageUtils.getNames(Map.of(
       key, "ア"
     ), translations).get("name:latin"));
-    assertNull(LanguageUtils.getNames(Map.of(
+    assertNull(OmtLanguageUtils.getNames(Map.of(
       key, "غ"
     ), translations).get("name:latin"));
   }
@@ -171,7 +171,7 @@ class LanguageUtilsTest {
       "name_de", "Branch Hill–Loveland Road",
       "name:latin", "Branch Hill–Loveland Road",
       "name_int", "Branch Hill–Loveland Road"
-    ), LanguageUtils.getNames(Map.of(
+    ), OmtLanguageUtils.getNames(Map.of(
       "name", "Branch Hill–Loveland Road",
       key, "Q22133584;Q843993"
     ), translations));
@@ -181,7 +181,7 @@ class LanguageUtilsTest {
       "name_de", "日",
       "name:latin", "rì",
       "name_int", "rì"
-    ), LanguageUtils.getNames(Map.of(
+    ), OmtLanguageUtils.getNames(Map.of(
       "name", "日",
       key, "other" // don't use this latin string with invalid name keys
     ), translations));
@@ -194,11 +194,11 @@ class LanguageUtilsTest {
     "биологическом, biologičeskom",
   })
   void testTransliterate(String in, String out) {
-    assertEquals(out, LanguageUtils.getNames(Map.of(
+    assertEquals(out, OmtLanguageUtils.getNames(Map.of(
       "name", in
     ), translations).get("name:latin"));
     translations.setShouldTransliterate(false);
-    assertNull(LanguageUtils.getNames(Map.of(
+    assertNull(OmtLanguageUtils.getNames(Map.of(
       "name", in
     ), translations).get("name:latin"));
   }
@@ -208,7 +208,7 @@ class LanguageUtilsTest {
     wikidataTranslations.put(123, "es", "es name");
     assertSubmap(Map.of(
       "name:es", "es name"
-    ), LanguageUtils.getNames(Map.of(
+    ), OmtLanguageUtils.getNames(Map.of(
       "name", "name",
       "wikidata", "Q123"
     ), translations));
@@ -218,7 +218,7 @@ class LanguageUtilsTest {
   void testUseOsm() {
     assertSubmap(Map.of(
       "name:es", "es name osm"
-    ), LanguageUtils.getNames(Map.of(
+    ), OmtLanguageUtils.getNames(Map.of(
       "name", "name",
       "wikidata", "Q123",
       "name:es", "es name osm"
@@ -231,7 +231,7 @@ class LanguageUtilsTest {
     assertSubmap(Map.of(
       "name:es", "wd es name",
       "name:de", "de name osm"
-    ), LanguageUtils.getNames(Map.of(
+    ), OmtLanguageUtils.getNames(Map.of(
       "name", "name",
       "wikidata", "Q123",
       "name:es", "es name osm",
@@ -241,7 +241,7 @@ class LanguageUtilsTest {
 
   @Test
   void testDontUseTranslationsWhenNotSpecified() {
-    var result = LanguageUtils.getNamesWithoutTranslations(Map.of(
+    var result = OmtLanguageUtils.getNamesWithoutTranslations(Map.of(
       "name", "name",
       "wikidata", "Q123",
       "name:es", "es name osm",
@@ -255,7 +255,7 @@ class LanguageUtilsTest {
   @Test
   void testIgnoreLanguages() {
     wikidataTranslations.put(123, "ja", "ja name wd");
-    var result = LanguageUtils.getNamesWithoutTranslations(Map.of(
+    var result = OmtLanguageUtils.getNamesWithoutTranslations(Map.of(
       "name", "name",
       "wikidata", "Q123",
       "name:ja", "ja name osm"

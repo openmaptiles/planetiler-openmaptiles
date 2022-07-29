@@ -2,21 +2,60 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>planetiler-openmaptiles</artifactId>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>16</maven.compiler.source>
+    <maven.compiler.target>16</maven.compiler.target>
+    <planetiler.version>0.5-SNAPSHOT</planetiler.version>
+    <junit.version>5.9.0</junit.version>
 
-  <parent>
-    <groupId>com.onthegomap.planetiler</groupId>
-    <artifactId>planetiler-parent</artifactId>
-    <version>0.5-SNAPSHOT</version>
-  </parent>
+    <mainClass>com.onthegomap.planetiler.openmaptiles.OpenMapTilesMain</mainClass>
+    <image.version>${project.version}</image.version>
+    <image>ghcr.io/openmaptiles/planetiler-openmaptiles:${image.version}</image>
+    <assembly-phase>package</assembly-phase>
+  </properties>
+
+  <groupId>com.onthegomap.planetiler</groupId>
+  <artifactId>planetiler-examples</artifactId>
+  <version>3.13.1</version>
+
+  <name>OpenMapTiles Vector Tile Schema implementation for Planetiler tool</name>
+
+  <repositories>
+    <!-- Planetiler depends on geotools for shapefile processing, which is not in maven central. Add here: -->
+    <repository>
+      <id>osgeo</id>
+      <name>OSGeo Release Repository</name>
+      <url>https://repo.osgeo.org/repository/release/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+    <!-- Get planetiler snapshot builds from here: -->
+    <repository>
+      <id>nexus-snapshots</id>
+      <name>Nexus SNAPSHOT Repository</name>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+  </repositories>
 
   <dependencies>
     <dependency>
       <groupId>com.onthegomap.planetiler</groupId>
       <artifactId>planetiler-core</artifactId>
-      <version>${project.parent.version}</version>
+      <version>${planetiler.version}</version>
     </dependency>
     <dependency>
       <groupId>org.yaml</groupId>
@@ -29,11 +68,26 @@
       <version>0.19.0</version>
     </dependency>
 
+    <!-- To use test utilities: -->
     <dependency>
       <groupId>com.onthegomap.planetiler</groupId>
       <artifactId>planetiler-core</artifactId>
-      <version>${project.parent.version}</version>
+      <version>${planetiler.version}</version>
       <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -41,15 +95,87 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>io.github.zlika</groupId>
-        <artifactId>reproducible-build-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M7</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.0.0-M7</version>
       </plugin>
 
+      <!-- Create an executable jar from "mvn package" goal -->
       <plugin>
-        <artifactId>maven-deploy-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.4.2</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.onthegomap.planetiler</groupId>
+            <artifactId>planetiler-core</artifactId>
+            <version>${planetiler.version}</version>
+          </dependency>
+        </dependencies>
+
         <configuration>
-          <!-- we don't want to deploy this module -->
-          <skip>true</skip>
+          <archive>
+            <manifestEntries>
+              <Multi-Release>true</Multi-Release>
+            </manifestEntries>
+            <manifest>
+              <mainClass>${mainClass}</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>with-deps</descriptorRef>
+          </descriptorRefs>
+          <attach>false</attach>
+        </configuration>
+
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>${assembly-phase}</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>3.2.1</version>
+        <configuration>
+          <from>
+            <image>
+              eclipse-temurin:17-jre
+            </image>
+            <platforms>
+              <platform>
+                <architecture>amd64</architecture>
+                <os>linux</os>
+              </platform>
+              <platform>
+                <architecture>arm64</architecture>
+                <os>linux</os>
+              </platform>
+            </platforms>
+          </from>
+          <to>
+            <image>${image}</image>
+          </to>
+          <container>
+            <labels>
+              <org.opencontainers.image.source>
+                https://github.com/openmaptiles/planetiler-openmaptiles
+              </org.opencontainers.image.source>
+            </labels>
+            <mainClass>${mainClass}</mainClass>
+          </container>
         </configuration>
       </plugin>
     </plugins>

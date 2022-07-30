@@ -16,6 +16,8 @@
     <image.version>${project.version}</image.version>
     <image>ghcr.io/openmaptiles/planetiler-openmaptiles:${image.version}</image>
     <assembly-phase>package</assembly-phase>
+    <jib.platform-arch>amd64</jib.platform-arch>
+    <jib.platform-os>linux</jib.platform-os>
   </properties>
 
   <groupId>com.onthegomap.planetiler</groupId>
@@ -211,12 +213,8 @@
             </image>
             <platforms>
               <platform>
-                <architecture>amd64</architecture>
-                <os>linux</os>
-              </platform>
-              <platform>
-                <architecture>arm64</architecture>
-                <os>linux</os>
+                <architecture>${jib.platform-arch}</architecture>
+                <os>${jib.platform-os}</os>
               </platform>
             </platforms>
           </from>
@@ -235,4 +233,32 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>jib-multi-arch</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <configuration>
+              <from>
+                <platforms>
+                  <platform>
+                    <architecture>amd64</architecture>
+                    <os>linux</os>
+                  </platform>
+                  <platform>
+                    <architecture>arm64</architecture>
+                    <os>linux</os>
+                  </platform>
+                </platforms>
+              </from>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

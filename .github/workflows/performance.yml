@@ -36,7 +36,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: base
-          ref: ${{ github.event.pull_request.base.sha }}
+          # TODO removed for testing
+          # ref: ${{ github.event.pull_request.base.sha }}
 
       - name: 'Cache data/sources'
         uses: ./branch/.github/cache-sources-action

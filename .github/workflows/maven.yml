@@ -123,6 +123,9 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: planetiler-openmaptiles
+      # TODO remove, added just for testing
+      - name: TODO TEMP FOR TESTING
+        run: mv planetiler-openmaptiles/standalone.pom.xml planetiler-openmaptiles/pom.xml
       - name: Move planetiler-openmaptiles into planetiler
         run: mv planetiler-openmaptiles planetiler
       - name: Cache data/sources

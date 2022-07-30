@@ -26,36 +26,20 @@ jobs:
         uses: styfle/cancel-workflow-action@0.9.1
         with:
           access_token: ${{ github.token }}
-      - name: 'Checkout parent Planetiler repo for branch'
-        uses: actions/checkout@v3
-        with:
-          repository: lazaa32/planetiler
-          ref: omt_submodule
-          path: branch/planetiler
-      - name: 'Checkout parent Planetiler repo for base'
-        uses: actions/checkout@v3
-        with:
-          repository: lazaa32/planetiler
-          ref: omt_submodule
-          path: base/planetiler
 
       - name: 'Checkout PT-OMT PR branch'
         uses: actions/checkout@v3
         with:
-          path: branch/planetiler-openmaptiles
-      - name: 'Move planetiler-openmaptiles into planetiler for base'
-        run: mv branch/planetiler-openmaptiles branch/planetiler
+          path: branch
 
       - name: 'Checkout PT-OMT base'
         uses: actions/checkout@v3
         with:
-          path: base/planetiler-openmaptiles
+          path: base
           ref: ${{ github.event.pull_request.base.sha }}
-      - name: 'Move planetiler-openmaptiles into planetiler for base'
-        run: mv base/planetiler-openmaptiles base/planetiler
 
       - name: 'Cache data/sources'
-        uses: ./branch/planetiler/.github/cache-sources-action
+        uses: ./branch/.github/cache-sources-action
         with:
           basedir: branch
       - name: 'Set up JDK'
@@ -71,16 +55,16 @@ jobs:
 
       - name: 'Build branch'
         run: ./scripts/build.sh
-        working-directory: branch/planetiler
+        working-directory: branch
       - name: 'Build base'
         run: ./scripts/build.sh
-        working-directory: base/planetiler
+        working-directory: base
 
       - name: 'Download data'
         run: |
           set -eo pipefail
-          cp base/planetiler/planetiler-dist/target/*with-deps.jar run.jar && java -jar run.jar --only-download --area="${{ env.AREA }}"
-          cp branch/planetiler/planetiler-dist/target/*with-deps.jar run.jar && java -jar run.jar --only-download --area="${{ env.AREA }}"
+          cp base/target/*with-deps.jar run.jar && java -jar run.jar --only-download --area="${{ env.AREA }}"
+          cp branch/target/*with-deps.jar run.jar && java -jar run.jar --only-download --area="${{ env.AREA }}"
 
       - name: 'Store build info'
         run: |
@@ -92,14 +76,14 @@ jobs:
       - name: 'Run branch'
         run: |
           rm -rf data/out.mbtiles data/tmp
-          cp branch/planetiler/planetiler-dist/target/*with-deps.jar run.jar
+          cp branch/target/*with-deps.jar run.jar
           java -Xms${{ env.RAM }} -Xmx${{ env.RAM }} -jar run.jar --area="${{ env.AREA }}" "${{ env.BOUNDS_ARG }}" --mbtiles=data/out.mbtiles 2>&1 | tee log
           ls -alh run.jar | tee -a log
           cat log | strip-ansi > build-info/branchlogs.txt
       - name: 'Run base'
         run: |
           rm -rf data/out.mbtiles data/tmp
-          cp base/planetiler/planetiler-dist/target/*with-deps.jar run.jar
+          cp base/target/*with-deps.jar run.jar
           java -Xms${{ env.RAM }} -Xmx${{ env.RAM }} -jar run.jar --area="${{ env.AREA }}" "${{ env.BOUNDS_ARG }}" --mbtiles=data/out.mbtiles 2>&1 | tee log
           ls -alh run.jar | tee -a log
           cat log | strip-ansi > build-info/baselogs.txt

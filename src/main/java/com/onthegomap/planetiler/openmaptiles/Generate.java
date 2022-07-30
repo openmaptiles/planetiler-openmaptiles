@@ -163,7 +163,7 @@ public class Generate {
 
     String packageName = "com.onthegomap.planetiler.openmaptiles.generated";
     String[] packageParts = packageName.split("\\.");
-    Path output = Path.of("planetiler-openmaptiles", "src", "main", "java")
+    Path output = Path.of("src", "main", "java")
       .resolve(Path.of(packageParts[0], Arrays.copyOfRange(packageParts, 1, packageParts.length)));
 
     FileUtils.deleteDirectory(output);

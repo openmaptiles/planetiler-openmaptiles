@@ -78,6 +78,7 @@ class OmtLanguageUtilsTest {
     }
   }
 
+
   @ParameterizedTest
   @CsvSource(value = {
     "abcaāíìś+, null",

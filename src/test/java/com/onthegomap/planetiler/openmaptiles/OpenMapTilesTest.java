@@ -13,8 +13,10 @@ import com.onthegomap.planetiler.config.Arguments;
 import com.onthegomap.planetiler.mbtiles.Mbtiles;
 import com.onthegomap.planetiler.openmaptiles.util.VerifyMonaco;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
@@ -41,16 +43,27 @@ class OpenMapTilesTest {
   static Path tmpDir;
   private static Mbtiles mbtiles;
 
+  private static Path getTestResource(String name) throws IOException {
+    var path = tmpDir.resolve(name);
+    try (
+      var input = OpenMapTilesTest.class.getResourceAsStream("/" + name);
+      var output = Files.newOutputStream(path);
+    ) {
+      Objects.requireNonNull(input, "Could not find " + name + " on classpath").transferTo(output);
+    }
+    return path;
+  }
+
   @BeforeAll
   public static void runPlanetiler() throws Exception {
     Path dbPath = tmpDir.resolve("output.mbtiles");
     OpenMapTilesMain.run(Arguments.of(
       // Override input source locations
-      "osm_path", TestUtils.pathToResource("monaco-latest.osm.pbf"),
-      "natural_earth_path", TestUtils.pathToResource("natural_earth_vector.sqlite.zip"),
-      "water_polygons_path", TestUtils.pathToResource("water-polygons-split-3857.zip"),
+      "osm_path", getTestResource("monaco-latest.osm.pbf"),
+      "natural_earth_path", getTestResource("natural_earth_vector.sqlite.zip"),
+      "water_polygons_path", getTestResource("water-polygons-split-3857.zip"),
       // no centerlines in monaco - so fake it out with an empty source
-      "lake_centerlines_path", TestUtils.pathToResource("water-polygons-split-3857.zip"),
+      "lake_centerlines_path", getTestResource("water-polygons-split-3857.zip"),
 
       // Override temp dir location
       "tmp", tmpDir.toString(),

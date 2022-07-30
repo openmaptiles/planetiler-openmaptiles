@@ -57,13 +57,16 @@ class OpenMapTilesTest {
   @BeforeAll
   public static void runPlanetiler() throws Exception {
     Path dbPath = tmpDir.resolve("output.mbtiles");
+    var osmPath = getTestResource("monaco-latest.osm.pbf");
+    var naturalEarthPath = getTestResource("natural_earth_vector.sqlite.zip");
+    var waterPath = getTestResource("water-polygons-split-3857.zip");
     OpenMapTilesMain.run(Arguments.of(
       // Override input source locations
-      "osm_path", getTestResource("monaco-latest.osm.pbf"),
-      "natural_earth_path", getTestResource("natural_earth_vector.sqlite.zip"),
-      "water_polygons_path", getTestResource("water-polygons-split-3857.zip"),
+      "osm_path", osmPath,
+      "natural_earth_path", naturalEarthPath,
+      "water_polygons_path", waterPath,
       // no centerlines in monaco - so fake it out with an empty source
-      "lake_centerlines_path", getTestResource("water-polygons-split-3857.zip"),
+      "lake_centerlines_path", waterPath,
 
       // Override temp dir location
       "tmp", tmpDir.toString(),
@@ -71,6 +74,10 @@ class OpenMapTilesTest {
       // Override output location
       "mbtiles", dbPath.toString()
     ));
+    Files.delete(osmPath);
+    Files.delete(naturalEarthPath);
+    Files.delete(waterPath);
+
     mbtiles = Mbtiles.newReadOnlyDatabase(dbPath);
   }
 

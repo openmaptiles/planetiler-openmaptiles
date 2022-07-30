@@ -21,7 +21,7 @@
   </properties>
 
   <groupId>com.onthegomap.planetiler</groupId>
-  <artifactId>planetiler-examples</artifactId>
+  <artifactId>planetiler-openmaptiles</artifactId>
   <version>3.13.1</version>
 
   <name>OpenMapTiles Vector Tile Schema implementation for Planetiler tool</name>

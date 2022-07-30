@@ -44,7 +44,11 @@ class OpenMapTilesTest {
   private static Mbtiles mbtiles;
 
   private static Path getTestResource(String name) throws IOException {
-    var path = tmpDir.resolve(name);
+    return getTestResource(name, name);
+  }
+
+  private static Path getTestResource(String name, String local) throws IOException {
+    var path = tmpDir.resolve(local);
     try (
       var input = OpenMapTilesTest.class.getResourceAsStream("/" + name);
       var output = Files.newOutputStream(path);
@@ -59,14 +63,15 @@ class OpenMapTilesTest {
     Path dbPath = tmpDir.resolve("output.mbtiles");
     var osmPath = getTestResource("monaco-latest.osm.pbf");
     var naturalEarthPath = getTestResource("natural_earth_vector.sqlite.zip");
-    var waterPath = getTestResource("water-polygons-split-3857.zip");
+    var waterPath = getTestResource("water-polygons-split-3857.zip", "water.zip");
+    // no centerlines in monaco - so fake it out with an empty source
+    var lakelinePath = getTestResource("water-polygons-split-3857.zip", "lakeline.zip");
     OpenMapTilesMain.run(Arguments.of(
       // Override input source locations
       "osm_path", osmPath,
       "natural_earth_path", naturalEarthPath,
       "water_polygons_path", waterPath,
-      // no centerlines in monaco - so fake it out with an empty source
-      "lake_centerlines_path", waterPath,
+      "lake_centerlines_path", lakelinePath,
 
       // Override temp dir location
       "tmp", tmpDir.toString(),
@@ -77,6 +82,7 @@ class OpenMapTilesTest {
     Files.delete(osmPath);
     Files.delete(naturalEarthPath);
     Files.delete(waterPath);
+    Files.delete(lakelinePath);
 
     mbtiles = Mbtiles.newReadOnlyDatabase(dbPath);
   }

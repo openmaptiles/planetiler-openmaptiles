@@ -9,16 +9,13 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import com.onthegomap.planetiler.TestUtils;
 import com.onthegomap.planetiler.VectorTile;
+import com.onthegomap.planetiler.config.Arguments;
 import com.onthegomap.planetiler.mbtiles.Mbtiles;
 import com.onthegomap.planetiler.openmaptiles.util.VerifyMonaco;
-import java.io.File;
+import com.onthegomap.planetiler.util.FileUtils;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
@@ -46,62 +43,29 @@ class OpenMapTilesTest {
   static Path tmpDir;
   private static Mbtiles mbtiles;
 
-  private static Path getTestResource(String name) throws IOException {
-    var path = tmpDir.resolve(name);
-    try (
-      var input = OpenMapTilesTest.class.getResourceAsStream("/" + name);
-      var output = Files.newOutputStream(path);
-    ) {
-      Objects.requireNonNull(input, "Could not find " + name + " on classpath").transferTo(output);
-    }
-    return path;
-  }
-
-  public static void exec(Class<?> clazz, String... args) throws IOException,
-    InterruptedException {
-    String javaHome = System.getProperty("java.home");
-    String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-    String classpath = System.getProperty("java.class.path");
-    String className = clazz.getName();
-    List<String> command = new ArrayList<>();
-    command.add(javaBin);
-    command.add("-cp");
-    command.add(classpath);
-    command.add(className);
-    command.addAll(List.of(args));
-
-    ProcessBuilder builder = new ProcessBuilder(command);
-    Process process = builder.inheritIO().start();
-    process.waitFor();
-    int exit = process.exitValue();
-    assertEquals(0, exit);
-  }
-
   @BeforeAll
   @Timeout(30)
   public static void runPlanetiler() throws Exception {
     Path dbPath = tmpDir.resolve("output.mbtiles");
-    var osmPath = getTestResource("monaco-latest.osm.pbf");
-    var naturalEarthPath = getTestResource("natural_earth_vector.sqlite.zip");
-    var waterPath = getTestResource("water-polygons-split-3857.zip");
-
-    exec(OpenMapTilesMain.class,
+    var osmPath = TestUtils.extractPathToResource(tmpDir, "monaco-latest.osm.pbf");
+    var naturalEarthPath = TestUtils.extractPathToResource(tmpDir, "natural_earth_vector.sqlite.zip");
+    var waterPath = tmpDir.resolve("water");
+    // windows seems to have trouble closing zip file after reading from it, so extract first instead
+    FileUtils.unzipResource("/water-polygons-split-3857.zip", waterPath);
+    OpenMapTilesMain.run(Arguments.of(
       // Override input source locations
-      "--osm_path=" + osmPath,
-      "--natural_earth_path=" + naturalEarthPath,
-      "--water_polygons_path=" + waterPath,
+      "osm_path", osmPath,
+      "natural_earth_path", naturalEarthPath,
+      "water_polygons_path", waterPath,
       // no centerlines in monaco - so fake it out with an empty source
-      "--lake_centerlines_path=" + waterPath,
+      "lake_centerlines_path", waterPath,
 
       // Override temp dir location
-      "--tmpdir=" + tmpDir.resolve("tmp"),
+      "tmpdir", tmpDir.resolve("tmp"),
 
       // Override output location
-      "--mbtiles=" + dbPath
-    );
-    Files.delete(osmPath);
-    Files.delete(naturalEarthPath);
-    Files.delete(waterPath);
+      "mbtiles", dbPath
+    ));
 
     mbtiles = Mbtiles.newReadOnlyDatabase(dbPath);
   }

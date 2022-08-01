@@ -12,15 +12,15 @@
     <planetiler.version>0.5-SNAPSHOT</planetiler.version>
     <junit.version>5.9.0</junit.version>
 
-    <mainClass>com.onthegomap.planetiler.openmaptiles.OpenMapTilesMain</mainClass>
+    <mainClass>org.openmaptiles.OpenMapTilesMain</mainClass>
     <image.version>${project.version}</image.version>
-    <image>ghcr.io/openmaptiles/planetiler-openmaptiles:${image.version}</image>
+    <image>openmaptiles/planetiler-openmaptiles:${image.version}</image>
     <assembly-phase>package</assembly-phase>
     <jib.platform-arch>amd64</jib.platform-arch>
     <jib.platform-os>linux</jib.platform-os>
   </properties>
 
-  <groupId>com.onthegomap.planetiler</groupId>
+  <groupId>org.openmaptiles</groupId>
   <artifactId>planetiler-openmaptiles</artifactId>
   <version>3.13.1</version>
 

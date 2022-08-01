@@ -14,7 +14,7 @@ echo "Building..."
 ./mvnw -DskipTests=true package
 
 echo "Running..."
-java -cp target/*-with-deps.jar com.onthegomap.planetiler.openmaptiles.Generate -tag="${TAG}" -base-url="${BASE_URL}"
+java -cp target/*-with-deps.jar org.openmaptiles.Generate -tag="${TAG}" -base-url="${BASE_URL}"
 
 echo "Formatting..."
 ./scripts/format.sh

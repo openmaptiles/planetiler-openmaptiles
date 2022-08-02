@@ -1,0 +1,23 @@
+# Configure dependabot automatic version upgrades
+# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: "/"
+    open-pull-requests-limit: 1
+    schedule:
+      interval: daily
+      time: "04:30"
+      timezone: America/New_York
+    labels:
+      - dependencies
+  - package-ecosystem: github-actions
+    directory: "/"
+    open-pull-requests-limit: 1
+    schedule:
+      interval: daily
+      time: "04:30"
+      timezone: America/New_York
+    labels:
+      - dependencies

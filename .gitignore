@@ -7,7 +7,6 @@ target/
 
 # idea
 */.idea
-.idea/
 .idea/*
 *.iml
 !.idea/codeStyles
@@ -19,3 +18,5 @@ target/
 .project
 .settings
 bin/
+
+data/

@@ -1,7 +1,27 @@
 # Planetiler OpenMapTiles Profile
 
-This OpenMapTiles profile is based on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles).
-See [README.md](https://github.com/onthegomap/planetiler/blob/main/README.md) in the parent repository for instructions on how to run.
+This OpenMapTiles profile for [Planetiler](https://github.com/onthegomap/planetiler) is based
+on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles).
+
+## How to run
+
+Using pre-built docker image:
+
+```bash
+docker run -v "$(pwd)/data":/data openmaptiles/planetiler-openmaptiles:latest --force --download --area=monaco
+```
+
+Or to build from source, after [installing Java 16+](https://adoptium.net/installation.html):
+
+```bash
+# Build the project (use mvnw.cmd on windows):
+./mvnw clean package
+# Then run:
+java -jar target/*with-deps.jar --force --download --area=monaco
+```
+
+See [Planetiler README.md](https://github.com/onthegomap/planetiler/blob/main/README.md) for more description of the
+available options.
 
 ## Differences from OpenMapTiles
 
@@ -14,30 +34,35 @@ See [README.md](https://github.com/onthegomap/planetiler/blob/main/README.md) in
 
 ## Code Layout
 
-[Generate.java](./src/main/java/com/onthegomap/planetiler/openmaptiles/Generate.java) generates code in
-the [generated](./src/main/java/com/onthegomap/planetiler/openmaptiles/generated) package from an OpenMapTiles tag in GitHub:
+[Generate.java](src/main/java/org/openmaptiles/Generate.java) generates code in
+the [generated](src/main/java/org/openmaptiles/generated) package from an OpenMapTiles tag in
+GitHub:
 
-- [OpenMapTilesSchema](./src/main/java/com/onthegomap/planetiler/openmaptiles/generated/OpenMapTilesSchema.java)
+- [OpenMapTilesSchema](src/main/java/org/openmaptiles/generated/OpenMapTilesSchema.java)
   contains an interface for each layer with constants for the name, attributes, and allowed values for each tag in that
   layer
-- [Tables](./src/main/java/com/onthegomap/planetiler/openmaptiles/generated/Tables.java)
+- [Tables](src/main/java/org/openmaptiles/generated/Tables.java)
   contains a record for each table that OpenMapTiles [imposm3](https://github.com/omniscale/imposm3) configuration
   generates (along with the tag-filtering expression) so layers can listen on instances of those records instead of
   doing the tag filtering and parsing themselves
 
-The [layers](./src/main/java/com/onthegomap/planetiler/openmaptiles/layers) package contains a port of the SQL logic to
+The [layers](src/main/java/org/openmaptiles/layers) package contains a port of the SQL logic to
 generate each layer from OpenMapTiles. Layers define how source features (or parsed imposm3 table rows) map to vector
 tile features, and logic for post-processing tile geometries.
 
-[OpenMapTilesProfile](./src/main/java/com/onthegomap/planetiler/openmaptiles/OpenMapTilesProfile.java) dispatches source features to
+[OpenMapTilesProfile](src/main/java/org/openmaptiles/OpenMapTilesProfile.java) dispatches source
+features to
 layer handlers and merges the results.
 
-[OpenMapTilesMain](./src/main/java/com/onthegomap/planetiler/openmaptiles/OpenMapTilesMain.java) is the main driver that registers
+[OpenMapTilesMain](src/main/java/org/openmaptiles/OpenMapTilesMain.java) is the main driver that
+registers
 source data and output location.
 
 ## Regenerating Code
 
-To run `Generate.java`, use [scripts/regenerate-openmaptiles.sh](https://github.com/onthegomap/planetiler/blob/main/scripts/regenerate-openmaptiles.sh) script with the
+To run `Generate.java`,
+use [scripts/regenerate-openmaptiles.sh](https://github.com/onthegomap/planetiler/blob/main/scripts/regenerate-openmaptiles.sh)
+script with the
 OpenMapTiles release tag:
 
 ```bash
@@ -54,9 +79,12 @@ If you want to regenerate from a different repository than the default openmapti
 
 ## License
 
-All code in this repository is under the [BSD license](./LICENSE.md) and the cartography decisions encoded in the schema and SQL are licensed under [CC-BY](./LICENSE.md).
+All code in this repository is under the [BSD license](./LICENSE.md) and the cartography decisions encoded in the schema
+and SQL are licensed under [CC-BY](./LICENSE.md).
 
-Products or services using maps derived from OpenMapTiles schema need to visibly credit "OpenMapTiles.org" or reference "OpenMapTiles" with a link to https://openmaptiles.org/. Exceptions to attribution requirement can be granted on request.
+Products or services using maps derived from OpenMapTiles schema need to visibly credit "OpenMapTiles.org" or
+reference "OpenMapTiles" with a link to https://openmaptiles.org/. Exceptions to attribution requirement can be granted
+on request.
 
 For a browsable electronic map based on OpenMapTiles and OpenStreetMap data, the
 credit should appear in the corner of the map. For example:

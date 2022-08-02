@@ -1,0 +1,32 @@
+# Publish a docker image on each commit to main
+name: Publish a Snapshot
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
+      - run: |
+          ./mvnw -B -ntp -Pjib-multi-arch \
+            -Dimage.version="latest" \
+            -Djib.to.auth.username="${{ secrets.DOCKERHUB_USER }}" \
+            -Djib.to.auth.password="${{ secrets.DOCKERHUB_PASSWORD }}" \
+            package jib:build --file pom.xml
+      - run: sha256sum target/*with-deps.jar
+      - run: md5sum target/*with-deps.jar
+      - name: 'Upload artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: planetiler-build
+          path: target/*with-deps.jar

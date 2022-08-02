@@ -19,8 +19,8 @@ jobs:
           cache: 'maven'
       - run: |
           ./mvnw -B -ntp -Pjib-multi-arch \
-            -Dimage.version="latest" \
-            -Djib.to.auth.username="${{ secrets.DOCKERHUB_USER }}" \
+            -Dimage.tags="latest" \
+            -Djib.to.auth.username="${{ secrets.DOCKERHUB_USERNAME }}" \
             -Djib.to.auth.password="${{ secrets.DOCKERHUB_PASSWORD }}" \
             package jib:build --file pom.xml
       - run: sha256sum target/*with-deps.jar

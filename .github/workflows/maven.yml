@@ -123,9 +123,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: planetiler-openmaptiles
-      # TODO remove, added until planetiler repo moves to depend on submodule.pom.xml
-      - name: TODO TEMP FOR TESTING
-        run: cp planetiler-openmaptiles/submodule.pom.xml planetiler-openmaptiles/pom.xml
       - name: Move planetiler-openmaptiles into planetiler
         run: mv planetiler-openmaptiles planetiler
       - name: Cache data/sources

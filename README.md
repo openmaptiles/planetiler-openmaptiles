@@ -61,7 +61,7 @@ source data and output location.
 ## Regenerating Code
 
 To run `Generate.java`,
-use [scripts/regenerate-openmaptiles.sh](https://github.com/onthegomap/planetiler/blob/main/scripts/regenerate-openmaptiles.sh)
+use [scripts/regenerate-openmaptiles.sh](https://github.com/openmaptiles/planetiler-openmaptiles/blob/main/scripts/regenerate-openmaptiles.sh)
 script with the
 OpenMapTiles release tag:
 

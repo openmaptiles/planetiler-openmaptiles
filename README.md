@@ -2,8 +2,26 @@
 
 This OpenMapTiles profile for [Planetiler](https://github.com/onthegomap/planetiler) is based
 on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles).
-See the [Planetiler README.md](https://github.com/onthegomap/planetiler/blob/main/README.md) for instructions on how to
-run.
+
+## How to run
+
+Using pre-built docker image:
+
+```bash
+docker run -v "$(pwd)/data":/data openmaptiles/planetiler-openmaptiles:latest --force --download --area=monaco
+```
+
+Or to build from source, after [installing Java 16+](https://adoptium.net/installation.html):
+
+```bash
+# Build the project (use mvnw.cmd on windows):
+./mvnw clean package
+# Then run:
+java -jar target/*with-deps.jar --force --download --area=monaco
+```
+
+See [Planetiler README.md](https://github.com/onthegomap/planetiler/blob/main/README.md) for more description of the
+available options.
 
 ## Differences from OpenMapTiles
 

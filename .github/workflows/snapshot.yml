@@ -23,7 +23,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: 'Build and push to dockerhub'
-        run: ./mvnw -B -ntp -Pjib-multi-arch -Dimage.tags="latest" package jib:build --file pom.xml
+        run: ./mvnw -B -ntp -Pjib-multi-arch -Djib.to.tags="latest" package jib:build --file pom.xml
       - run: sha256sum target/*with-deps.jar
       - run: md5sum target/*with-deps.jar
       - name: 'Upload artifact'

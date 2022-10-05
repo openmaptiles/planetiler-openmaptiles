@@ -176,20 +176,20 @@ public abstract class AbstractLayerTest {
     );
   }
 
-  protected void testMergesLinestrings(Map<String, Object> attrs, String layer,
-    double length, int zoom) throws GeometryException {
+  protected void testMergesLinestrings(Map<String, Object> attrs, String layer, double length, int zoom)
+    throws GeometryException {
     var line1 = new VectorTile.Feature(
       layer,
       1,
       VectorTile.encodeGeometry(newLineString(0, 0, length / 2, 0)),
-      attrs,
+      new HashMap<>(attrs),
       0
     );
     var line2 = new VectorTile.Feature(
       layer,
       1,
       VectorTile.encodeGeometry(newLineString(length / 2, 0, length, 0)),
-      attrs,
+      new HashMap<>(attrs),
       0
     );
     var connected = new VectorTile.Feature(
@@ -206,20 +206,20 @@ public abstract class AbstractLayerTest {
     );
   }
 
-  protected void testDoesNotMergeLinestrings(Map<String, Object> attrs, String layer,
-    double length, int zoom) throws GeometryException {
+  protected void testDoesNotMergeLinestrings(Map<String, Object> attrs, String layer, double length, int zoom)
+    throws GeometryException {
     var line1 = new VectorTile.Feature(
       layer,
       1,
       VectorTile.encodeGeometry(newLineString(0, 0, length / 2, 0)),
-      attrs,
+      new HashMap<>(attrs),
       0
     );
     var line2 = new VectorTile.Feature(
       layer,
       1,
       VectorTile.encodeGeometry(newLineString(length / 2, 0, length, 0)),
-      attrs,
+      new HashMap<>(attrs),
       0
     );
 

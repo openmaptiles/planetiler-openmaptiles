@@ -534,8 +534,30 @@ public class Transportation implements
   public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
     double tolerance = config.tolerance(zoom);
     double minLength = coalesce(MIN_LENGTH.apply(zoom), 0).doubleValue();
-    // TODO preserve direction for one-way?
-    return FeatureMerge.mergeLineStrings(items, minLength, tolerance, BUFFER_SIZE);
+    // TODO merge preserving oneway instead of just ignoring oneway roads?
+    addOneWayTags(items);
+    var merged = FeatureMerge.mergeLineStrings(items, minLength, tolerance, BUFFER_SIZE);
+    removeOneWayTags(merged);
+    return merged;
+  }
+
+  private static final Set<Integer> ONEWAY_VALUES = Set.of(-1, 1);
+  private static final String LIMIT_MERGE_TAG = "__limit_merge";
+
+  static void addOneWayTags(List<VectorTile.Feature> items) {
+    int i = 1;
+    for (var item : items) {
+      var oneway = item.attrs().getOrDefault(Fields.ONEWAY, 0);
+      if (ONEWAY_VALUES.contains(oneway)) {
+        item.attrs().put(LIMIT_MERGE_TAG, i++);
+      }
+    }
+  }
+
+  static void removeOneWayTags(List<VectorTile.Feature> items) {
+    for (var item : items) {
+      item.attrs().remove(LIMIT_MERGE_TAG);
+    }
   }
 
   /** Information extracted from route relations to use when processing ways in that relation. */

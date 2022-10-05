@@ -149,12 +149,14 @@ public class Transportation implements
     .thenComparing(routeRelation -> coalesce(routeRelation.network(), ""))
     .thenComparingInt(r -> r.ref().length())
     .thenComparing(RouteRelation::ref);
+  private static final Set<Integer> ONEWAY_VALUES = Set.of(-1, 1);
+  private static final String LIMIT_MERGE_TAG = "__limit_merge";
   private final AtomicBoolean loggedNoGb = new AtomicBoolean(false);
   private final boolean z13Paths;
-  private PreparedGeometry greatBritain = null;
   private final Map<String, Integer> MINZOOMS;
   private final Stats stats;
   private final PlanetilerConfig config;
+  private PreparedGeometry greatBritain = null;
 
   public Transportation(Translations translations, PlanetilerConfig config, Stats stats) {
     this.config = config;
@@ -177,23 +179,6 @@ public class Transportation implements
       entry(FieldValues.CLASS_TRUNK, 5),
       entry(FieldValues.CLASS_MOTORWAY, 4)
     );
-  }
-
-  @Override
-  public void processNaturalEarth(String table, SourceFeature feature,
-    FeatureCollector features) {
-    if ("ne_10m_admin_0_countries".equals(table) && feature.hasTag("iso_a2", "GB")) {
-      // multiple threads call this method concurrently, GB polygon *should* only be found
-      // once, but just to be safe synchronize updates to that field
-      synchronized (this) {
-        try {
-          Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
-          greatBritain = PreparedGeometryFactory.prepare(boundary);
-        } catch (GeometryException e) {
-          LOGGER.error("Failed to get Great Britain Polygon: " + e);
-        }
-      }
-    }
   }
 
   /** Returns a value for {@code surface} tag constrained to a small set of known values from raw OSM data. */
@@ -250,19 +235,20 @@ public class Transportation implements
     return "bridge".equals(manMade) || "pier".equals(manMade);
   }
 
-  enum RouteNetwork {
-
-    US_INTERSTATE("us-interstate"),
-    US_HIGHWAY("us-highway"),
-    US_STATE("us-state"),
-    CA_TRANSCANADA("ca-transcanada"),
-    GB_MOTORWAY("gb-motorway"),
-    GB_TRUNK("gb-trunk");
-
-    final String name;
-
-    RouteNetwork(String name) {
-      this.name = name;
+  @Override
+  public void processNaturalEarth(String table, SourceFeature feature,
+    FeatureCollector features) {
+    if ("ne_10m_admin_0_countries".equals(table) && feature.hasTag("iso_a2", "GB")) {
+      // multiple threads call this method concurrently, GB polygon *should* only be found
+      // once, but just to be safe synchronize updates to that field
+      synchronized (this) {
+        try {
+          Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+          greatBritain = PreparedGeometryFactory.prepare(boundary);
+        } catch (GeometryException e) {
+          LOGGER.error("Failed to get Great Britain Polygon: " + e);
+        }
+      }
     }
   }
 
@@ -534,29 +520,38 @@ public class Transportation implements
   public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
     double tolerance = config.tolerance(zoom);
     double minLength = coalesce(MIN_LENGTH.apply(zoom), 0).doubleValue();
-    // TODO merge preserving oneway instead of just ignoring oneway roads?
-    addOneWayTags(items);
+
+    // don't merge road segments with oneway tag
+    // TODO merge preserving oneway instead ignoring
+    int onewayId = 1;
+    for (var item : items) {
+      var oneway = item.attrs().get(Fields.ONEWAY);
+      if (oneway instanceof Integer i && ONEWAY_VALUES.contains(i)) {
+        item.attrs().put(LIMIT_MERGE_TAG, onewayId++);
+      }
+    }
+
     var merged = FeatureMerge.mergeLineStrings(items, minLength, tolerance, BUFFER_SIZE);
-    removeOneWayTags(merged);
+
+    for (var item : merged) {
+      item.attrs().remove(LIMIT_MERGE_TAG);
+    }
     return merged;
   }
 
-  private static final Set<Integer> ONEWAY_VALUES = Set.of(-1, 1);
-  private static final String LIMIT_MERGE_TAG = "__limit_merge";
+  enum RouteNetwork {
 
-  static void addOneWayTags(List<VectorTile.Feature> items) {
-    int i = 1;
-    for (var item : items) {
-      var oneway = item.attrs().getOrDefault(Fields.ONEWAY, 0);
-      if (ONEWAY_VALUES.contains(oneway)) {
-        item.attrs().put(LIMIT_MERGE_TAG, i++);
-      }
-    }
-  }
+    US_INTERSTATE("us-interstate"),
+    US_HIGHWAY("us-highway"),
+    US_STATE("us-state"),
+    CA_TRANSCANADA("ca-transcanada"),
+    GB_MOTORWAY("gb-motorway"),
+    GB_TRUNK("gb-trunk");
 
-  static void removeOneWayTags(List<VectorTile.Feature> items) {
-    for (var item : items) {
-      item.attrs().remove(LIMIT_MERGE_TAG);
+    final String name;
+
+    RouteNetwork(String name) {
+      this.name = name;
     }
   }
 

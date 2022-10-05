@@ -550,7 +550,7 @@ public class Generate {
         filters == null || filters.require == null ? List.of() : parseFieldMappingExpression(filters.require).toList()),
       not(or(
         filters == null || filters.reject == null ? List.of() : parseFieldMappingExpression(filters.reject).toList())),
-      matchType(type.replaceAll("s$", ""))
+      type.equals("relation_member") ? Expression.FALSE : matchType(type.replaceAll("s$", ""))
     ).simplify();
   }
 

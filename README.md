@@ -38,8 +38,14 @@ If you want to exclude layers or only include certain layers, then run the proje
 with  `--exclude-layers=poi,housenumber,...` or `--only-layers=water,transportation,...` command-line arguments.
 
 If you want to customize existing layers in OpenMapTiles, then fork this repo, find the appropriate class from
-the [layers package](src/main/java/org/openmaptiles/layers), and make a change to where it processes output features,
-for example to copy over the `source` attribute from OpenStreetMap elements to the building layer,
+the [layers package](src/main/java/org/openmaptiles/layers), and make a change to where it processes output features.
+
+<details>
+<summary>
+Example adding an attribute to a built-in layer
+</summary>
+
+For example to copy over the source attribute from OpenStreetMap elements to the building layer,
 modify [Building.java](src/main/java/org/openmaptiles/layers/Building.java):
 
 ```diff
@@ -53,6 +59,8 @@ modify [Building.java](src/main/java/org/openmaptiles/layers/Building.java):
          feature
 ```
 
+</details>
+
 If you want to generate a mbtiles file with OpenMapTiles base layers plus some extra ones then fork this repo and:
 
 1. Create a new class that implements the [`Layer` interface](src/main/java/org/openmaptiles/Layer.java) in
@@ -63,6 +71,44 @@ If you want to generate a mbtiles file with OpenMapTiles base layers plus some e
    method. See the [built-in layers](src/main/java/org/openmaptiles/layers) for examples.
 3. Create a new instance of that class from the [`ExtraLayers`](src/main/java/org/openmaptiles/addons/ExtraLayers.java)
    class.
+
+<details>
+<summary>
+Custom layer example
+</summary>
+
+This layer would add a `power` layer to OpenMapTiles output with power lines:
+
+```java
+package org.openmaptiles.addons;
+
+import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.reader.SourceFeature;
+import org.openmaptiles.Layer;
+import org.openmaptiles.OpenMapTilesProfile;
+
+public class Power implements Layer, OpenMapTilesProfile.OsmAllProcessor {
+
+  private static final String LAYER_NAME = "power";
+
+  @Override
+  public String name() {
+    return LAYER_NAME;
+  }
+
+  @Override
+  public void processAllOsm(SourceFeature feature, FeatureCollector features) {
+    if (feature.canBeLine() && feature.hasTag("power", "line")) {
+      features.line("power")
+          .setBufferPixels(4)
+          .setMinZoom(6)
+          .setAttr("class", "line");
+    }
+  }
+}
+```
+
+</details>
 
 If you think your custom layer or change to a built-in layer might be useful to others, consider opening a pull request
 to contribute it back to this repo. Any change that diverges from what is produced

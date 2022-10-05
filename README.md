@@ -37,6 +37,22 @@ available options.
 If you want to exclude layers or only include certain layers, then run the project
 with  `--exclude-layers=poi,housenumber,...` or `--only-layers=water,transportation,...` command-line arguments.
 
+If you want to customize existing layers in OpenMapTiles, then fork this repo, find the appropriate class from
+the [layers package](src/main/java/org/openmaptiles/layers), and make a change to where it processes output features,
+for example to copy over the `source` attribute from OpenStreetMap elements to the building layer,
+modify [Building.java](src/main/java/org/openmaptiles/layers/Building.java):
+
+```diff
+@@ -166,6 +166,7 @@ public class Building implements
+         .setAttrWithMinzoom(Fields.RENDER_MIN_HEIGHT, renderMinHeight, 14)
+         .setAttrWithMinzoom(Fields.COLOUR, color, 14)
+         .setAttrWithMinzoom(Fields.HIDE_3D, hide3d, 14)
++        .setAttrWithMinzoom("source", element.source().getTag("source"), 14)
+         .setSortKey(renderHeight);
+       if (mergeZ13Buildings) {
+         feature
+```
+
 If you want to generate a mbtiles file with OpenMapTiles base layers plus some extra ones then fork this repo and:
 
 1. Create a new class that implements the [`Layer` interface](src/main/java/org/openmaptiles/Layer.java) in
@@ -47,9 +63,6 @@ If you want to generate a mbtiles file with OpenMapTiles base layers plus some e
    method. See the [built-in layers](src/main/java/org/openmaptiles/layers) for examples.
 3. Create a new instance of that class from the [`ExtraLayers`](src/main/java/org/openmaptiles/addons/ExtraLayers.java)
    class.
-
-If you want to customize existing layers in OpenMapTiles, then fork this repo and change the logic for the appropriate
-class from the [layers package](src/main/java/org/openmaptiles/layers).
 
 If you think your custom layer or change to a built-in layer might be useful to others, consider opening a pull request
 to contribute it back to this repo. Any change that diverges from what is produced

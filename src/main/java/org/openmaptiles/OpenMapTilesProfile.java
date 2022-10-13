@@ -17,6 +17,8 @@ import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+import org.openmaptiles.addons.ExtraLayers;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.layers.Transportation;
@@ -65,7 +67,10 @@ public class OpenMapTilesProfile extends ForwardingProfile {
     List<Handler> layers = new ArrayList<>();
     Transportation transportationLayer = null;
     TransportationName transportationNameLayer = null;
-    for (Layer layer : OpenMapTilesSchema.createInstances(translations, config, stats)) {
+    var omtLayers = OpenMapTilesSchema.createInstances(translations, config, stats);
+    var extraLayers = ExtraLayers.create(translations, config, stats);
+    var allLayers = Stream.concat(omtLayers.stream(), extraLayers.stream()).toList();
+    for (Layer layer : allLayers) {
       if ((onlyLayers.isEmpty() || onlyLayers.contains(layer.name())) && !excludeLayers.contains(layer.name())) {
         layers.add(layer);
         registerHandler(layer);

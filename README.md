@@ -32,6 +32,91 @@ available options.
 - `rank` field on `mountain_peak` linestrings only has 3 levels (1: has wikipedia page and name, 2: has name, 3: no name
   or wikipedia page or name)
 
+## Customizing
+
+If you want to exclude layers or only include certain layers, then run the project
+with  `--exclude-layers=poi,housenumber,...` or `--only-layers=water,transportation,...` command-line arguments.
+
+If you want to customize existing layers in OpenMapTiles, then fork this repo, find the appropriate class from
+the [layers package](src/main/java/org/openmaptiles/layers), and make a change to where it processes output features.
+
+<details>
+<summary>
+Example adding an attribute to a built-in layer
+</summary>
+
+For example to copy over the source attribute from OpenStreetMap elements to the building layer,
+modify [Building.java](src/main/java/org/openmaptiles/layers/Building.java):
+
+```diff
+@@ -166,6 +166,7 @@ public class Building implements
+         .setAttrWithMinzoom(Fields.RENDER_MIN_HEIGHT, renderMinHeight, 14)
+         .setAttrWithMinzoom(Fields.COLOUR, color, 14)
+         .setAttrWithMinzoom(Fields.HIDE_3D, hide3d, 14)
++        .setAttrWithMinzoom("source", element.source().getTag("source"), 14)
+         .setSortKey(renderHeight);
+       if (mergeZ13Buildings) {
+         feature
+```
+
+</details>
+
+If you want to generate a mbtiles file with OpenMapTiles base layers plus some extra ones then fork this repo and:
+
+1. Create a new class that implements the [`Layer` interface](src/main/java/org/openmaptiles/Layer.java) in
+   the [addons package](src/main/java/org/openmaptiles/addons) and make the `public String name()` method return the ID
+   of the new layer.
+2. Make the new class implement interfaces from `OpenMapTilesProfile` to register handlers for elements from input
+   sources. For example implement `OpenMapTilesProfile.OsmAllProcessor` to handle every OSM element from `processAllOsm`
+   method. See the [built-in layers](src/main/java/org/openmaptiles/layers) for examples.
+3. Create a new instance of that class from the [`ExtraLayers`](src/main/java/org/openmaptiles/addons/ExtraLayers.java)
+   class.
+
+<details>
+<summary>
+Custom layer example
+</summary>
+
+This layer would add a `power` layer to OpenMapTiles output with power lines:
+
+```java
+package org.openmaptiles.addons;
+
+import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.reader.SourceFeature;
+import org.openmaptiles.Layer;
+import org.openmaptiles.OpenMapTilesProfile;
+
+public class Power implements Layer, OpenMapTilesProfile.OsmAllProcessor {
+
+  private static final String LAYER_NAME = "power";
+
+  @Override
+  public String name() {
+    return LAYER_NAME;
+  }
+
+  @Override
+  public void processAllOsm(SourceFeature feature, FeatureCollector features) {
+    if (feature.canBeLine() && feature.hasTag("power", "line")) {
+      features.line("power")
+          .setBufferPixels(4)
+          .setMinZoom(6)
+          .setAttr("class", "line");
+    }
+  }
+}
+```
+
+</details>
+
+If you think your custom layer or change to a built-in layer might be useful to others, consider opening a pull request
+to contribute it back to this repo. Any change that diverges from what is produced
+by https://github.com/openmaptiles/openmaptiles should be disabled by default, and enabled through a command-line
+argument that users can opt-into. For example, see how
+the [building layer](src/main/java/org/openmaptiles/layers/Building.java) exposes a `building_merge_z13` command-line
+argument to disable merging nearby buildings at z13.
+
 ## Code Layout
 
 [Generate.java](src/main/java/org/openmaptiles/Generate.java) generates code in
@@ -51,12 +136,10 @@ generate each layer from OpenMapTiles. Layers define how source features (or par
 tile features, and logic for post-processing tile geometries.
 
 [OpenMapTilesProfile](src/main/java/org/openmaptiles/OpenMapTilesProfile.java) dispatches source
-features to
-layer handlers and merges the results.
+features to layer handlers and merges the results.
 
 [OpenMapTilesMain](src/main/java/org/openmaptiles/OpenMapTilesMain.java) is the main driver that
-registers
-source data and output location.
+registers source data and output location.
 
 ## Regenerating Code
 

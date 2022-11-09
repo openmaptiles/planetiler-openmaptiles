@@ -36,7 +36,7 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 package org.openmaptiles.layers;
 
 import static com.onthegomap.planetiler.collection.FeatureGroup.SORT_KEY_BITS;
-import static org.openmaptiles.util.Utils.coalesce;
+import static org.openmaptiles.util.Utils.coalesceF;
 import static org.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.carrotsearch.hppc.LongIntMap;
@@ -53,10 +53,12 @@ import com.onthegomap.planetiler.util.SortKey;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.util.OmtLanguageUtils;
+import org.openmaptiles.util.Utils;
 
 /**
  * Defines the logic for generating map elements for designated parks polygons and their label points in the {@code
@@ -95,10 +97,11 @@ public class Park implements
     if (protectionTitle != null) {
       protectionTitle = protectionTitle.replace(' ', '_').toLowerCase(Locale.ROOT);
     }
-    String clazz = coalesce(
+    Function<String, String> f = Utils::nullIfEmpty;
+    String clazz = coalesceF(
       nullIfEmpty(protectionTitle),
-      nullIfEmpty(element.boundary()),
-      nullIfEmpty(element.leisure())
+      f, element.boundary(),
+      f, element.leisure()
     );
 
     // park shape

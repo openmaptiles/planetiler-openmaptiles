@@ -2,6 +2,7 @@ package org.openmaptiles.util;
 
 import com.onthegomap.planetiler.util.Parse;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Common utilities for working with data and the OpenMapTiles schema in {@code layers} implementations.
@@ -12,8 +13,23 @@ public class Utils {
     return a != null ? a : b;
   }
 
+  public static <T, U> T coalesceF(T a, Function<U, T> fb, U b) {
+    return a != null ? a : fb.apply(b);
+  }
+
   public static <T> T coalesce(T a, T b, T c) {
     return a != null ? a : b != null ? b : c;
+  }
+
+  public static <T, U> T coalesceF(T a, Function<U, T> fb, U b, Function<U, T> fc, U c) {
+    if (a != null) {
+      return a;
+    }
+    T r = fb.apply(b);
+    if (r != null) {
+      return r;
+    }
+    return fc.apply(c);
   }
 
   public static <T> T coalesce(T a, T b, T c, T d) {
@@ -26,6 +42,30 @@ public class Utils {
 
   public static <T> T coalesce(T a, T b, T c, T d, T e, T f) {
     return a != null ? a : b != null ? b : c != null ? c : d != null ? d : e != null ? e : f;
+  }
+
+  public static <T, U> T coalesceF(T a, Function<U, T> fb, U b, Function<U, T> fc, U c, Function<U, T> fd, U d,
+    Function<U, T> fe, U e, Function<U, T> ff, U f) {
+    if (a != null) {
+      return a;
+    }
+    T r = fb.apply(b);
+    if (r != null) {
+      return r;
+    }
+    r = fc.apply(c);
+    if (r != null) {
+      return r;
+    }
+    r = fd.apply(d);
+    if (r != null) {
+      return r;
+    }
+    r = fe.apply(e);
+    if (r != null) {
+      return r;
+    }
+    return ff.apply(f);
   }
 
   /** Boxes {@code a} into an {@link Integer}, or {@code null} if {@code a} is {@code nullValue}. */

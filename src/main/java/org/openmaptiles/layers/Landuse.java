@@ -35,7 +35,7 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 */
 package org.openmaptiles.layers;
 
-import static org.openmaptiles.util.Utils.coalesce;
+import static org.openmaptiles.util.Utils.coalesceF;
 import static org.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.onthegomap.planetiler.FeatureCollector;
@@ -47,9 +47,11 @@ import com.onthegomap.planetiler.util.Translations;
 import com.onthegomap.planetiler.util.ZoomFunction;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
+import org.openmaptiles.util.Utils;
 
 /**
  * Defines the logic for generating map elements for man-made land use polygons like cemeteries, zoos, and hospitals in
@@ -91,13 +93,14 @@ public class Landuse implements
 
   @Override
   public void process(Tables.OsmLandusePolygon element, FeatureCollector features) {
-    String clazz = coalesce(
+    Function<String, String> f = Utils::nullIfEmpty;
+    String clazz = coalesceF(
       nullIfEmpty(element.landuse()),
-      nullIfEmpty(element.amenity()),
-      nullIfEmpty(element.leisure()),
-      nullIfEmpty(element.tourism()),
-      nullIfEmpty(element.place()),
-      nullIfEmpty(element.waterway())
+      f, element.amenity(),
+      f, element.leisure(),
+      f, element.tourism(),
+      f, element.place(),
+      f, element.waterway()
     );
     if (clazz != null) {
       if ("grave_yard".equals(clazz)) {

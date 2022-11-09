@@ -38,7 +38,7 @@ package org.openmaptiles.layers;
 import static com.onthegomap.planetiler.util.MemoryEstimator.CLASS_HEADER_BYTES;
 import static com.onthegomap.planetiler.util.Parse.parseDoubleOrNull;
 import static java.util.Map.entry;
-import static org.openmaptiles.util.Utils.coalesce;
+import static org.openmaptiles.util.Utils.coalesceF;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.FeatureMerge;
@@ -49,10 +49,12 @@ import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.MemoryEstimator;
+import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
@@ -138,21 +140,22 @@ public class Building implements
       color = color.toLowerCase(Locale.ROOT);
     }
 
-    Double height = coalesce(
+    Function<String, Double> f = Parse::parseDoubleOrNull;
+    Double height = coalesceF(
       parseDoubleOrNull(element.height()),
-      parseDoubleOrNull(element.buildingheight())
+      f, element.buildingheight()
     );
-    Double minHeight = coalesce(
+    Double minHeight = coalesceF(
       parseDoubleOrNull(element.minHeight()),
-      parseDoubleOrNull(element.buildingminHeight())
+      f, element.buildingminHeight()
     );
-    Double levels = coalesce(
+    Double levels = coalesceF(
       parseDoubleOrNull(element.levels()),
-      parseDoubleOrNull(element.buildinglevels())
+      f, element.buildinglevels()
     );
-    Double minLevels = coalesce(
+    Double minLevels = coalesceF(
       parseDoubleOrNull(element.minLevel()),
-      parseDoubleOrNull(element.buildingminLevel())
+      f, element.buildingminLevel()
     );
 
     int renderHeight = (int) Math.ceil(height != null ? height : levels != null ? (levels * 3.66) : 5);

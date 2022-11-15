@@ -22,7 +22,7 @@
 
   <groupId>org.openmaptiles</groupId>
   <artifactId>planetiler-openmaptiles</artifactId>
-  <version>3.13.1</version>
+  <version>3.14.0</version>
 
   <name>OpenMapTiles Vector Tile Schema implementation for Planetiler tool</name>
 

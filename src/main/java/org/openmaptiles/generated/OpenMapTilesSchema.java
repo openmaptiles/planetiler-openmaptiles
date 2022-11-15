@@ -37,10 +37,7 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 
 package org.openmaptiles.generated;
 
-import static com.onthegomap.planetiler.expression.Expression.FALSE;
-import static com.onthegomap.planetiler.expression.Expression.and;
-import static com.onthegomap.planetiler.expression.Expression.matchAny;
-import static com.onthegomap.planetiler.expression.Expression.or;
+import static com.onthegomap.planetiler.expression.Expression.*;
 
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.expression.MultiExpression;
@@ -52,14 +49,14 @@ import org.openmaptiles.Layer;
 
 /**
  * All vector tile layer definitions, attributes, and allowed values generated from the
- * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/openmaptiles.yaml">OpenMapTiles vector tile schema
- * v3.13.1</a>.
+ * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.14/openmaptiles.yaml">OpenMapTiles vector tile schema
+ * v3.14</a>.
  */
 @SuppressWarnings("unused")
 public class OpenMapTilesSchema {
   public static final String NAME = "OpenMapTiles";
   public static final String DESCRIPTION = "A tileset showcasing all layers in OpenMapTiles. https://openmaptiles.org";
-  public static final String VERSION = "3.13.1";
+  public static final String VERSION = "3.14.0";
   public static final String ATTRIBUTION =
     "<a href=\"https://www.openmaptiles.org/\" target=\"_blank\">&copy; OpenMapTiles</a> <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">&copy; OpenStreetMap contributors</a>";
   public static final List<String> LANGUAGES = List.of("am", "ar", "az", "be", "bg", "br", "bs", "ca", "co", "cs", "cy",
@@ -99,7 +96,7 @@ public class OpenMapTilesSchema {
    * boundaries show up. So you might not be able to use border styling for ocean water features.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/water/water.yaml">water.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/water/water.yaml">water.yaml</a>
    */
   public interface Water extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -121,7 +118,6 @@ public class OpenMapTilesSchema {
       /**
        * All water polygons from <a href="http://osmdata.openstreetmap.de/">OpenStreetMapData</a> have the class
        * <code>ocean</code>. Water bodies with the
-       * <a href="http://wiki.openstreetmap.org/wiki/Tag:waterway=riverbank"><code>waterway=riverbank</code></a> or
        * <a href="http://wiki.openstreetmap.org/wiki/Tag:water=river"><code>water=river</code></a> tag are classified as
        * river. Wet and dry docks tagged
        * <a href="http://wiki.openstreetmap.org/wiki/Tag:waterway=dock"><code>waterway=dock</code></a> are classified as
@@ -179,8 +175,8 @@ public class OpenMapTilesSchema {
     final class FieldMappings {
       public static final MultiExpression<String> Class =
         MultiExpression.of(List.of(MultiExpression.entry("dock", matchAny("waterway", "dock")),
-          MultiExpression.entry("river", or(matchAny("water", "river"), matchAny("waterway", "riverbank"))),
-          MultiExpression.entry("lake", FALSE), MultiExpression.entry("ocean", FALSE),
+          MultiExpression.entry("river", matchAny("water", "river")), MultiExpression.entry("lake", FALSE),
+          MultiExpression.entry("ocean", FALSE),
           MultiExpression.entry("swimming_pool", matchAny("leisure", "swimming_pool"))));
     }
   }
@@ -192,7 +188,7 @@ public class OpenMapTilesSchema {
    * field applied. Waterways do not have a <code>subclass</code> field.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/waterway/waterway.yaml">waterway.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/waterway/waterway.yaml">waterway.yaml</a>
    */
   public interface Waterway extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -277,7 +273,7 @@ public class OpenMapTilesSchema {
    * layer is to style wood (<code>class=wood</code>) and grass (<code>class=grass</code>) areas.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/landcover/landcover.yaml">landcover.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/landcover/landcover.yaml">landcover.yaml</a>
    */
   public interface Landcover extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -321,6 +317,7 @@ public class OpenMapTilesSchema {
        * <li>"bog"
        * <li>"dune"
        * <li>"scrub"
+       * <li>"shrubbery"
        * <li>"farm"
        * <li>"farmland"
        * <li>"fell"
@@ -372,6 +369,7 @@ public class OpenMapTilesSchema {
       public static final String SUBCLASS_BOG = "bog";
       public static final String SUBCLASS_DUNE = "dune";
       public static final String SUBCLASS_SCRUB = "scrub";
+      public static final String SUBCLASS_SHRUBBERY = "shrubbery";
       public static final String SUBCLASS_FARM = "farm";
       public static final String SUBCLASS_FARMLAND = "farmland";
       public static final String SUBCLASS_FELL = "fell";
@@ -403,10 +401,10 @@ public class OpenMapTilesSchema {
       public static final String SUBCLASS_WETLAND = "wetland";
       public static final String SUBCLASS_WOOD = "wood";
       public static final Set<String> SUBCLASS_VALUES =
-        Set.of("allotments", "bare_rock", "beach", "bog", "dune", "scrub", "farm", "farmland", "fell", "forest",
-          "garden", "glacier", "grass", "grassland", "golf_course", "heath", "mangrove", "marsh", "meadow", "orchard",
-          "park", "plant_nursery", "recreation_ground", "reedbed", "saltern", "saltmarsh", "sand", "scree", "swamp",
-          "tidalflat", "tundra", "village_green", "vineyard", "wet_meadow", "wetland", "wood");
+        Set.of("allotments", "bare_rock", "beach", "bog", "dune", "scrub", "shrubbery", "farm", "farmland", "fell",
+          "forest", "garden", "glacier", "grass", "grassland", "golf_course", "heath", "mangrove", "marsh", "meadow",
+          "orchard", "park", "plant_nursery", "recreation_ground", "reedbed", "saltern", "saltmarsh", "sand", "scree",
+          "swamp", "tidalflat", "tundra", "village_green", "vineyard", "wet_meadow", "wetland", "wood");
     }
     /** Complex mappings to generate attribute values from OSM element tags in the landcover layer. */
     final class FieldMappings {
@@ -419,8 +417,8 @@ public class OpenMapTilesSchema {
             MultiExpression.entry("wood", matchAny("subclass", "wood", "forest")),
             MultiExpression.entry("rock", matchAny("subclass", "bare_rock", "scree")),
             MultiExpression.entry("grass",
-              matchAny("subclass", "fell", "grassland", "heath", "scrub", "tundra", "grass", "meadow", "allotments",
-                "park", "village_green", "recreation_ground", "garden", "golf_course")),
+              matchAny("subclass", "fell", "grassland", "heath", "scrub", "shrubbery", "tundra", "grass", "meadow",
+                "allotments", "park", "village_green", "recreation_ground", "garden", "golf_course")),
             MultiExpression.entry("wetland",
               matchAny("subclass", "wetland", "bog", "swamp", "wet_meadow", "marsh", "reedbed", "saltern", "tidalflat",
                 "saltmarsh", "mangrove")),
@@ -432,7 +430,7 @@ public class OpenMapTilesSchema {
    * residential (urban) areas and at higher zoom levels mostly OSM <code>landuse</code> tags.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/landuse/landuse.yaml">landuse.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/landuse/landuse.yaml">landuse.yaml</a>
    */
   public interface Landuse extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -481,6 +479,7 @@ public class OpenMapTilesSchema {
        * <li>"quarter"
        * <li>"neighbourhood"
        * <li>"dam"
+       * <li>"quarry"
        * </ul>
        */
       public static final String CLASS = "class";
@@ -512,10 +511,11 @@ public class OpenMapTilesSchema {
       public static final String CLASS_QUARTER = "quarter";
       public static final String CLASS_NEIGHBOURHOOD = "neighbourhood";
       public static final String CLASS_DAM = "dam";
+      public static final String CLASS_QUARRY = "quarry";
       public static final Set<String> CLASS_VALUES =
         Set.of("railway", "cemetery", "military", "residential", "commercial", "industrial", "garages", "retail",
           "bus_station", "school", "university", "kindergarten", "college", "library", "hospital", "stadium", "pitch",
-          "playground", "track", "theme_park", "zoo", "suburb", "quarter", "neighbourhood", "dam");
+          "playground", "track", "theme_park", "zoo", "suburb", "quarter", "neighbourhood", "dam", "quarry");
     }
     /** Complex mappings to generate attribute values from OSM element tags in the landuse layer. */
     final class FieldMappings {
@@ -526,7 +526,7 @@ public class OpenMapTilesSchema {
    * <a href="http://wiki.openstreetmap.org/wiki/Tag:natural%3Dpeak">Natural peaks</a>
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/mountain_peak/mountain_peak.yaml">mountain_peak.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/mountain_peak/mountain_peak.yaml">mountain_peak.yaml</a>
    */
   public interface MountainPeak extends Layer {
     double BUFFER_SIZE = 64.0;
@@ -601,7 +601,7 @@ public class OpenMapTilesSchema {
    * <a href="http://wiki.openstreetmap.org/wiki/Tag:leisure%3Dnature_reserve"><code>leisure=nature_reserve</code></a>.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/park/park.yaml">park.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/park/park.yaml">park.yaml</a>
    */
   public interface Park extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -661,7 +661,7 @@ public class OpenMapTilesSchema {
    * but for most styles it makes sense to just style <code>admin_level=2</code> and <code>admin_level=4</code>.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/boundary/boundary.yaml">boundary.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/boundary/boundary.yaml">boundary.yaml</a>
    */
   public interface Boundary extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -762,7 +762,7 @@ public class OpenMapTilesSchema {
    * in the <strong>aeroway</strong> layer.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/aeroway/aeroway.yaml">aeroway.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/aeroway/aeroway.yaml">aeroway.yaml</a>
    */
   public interface Aeroway extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -822,7 +822,7 @@ public class OpenMapTilesSchema {
    * features like plazas.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/transportation/transportation.yaml">transportation.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/transportation/transportation.yaml">transportation.yaml</a>
    */
   public interface Transportation extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -858,6 +858,8 @@ public class OpenMapTilesSchema {
        * <li>track
        * <li>raceway
        * <li>busway
+       * <li>bus_guideway
+       * <li>ferry
        * <li>motorway_construction
        * <li>trunk_construction
        * <li>primary_construction
@@ -897,6 +899,7 @@ public class OpenMapTilesSchema {
        * <li>"bridleway"
        * <li>"corridor"
        * <li>"platform"
+       * <li>"ferry (DEPRECATED - use class)"
        * </ul>
        */
       public static final String SUBCLASS = "subclass";
@@ -1060,6 +1063,8 @@ public class OpenMapTilesSchema {
       public static final String CLASS_TRACK = "track";
       public static final String CLASS_RACEWAY = "raceway";
       public static final String CLASS_BUSWAY = "busway";
+      public static final String CLASS_BUS_GUIDEWAY = "bus_guideway";
+      public static final String CLASS_FERRY = "ferry";
       public static final String CLASS_MOTORWAY_CONSTRUCTION = "motorway_construction";
       public static final String CLASS_TRUNK_CONSTRUCTION = "trunk_construction";
       public static final String CLASS_PRIMARY_CONSTRUCTION = "primary_construction";
@@ -1070,10 +1075,11 @@ public class OpenMapTilesSchema {
       public static final String CLASS_SERVICE_CONSTRUCTION = "service_construction";
       public static final String CLASS_TRACK_CONSTRUCTION = "track_construction";
       public static final String CLASS_RACEWAY_CONSTRUCTION = "raceway_construction";
-      public static final Set<String> CLASS_VALUES = Set.of("motorway", "trunk", "primary", "secondary", "tertiary",
-        "minor", "path", "service", "track", "raceway", "busway", "motorway_construction", "trunk_construction",
-        "primary_construction", "secondary_construction", "tertiary_construction", "minor_construction",
-        "path_construction", "service_construction", "track_construction", "raceway_construction");
+      public static final Set<String> CLASS_VALUES =
+        Set.of("motorway", "trunk", "primary", "secondary", "tertiary", "minor", "path", "service", "track", "raceway",
+          "busway", "bus_guideway", "ferry", "motorway_construction", "trunk_construction", "primary_construction",
+          "secondary_construction", "tertiary_construction", "minor_construction", "path_construction",
+          "service_construction", "track_construction", "raceway_construction");
       public static final String SUBCLASS_RAIL = "rail";
       public static final String SUBCLASS_NARROW_GAUGE = "narrow_gauge";
       public static final String SUBCLASS_PRESERVED = "preserved";
@@ -1090,9 +1096,10 @@ public class OpenMapTilesSchema {
       public static final String SUBCLASS_BRIDLEWAY = "bridleway";
       public static final String SUBCLASS_CORRIDOR = "corridor";
       public static final String SUBCLASS_PLATFORM = "platform";
+      public static final String SUBCLASS_FERRY = "ferry";
       public static final Set<String> SUBCLASS_VALUES =
         Set.of("rail", "narrow_gauge", "preserved", "funicular", "subway", "light_rail", "monorail", "tram",
-          "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor", "platform");
+          "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor", "platform", "ferry");
       public static final String BRUNNEL_BRIDGE = "bridge";
       public static final String BRUNNEL_TUNNEL = "tunnel";
       public static final String BRUNNEL_FORD = "ford";
@@ -1112,43 +1119,45 @@ public class OpenMapTilesSchema {
     }
     /** Complex mappings to generate attribute values from OSM element tags in the transportation layer. */
     final class FieldMappings {
-      public static final MultiExpression<String> Class =
-        MultiExpression.of(List.of(MultiExpression.entry("motorway", matchAny("highway", "motorway", "motorway_link")),
-          MultiExpression.entry("trunk", matchAny("highway", "trunk", "trunk_link")),
-          MultiExpression.entry("primary", matchAny("highway", "primary", "primary_link")),
-          MultiExpression.entry("secondary", matchAny("highway", "secondary", "secondary_link")),
-          MultiExpression.entry("tertiary", matchAny("highway", "tertiary", "tertiary_link")),
-          MultiExpression.entry("minor", matchAny("highway", "unclassified", "residential", "living_street", "road")),
-          MultiExpression.entry("path",
-            or(matchAny("highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor"),
-              matchAny("public_transport", "platform"))),
-          MultiExpression.entry("service", matchAny("highway", "service")),
-          MultiExpression.entry("track", matchAny("highway", "track")),
-          MultiExpression.entry("raceway", matchAny("highway", "raceway")),
-          MultiExpression.entry("busway", matchAny("highway", "busway")),
-          MultiExpression.entry("motorway_construction",
-            and(matchAny("highway", "construction"), matchAny("construction", "motorway", "motorway_link"))),
-          MultiExpression.entry("trunk_construction",
-            and(matchAny("highway", "construction"), matchAny("construction", "trunk", "trunk_link"))),
-          MultiExpression.entry("primary_construction",
-            and(matchAny("highway", "construction"), matchAny("construction", "primary", "primary_link"))),
-          MultiExpression.entry("secondary_construction",
-            and(matchAny("highway", "construction"), matchAny("construction", "secondary", "secondary_link"))),
-          MultiExpression.entry("tertiary_construction",
-            and(matchAny("highway", "construction"), matchAny("construction", "tertiary", "tertiary_link"))),
-          MultiExpression.entry(
-            "minor_construction",
-            and(matchAny("highway", "construction"),
-              matchAny("construction", "", "unclassified", "residential", "living_street", "road"))),
-          MultiExpression.entry("path_construction", and(matchAny("highway", "construction"),
+      public static final MultiExpression<String> Class = MultiExpression.of(List.of(
+        MultiExpression.entry("motorway", matchAny("highway", "motorway", "motorway_link")),
+        MultiExpression.entry("trunk", matchAny("highway", "trunk", "trunk_link")),
+        MultiExpression.entry("primary", matchAny("highway", "primary", "primary_link")),
+        MultiExpression.entry("secondary", matchAny("highway", "secondary", "secondary_link")),
+        MultiExpression.entry("tertiary", matchAny("highway", "tertiary", "tertiary_link")),
+        MultiExpression.entry("minor", matchAny("highway", "unclassified", "residential", "living_street", "road")),
+        MultiExpression.entry("path",
+          or(matchAny("highway", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor"),
+            matchAny("public_transport", "platform"))),
+        MultiExpression.entry("service", matchAny("highway", "service")),
+        MultiExpression.entry("track", matchAny("highway", "track")),
+        MultiExpression.entry("raceway", matchAny("highway", "raceway")),
+        MultiExpression.entry("busway", matchAny("highway", "busway")),
+        MultiExpression.entry("bus_guideway", matchAny("highway", "bus_guideway")),
+        MultiExpression.entry("ferry", matchAny("highway", "shipway")),
+        MultiExpression.entry("motorway_construction",
+          and(matchAny("highway", "construction"), matchAny("construction", "motorway", "motorway_link"))),
+        MultiExpression.entry("trunk_construction",
+          and(matchAny("highway", "construction"), matchAny("construction", "trunk", "trunk_link"))),
+        MultiExpression.entry("primary_construction",
+          and(matchAny("highway", "construction"), matchAny("construction", "primary", "primary_link"))),
+        MultiExpression.entry("secondary_construction",
+          and(matchAny("highway", "construction"), matchAny("construction", "secondary", "secondary_link"))),
+        MultiExpression.entry("tertiary_construction",
+          and(matchAny("highway", "construction"), matchAny("construction", "tertiary", "tertiary_link"))),
+        MultiExpression.entry("minor_construction",
+          and(matchAny("highway", "construction"),
+            matchAny("construction", "", "unclassified", "residential", "living_street", "road"))),
+        MultiExpression.entry("path_construction",
+          and(matchAny("highway", "construction"),
             or(matchAny("construction", "pedestrian", "path", "footway", "cycleway", "steps", "bridleway", "corridor"),
               matchAny("public_transport", "platform")))),
-          MultiExpression.entry("service_construction",
-            and(matchAny("highway", "construction"), matchAny("construction", "service"))),
-          MultiExpression.entry("track_construction",
-            and(matchAny("highway", "construction"), matchAny("construction", "track"))),
-          MultiExpression.entry("raceway_construction",
-            and(matchAny("highway", "construction"), matchAny("construction", "raceway")))));
+        MultiExpression.entry("service_construction",
+          and(matchAny("highway", "construction"), matchAny("construction", "service"))),
+        MultiExpression.entry("track_construction",
+          and(matchAny("highway", "construction"), matchAny("construction", "track"))),
+        MultiExpression.entry("raceway_construction",
+          and(matchAny("highway", "construction"), matchAny("construction", "raceway")))));
     }
   }
   /**
@@ -1157,7 +1166,7 @@ public class OpenMapTilesSchema {
    * location:underground are excluded.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/building/building.yaml">building.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/building/building.yaml">building.yaml</a>
    */
   public interface Building extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -1199,7 +1208,7 @@ public class OpenMapTilesSchema {
    * from OSM water bodies. Only the most important lakes contain labels.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/water_name/water_name.yaml">water_name.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/water_name/water_name.yaml">water_name.yaml</a>
    */
   public interface WaterName extends Layer {
     double BUFFER_SIZE = 256.0;
@@ -1264,7 +1273,7 @@ public class OpenMapTilesSchema {
    * while for other roads you should use <code>name</code>.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/transportation_name/transportation_name.yaml">transportation_name.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/transportation_name/transportation_name.yaml">transportation_name.yaml</a>
    */
   public interface TransportationName extends Layer {
     double BUFFER_SIZE = 8.0;
@@ -1481,7 +1490,7 @@ public class OpenMapTilesSchema {
    * create a text hierarchy.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/place/place.yaml">place.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/place/place.yaml">place.yaml</a>
    */
   public interface Place extends Layer {
     double BUFFER_SIZE = 256.0;
@@ -1509,7 +1518,10 @@ public class OpenMapTilesSchema {
        * allowed values:
        * <ul>
        * <li>2
+       * <li>3
        * <li>4
+       * <li>5
+       * <li>6
        * </ul>
        */
       public static final String CAPITAL = "capital";
@@ -1586,7 +1598,7 @@ public class OpenMapTilesSchema {
    * housenumber.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/housenumber/housenumber.yaml">housenumber.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/housenumber/housenumber.yaml">housenumber.yaml</a>
    */
   public interface Housenumber extends Layer {
     double BUFFER_SIZE = 8.0;
@@ -1615,7 +1627,7 @@ public class OpenMapTilesSchema {
    * <a href="http://wiki.openstreetmap.org/wiki/Points_of_interest">Points of interests</a> containing a of a variety
    * of OpenStreetMap tags. Mostly contains amenities, sport, shop and tourist POIs.
    *
-   * Generated from <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/poi/poi.yaml">poi.yaml</a>
+   * Generated from <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/poi/poi.yaml">poi.yaml</a>
    */
   public interface Poi extends Layer {
     double BUFFER_SIZE = 64.0;
@@ -1810,7 +1822,7 @@ public class OpenMapTilesSchema {
           matchAny("subclass", "hotel", "motel", "bed_and_breakfast", "guest_house", "hostel", "chalet", "alpine_hut",
             "dormitory")),
         MultiExpression.entry("ice_cream", matchAny("subclass", "chocolate", "confectionery")),
-        MultiExpression.entry("post", matchAny("subclass", "post_box", "post_office")),
+        MultiExpression.entry("post", matchAny("subclass", "post_box", "post_office", "parcel_locker")),
         MultiExpression.entry("cafe", matchAny("subclass", "cafe")),
         MultiExpression.entry("school", matchAny("subclass", "school", "kindergarten")),
         MultiExpression.entry("alcohol_shop", matchAny("subclass", "alcohol", "beverages", "wine")),
@@ -1834,7 +1846,7 @@ public class OpenMapTilesSchema {
    * <a href="http://wiki.openstreetmap.org/wiki/Tag:aeroway%3Daerodrome">Aerodrome labels</a>
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.13.1/layers/aerodrome_label/aerodrome_label.yaml">aerodrome_label.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/v3.14/layers/aerodrome_label/aerodrome_label.yaml">aerodrome_label.yaml</a>
    */
   public interface AerodromeLabel extends Layer {
     double BUFFER_SIZE = 64.0;

@@ -182,13 +182,18 @@ class WaterTest extends AbstractLayerTest {
   }
 
   @Test
-  void testRiverbank() {
-    assertFeatures(11, List.of(Map.of(
-      "class", "river",
-      "_layer", "water",
-      "_type", "polygon"
+  void testDock() {
+    assertFeatures(11, List.of(
+      Map.of(
+        "class", "dock",
+        "_layer", "water",
+        "_type", "polygon"),
+      Map.of(
+        "class", "harbor",
+        "_layer", "poi",
+        "_type", "point"
     )), process(polygonFeature(Map.of(
-      "waterway", "riverbank"
+      "waterway", "dock"
     ))));
   }
 

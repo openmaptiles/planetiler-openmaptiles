@@ -112,8 +112,7 @@ public class Water implements
   @Override
   public void process(Tables.OsmWaterPolygon element, FeatureCollector features) {
     if (!"bay".equals(element.natural())) {
-      String clazz = "riverbank".equals(element.waterway()) ? FieldValues.CLASS_RIVER :
-        classMapping.getOrElse(element.source(), FieldValues.CLASS_LAKE);
+      String clazz = classMapping.getOrElse(element.source(), FieldValues.CLASS_LAKE);
       features.polygon(LAYER_NAME)
         .setBufferPixels(BUFFER_SIZE)
         .setMinPixelSizeBelowZoom(11, 2)

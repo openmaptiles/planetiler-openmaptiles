@@ -144,18 +144,25 @@ class WaterTest extends AbstractLayerTest {
       "natural", "water",
       "covered", "yes"
     ))));
-    assertFeatures(14, List.of(Map.of(
-      "class", "river",
-      "brunnel", "bridge",
-      "intermittent", 1,
+    assertFeatures(14, List.of(
+        Map.of(
+            "class", "dock",
+            "intermittent", 1,
 
-      "_layer", "water",
-      "_type", "polygon",
-      "_minzoom", 6,
-      "_maxzoom", 14
+            "_layer", "water",
+            "_type", "polygon",
+            "_minzoom", 6,
+            "_maxzoom", 14),
+        Map.of(
+            "class", "harbor",
+            "subclass", "dock",
+
+            "_layer", "poi",
+            "_type", "point",
+            "_minzoom", 14,
+            "_maxzoom", 14
     )), process(polygonFeature(Map.of(
-      "waterway", "riverbank",
-      "bridge", "1",
+      "waterway", "dock",
       "intermittent", "1"
     ))));
     assertFeatures(11, List.of(Map.of(

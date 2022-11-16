@@ -358,8 +358,14 @@ public class Place implements
 
     if ("2".equals(capital) || "yes".equals(capital)) {
       feature.setAttr(Fields.CAPITAL, 2);
+    } else if ("3".equals(capital)) {
+      feature.setAttr(Fields.CAPITAL, 3);
     } else if ("4".equals(capital)) {
       feature.setAttr(Fields.CAPITAL, 4);
+    } else if ("5".equals(capital)) {
+      feature.setAttr(Fields.CAPITAL, 5);
+    } else if ("6".equals(capital)) {
+      feature.setAttr(Fields.CAPITAL, 6);
     }
   }
 

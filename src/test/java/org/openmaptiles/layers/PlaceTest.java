@@ -430,6 +430,81 @@ class PlaceTest extends AbstractLayerTest {
       ))));
   }
 
+  @Test
+  void testCountyCapital() {
+    process(SimpleFeature.create(
+      newPoint(0, 0),
+      Map.of(
+        "name", "Pueblo",
+        "scalerank", 7,
+        "wikidataid", "Q675576"
+      ),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_populated_places",
+      0
+    ));
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "place",
+      "class", "city",
+      "name", "Pueblo",
+      "rank", 7,
+      "capital", 6,
+
+      "_type", "point",
+      "_minzoom", 6
+    )), process(pointFeature(
+      Map.of(
+        "place", "city",
+        "name", "Pueblo",
+        "population", "111876",
+        "capital", "6"
+      ))));
+    // no match when far away
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "place",
+      "class", "city",
+      "name", "Pueblo",
+      "rank", "<null>"
+    )), process(SimpleFeature.create(
+      newPoint(1, 1),
+      Map.of(
+        "place", "city",
+        "name", "Pueblo",
+        "wikidata", "Q675576",
+        "population", "111876",
+        "capital", "6"
+      ),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      0
+    )));
+    // unaccented name match
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "place",
+      "class", "city",
+      "rank", 7
+    )), process(pointFeature(
+      Map.of(
+        "place", "city",
+        "name", "Pueblo",
+        "population", "111876",
+        "capital", "6"
+      ))));
+    // wikidata only match
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "place",
+      "class", "city",
+      "rank", 7
+    )), process(pointFeature(
+      Map.of(
+        "place", "city",
+        "name", "Other name",
+        "population", "111876",
+        "wikidata", "Q675576",
+        "capital", "6"
+      ))));
+  }
+
 
   @Test
   void testCityWithoutNaturalEarthMatch() {

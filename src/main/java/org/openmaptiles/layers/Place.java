@@ -184,7 +184,7 @@ public class Place implements
           feature.getString("name"),
           feature.getString("wikidataid"),
           (int) feature.getLong("scalerank"),
-          Stream.of("name", "namealt", "meganame", "gn_ascii", "nameascii").map(feature::getString)
+          Stream.of("name", "namealt", "meganame", "name_en", "nameascii").map(feature::getString)
             .filter(Objects::nonNull)
             .map(s -> s.toLowerCase(Locale.ROOT))
             .collect(Collectors.toSet())

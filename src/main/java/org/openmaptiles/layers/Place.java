@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
@@ -73,7 +72,6 @@ import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.util.OmtLanguageUtils;
-import org.openmaptiles.util.Utils;
 
 /**
  * Defines the logic for generating label points for populated places like continents, countries, cities, and towns in
@@ -216,11 +214,10 @@ public class Place implements
     if (nullOrEmpty(element.name())) {
       return;
     }
-    Function<String, String> f = Utils::nullIfEmpty;
     String isoA2 = coalesceLazy(
       nullIfEmpty(element.countryCodeIso31661Alpha2()),
-      f, element.iso31661Alpha2(),
-      f, element.iso31661()
+      () -> nullIfEmpty(element.iso31661Alpha2()),
+      () -> nullIfEmpty(element.iso31661())
     );
     if (isoA2 == null) {
       return;

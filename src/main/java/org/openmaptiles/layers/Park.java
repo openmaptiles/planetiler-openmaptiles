@@ -53,12 +53,10 @@ import com.onthegomap.planetiler.util.SortKey;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Function;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.util.OmtLanguageUtils;
-import org.openmaptiles.util.Utils;
 
 /**
  * Defines the logic for generating map elements for designated parks polygons and their label points in the {@code
@@ -97,11 +95,10 @@ public class Park implements
     if (protectionTitle != null) {
       protectionTitle = protectionTitle.replace(' ', '_').toLowerCase(Locale.ROOT);
     }
-    Function<String, String> f = Utils::nullIfEmpty;
     String clazz = coalesceLazy(
       nullIfEmpty(protectionTitle),
-      f, element.boundary(),
-      f, element.leisure()
+      () -> nullIfEmpty(element.boundary()),
+      () -> nullIfEmpty(element.leisure())
     );
 
     // park shape

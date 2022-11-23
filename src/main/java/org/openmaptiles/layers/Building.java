@@ -49,12 +49,10 @@ import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.MemoryEstimator;
-import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Function;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
@@ -140,22 +138,21 @@ public class Building implements
       color = color.toLowerCase(Locale.ROOT);
     }
 
-    Function<String, Double> f = Parse::parseDoubleOrNull;
     Double height = coalesceLazy(
       parseDoubleOrNull(element.height()),
-      f, element.buildingheight()
+      () -> parseDoubleOrNull(element.buildingheight())
     );
     Double minHeight = coalesceLazy(
       parseDoubleOrNull(element.minHeight()),
-      f, element.buildingminHeight()
+      () -> parseDoubleOrNull(element.buildingminHeight())
     );
     Double levels = coalesceLazy(
       parseDoubleOrNull(element.levels()),
-      f, element.buildinglevels()
+      () -> parseDoubleOrNull(element.buildinglevels())
     );
     Double minLevels = coalesceLazy(
       parseDoubleOrNull(element.minLevel()),
-      f, element.buildingminLevel()
+      () -> parseDoubleOrNull(element.buildingminLevel())
     );
 
     int renderHeight = (int) Math.ceil(height != null ? height : levels != null ? (levels * 3.66) : 5);

@@ -2,7 +2,7 @@ package org.openmaptiles.util;
 
 import com.onthegomap.planetiler.util.Parse;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Common utilities for working with data and the OpenMapTiles schema in {@code layers} implementations.
@@ -13,23 +13,23 @@ public class Utils {
     return a != null ? a : b;
   }
 
-  public static <T, U> T coalesceLazy(T a, Function<U, T> fb, U b) {
-    return a != null ? a : fb.apply(b);
+  public static <T, U> T coalesceLazy(T a, Supplier<T> fb) {
+    return a != null ? a : fb.get();
   }
 
   public static <T> T coalesce(T a, T b, T c) {
     return a != null ? a : b != null ? b : c;
   }
 
-  public static <T, U> T coalesceLazy(T a, Function<U, T> fb, U b, Function<U, T> fc, U c) {
+  public static <T, U> T coalesceLazy(T a, Supplier<T> fb, Supplier<T> fc) {
     if (a != null) {
       return a;
     }
-    T r = fb.apply(b);
+    T r = fb.get();
     if (r != null) {
       return r;
     }
-    return fc.apply(c);
+    return fc.get();
   }
 
   public static <T> T coalesce(T a, T b, T c, T d) {
@@ -44,28 +44,27 @@ public class Utils {
     return a != null ? a : b != null ? b : c != null ? c : d != null ? d : e != null ? e : f;
   }
 
-  public static <T, U> T coalesceLazy(T a, Function<U, T> fb, U b, Function<U, T> fc, U c, Function<U, T> fd, U d,
-    Function<U, T> fe, U e, Function<U, T> ff, U f) {
+  public static <T, U> T coalesceLazy(T a, Supplier<T> fb, Supplier<T> fc, Supplier<T> fd, Supplier<T> fe, Supplier<T> ff) {
     if (a != null) {
       return a;
     }
-    T r = fb.apply(b);
+    T r = fb.get();
     if (r != null) {
       return r;
     }
-    r = fc.apply(c);
+    r = fc.get();
     if (r != null) {
       return r;
     }
-    r = fd.apply(d);
+    r = fd.get();
     if (r != null) {
       return r;
     }
-    r = fe.apply(e);
+    r = fe.get();
     if (r != null) {
       return r;
     }
-    return ff.apply(f);
+    return ff.get();
   }
 
   /** Boxes {@code a} into an {@link Integer}, or {@code null} if {@code a} is {@code nullValue}. */

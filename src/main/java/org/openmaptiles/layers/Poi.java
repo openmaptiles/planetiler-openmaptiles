@@ -36,7 +36,11 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 package org.openmaptiles.layers;
 
 import static java.util.Map.entry;
-import static org.openmaptiles.util.Utils.*;
+import static org.openmaptiles.util.Utils.coalesce;
+import static org.openmaptiles.util.Utils.coalesceLazy;
+import static org.openmaptiles.util.Utils.nullIfEmpty;
+import static org.openmaptiles.util.Utils.nullIfLong;
+import static org.openmaptiles.util.Utils.nullOrEmpty;
 
 import com.carrotsearch.hppc.LongIntMap;
 import com.onthegomap.planetiler.FeatureCollector;
@@ -53,7 +57,6 @@ import java.util.Map;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.util.OmtLanguageUtils;
-import org.openmaptiles.util.Utils;
 
 /**
  * Defines the logic for generating map elements for things like shops, parks, and schools in the {@code poi} layer from
@@ -150,7 +153,8 @@ public class Poi implements
     if ("atm".equals(rawSubclass) && nullOrEmpty(name)) {
       name = coalesceLazy(
         nullIfEmpty(element.operator()),
-        Utils::nullIfEmpty, element.network());
+        () -> nullIfEmpty(element.network())
+      );
       if (name != null) {
         tags.put("name", name);
       }

@@ -39,12 +39,16 @@ import static org.openmaptiles.util.Utils.coalesce;
 import static org.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.FeatureMerge;
+import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
+import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
 import com.onthegomap.planetiler.util.ZoomFunction;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.openmaptiles.OpenMapTilesProfile;
@@ -61,7 +65,22 @@ import org.openmaptiles.generated.Tables;
 public class Landuse implements
   OpenMapTilesSchema.Landuse,
   OpenMapTilesProfile.NaturalEarthProcessor,
+  OpenMapTilesProfile.FeaturePostProcessor,
   Tables.OsmLandusePolygon.Handler {
+
+  /*
+   * Emit all land-use from OSM data at z9 (z6 for some features) to z14.
+   *
+   * From z9 (or z6 for some classes) to z13, emit all land-use at process-time,
+   * but then at tile render-time, merge land-use polygons that are overlapping
+   * or almost touching into combined polygons so that several land-use blocks
+   * show up as a single polygon.
+   *
+   * Unlike merging of buildings, merging land-use at lower zoom levels adds
+   * negligible overhead to the total map generation time. To disable it,
+   * set landuse_merge_z9_to_z13 argument to false.
+   * (See also building_merge_z13 argument.)
+   */
 
   private static final ZoomFunction<Number> MIN_PIXEL_SIZE_THRESHOLDS = ZoomFunction.fromMaxZoomThresholds(Map.of(
     13, 4,
@@ -75,7 +94,15 @@ public class Landuse implements
     FieldValues.CLASS_NEIGHBOURHOOD
   );
 
-  public Landuse(Translations translations, PlanetilerConfig config, Stats stats) {}
+  private final boolean mergeZ9Z13Landuse;
+
+  public Landuse(Translations translations, PlanetilerConfig config, Stats stats) {
+    this.mergeZ9Z13Landuse = config.arguments().getBoolean(
+      "landuse_merge_z9_to_z13",
+      "landuse layer: merge nearby areas from z9 (or z6 for some classes) to z13",
+      true
+    );
+  }
 
   @Override
   public void processNaturalEarth(String table, SourceFeature feature, FeatureCollector features) {
@@ -103,10 +130,23 @@ public class Landuse implements
       if ("grave_yard".equals(clazz)) {
         clazz = FieldValues.CLASS_CEMETERY;
       }
-      features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
+      var feature = features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
         .setAttr(Fields.CLASS, clazz)
-        .setMinPixelSizeOverrides(MIN_PIXEL_SIZE_THRESHOLDS)
         .setMinZoom(Z6_CLASSES.contains(clazz) ? 6 : 9);
+      if (mergeZ9Z13Landuse) {
+        feature
+          .setMinPixelSize(0.1)
+          .setPixelTolerance(0.25);
+      } else {
+        feature
+          .setMinPixelSizeOverrides(MIN_PIXEL_SIZE_THRESHOLDS);
+      }
     }
+  }
+
+  @Override
+  public List<VectorTile.Feature> postProcess(int zoom,
+    List<VectorTile.Feature> items) throws GeometryException {
+    return (mergeZ9Z13Landuse && zoom <= 13) ? FeatureMerge.mergeNearbyPolygons(items, 4, 4, 0.5, 0.5) : items;
   }
 }

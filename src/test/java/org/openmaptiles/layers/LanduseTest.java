@@ -2,10 +2,13 @@ package org.openmaptiles.layers;
 
 import static com.onthegomap.planetiler.TestUtils.rectangle;
 
+import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.geo.GeoUtils;
+import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SimpleFeature;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openmaptiles.OpenMapTilesProfile;
 
@@ -40,7 +43,7 @@ class LanduseTest extends AbstractLayerTest {
       Map.of(
         "_layer", "landuse",
         "class", "railway",
-        "_minpixelsize", 4d,
+        "_minpixelsize", 0.1d,
         "_minzoom", 9,
         "_maxzoom", 14
       )), process(polygonFeature(Map.of(
@@ -50,7 +53,7 @@ class LanduseTest extends AbstractLayerTest {
     assertFeatures(13, List.of(Map.of("_layer", "poi"), Map.of(
       "_layer", "landuse",
       "class", "school",
-      "_minpixelsize", 4d,
+      "_minpixelsize", 0.1d,
       "_minzoom", 9,
       "_maxzoom", 14
     )), process(polygonFeature(Map.of(
@@ -77,7 +80,7 @@ class LanduseTest extends AbstractLayerTest {
       "class", "suburb",
       "_minzoom", 6,
       "_maxzoom", 14,
-      "_minpixelsize", 1d
+      "_minpixelsize", 0.1d
     )), process(polygonFeature(Map.of(
       "place", "suburb"
     ))));
@@ -86,9 +89,36 @@ class LanduseTest extends AbstractLayerTest {
       "class", "residential",
       "_minzoom", 6,
       "_maxzoom", 14,
-      "_minpixelsize", 2d
+      "_minpixelsize", 0.1d
     )), process(polygonFeature(Map.of(
       "landuse", "residential"
     ))));
+  }
+
+  @Test
+  void testMergePolygonsZ13() throws GeometryException {
+    var poly1 = new VectorTile.Feature(
+      Landuse.LAYER_NAME,
+      1,
+      VectorTile.encodeGeometry(rectangle(10, 20)),
+      Map.of(),
+      0
+    );
+    var poly2 = new VectorTile.Feature(
+      Landuse.LAYER_NAME,
+      1,
+      VectorTile.encodeGeometry(rectangle(20, 10, 22, 20)),
+      Map.of(),
+      0
+    );
+
+    Assertions.assertEquals(
+      2,
+      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 14, List.of(poly1, poly2)).size()
+    );
+    Assertions.assertEquals(
+      1,
+      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 13, List.of(poly1, poly2)).size()
+    );
   }
 }

@@ -79,7 +79,7 @@ public class Building implements
    *
    * THIS IS VERY EXPENSIVE! Merging buildings at z13 adds about 50% to the
    * total map generation time.  To disable it, set building_merge_z13 argument
-   * to false.
+   * to false. (See also landuse_merge_z9_to_z13 argument.)
    */
 
   private static final Map<String, String> MATERIAL_COLORS = Map.ofEntries(

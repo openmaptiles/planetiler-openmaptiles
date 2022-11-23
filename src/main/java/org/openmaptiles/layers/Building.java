@@ -38,7 +38,7 @@ package org.openmaptiles.layers;
 import static com.onthegomap.planetiler.util.MemoryEstimator.CLASS_HEADER_BYTES;
 import static com.onthegomap.planetiler.util.Parse.parseDoubleOrNull;
 import static java.util.Map.entry;
-import static org.openmaptiles.util.Utils.coalesceF;
+import static org.openmaptiles.util.Utils.coalesceLazy;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.FeatureMerge;
@@ -141,19 +141,19 @@ public class Building implements
     }
 
     Function<String, Double> f = Parse::parseDoubleOrNull;
-    Double height = coalesceF(
+    Double height = coalesceLazy(
       parseDoubleOrNull(element.height()),
       f, element.buildingheight()
     );
-    Double minHeight = coalesceF(
+    Double minHeight = coalesceLazy(
       parseDoubleOrNull(element.minHeight()),
       f, element.buildingminHeight()
     );
-    Double levels = coalesceF(
+    Double levels = coalesceLazy(
       parseDoubleOrNull(element.levels()),
       f, element.buildinglevels()
     );
-    Double minLevels = coalesceF(
+    Double minLevels = coalesceLazy(
       parseDoubleOrNull(element.minLevel()),
       f, element.buildingminLevel()
     );

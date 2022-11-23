@@ -13,7 +13,7 @@ public class Utils {
     return a != null ? a : b;
   }
 
-  public static <T, U> T coalesceF(T a, Function<U, T> fb, U b) {
+  public static <T, U> T coalesceLazy(T a, Function<U, T> fb, U b) {
     return a != null ? a : fb.apply(b);
   }
 
@@ -21,7 +21,7 @@ public class Utils {
     return a != null ? a : b != null ? b : c;
   }
 
-  public static <T, U> T coalesceF(T a, Function<U, T> fb, U b, Function<U, T> fc, U c) {
+  public static <T, U> T coalesceLazy(T a, Function<U, T> fb, U b, Function<U, T> fc, U c) {
     if (a != null) {
       return a;
     }
@@ -44,7 +44,7 @@ public class Utils {
     return a != null ? a : b != null ? b : c != null ? c : d != null ? d : e != null ? e : f;
   }
 
-  public static <T, U> T coalesceF(T a, Function<U, T> fb, U b, Function<U, T> fc, U c, Function<U, T> fd, U d,
+  public static <T, U> T coalesceLazy(T a, Function<U, T> fb, U b, Function<U, T> fc, U c, Function<U, T> fd, U d,
     Function<U, T> fe, U e, Function<U, T> ff, U f) {
     if (a != null) {
       return a;

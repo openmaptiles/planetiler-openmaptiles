@@ -35,7 +35,7 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 */
 package org.openmaptiles.layers;
 
-import static org.openmaptiles.util.Utils.coalesceF;
+import static org.openmaptiles.util.Utils.coalesceLazy;
 import static org.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.onthegomap.planetiler.FeatureCollector;
@@ -94,7 +94,7 @@ public class Landuse implements
   @Override
   public void process(Tables.OsmLandusePolygon element, FeatureCollector features) {
     Function<String, String> f = Utils::nullIfEmpty;
-    String clazz = coalesceF(
+    String clazz = coalesceLazy(
       nullIfEmpty(element.landuse()),
       f, element.amenity(),
       f, element.leisure(),

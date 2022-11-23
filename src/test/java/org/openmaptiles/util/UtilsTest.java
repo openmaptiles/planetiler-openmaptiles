@@ -25,7 +25,7 @@ public class UtilsTest {
   }
 
   @Test
-  public void coalesceF2() {
+  public void coalesceLazy2() {
     Function<TestRecord, Double> fb = (TestRecord s) -> {
       counter2++;
       return Double.valueOf(s.value());
@@ -34,15 +34,15 @@ public class UtilsTest {
     TestRecord a = new TestRecord("1");
     TestRecord b = new TestRecord("2");
 
-    Assertions.assertEquals(1, Utils.coalesceF(Double.valueOf(a.value()), fb, b));
+    Assertions.assertEquals(1, Utils.coalesceLazy(Double.valueOf(a.value()), fb, b));
     Assertions.assertEquals(0, counter2);
 
-    Assertions.assertEquals(2, Utils.coalesceF(null, fb, b));
+    Assertions.assertEquals(2, Utils.coalesceLazy(null, fb, b));
     Assertions.assertEquals(1, counter2);
   }
 
   @Test
-  public void coalesceF3() {
+  public void coalesceLazy3() {
     Function<TestRecord, Double> fb = (TestRecord s) -> {
       counter2++;
       return s == null ? null : Double.valueOf(s.value());
@@ -56,21 +56,21 @@ public class UtilsTest {
     TestRecord b = new TestRecord("2");
     TestRecord c = new TestRecord("3");
 
-    Assertions.assertEquals(1, Utils.coalesceF(Double.valueOf(a.value()), fb, b, fc, c));
+    Assertions.assertEquals(1, Utils.coalesceLazy(Double.valueOf(a.value()), fb, b, fc, c));
     Assertions.assertEquals(0, counter2);
     Assertions.assertEquals(0, counter3);
 
-    Assertions.assertEquals(2, Utils.coalesceF(null, fb, b, fc, c));
+    Assertions.assertEquals(2, Utils.coalesceLazy(null, fb, b, fc, c));
     Assertions.assertEquals(1, counter2);
     Assertions.assertEquals(0, counter3);
 
-    Assertions.assertEquals(3, Utils.coalesceF(null, fb, null, fc, c));
+    Assertions.assertEquals(3, Utils.coalesceLazy(null, fb, null, fc, c));
     Assertions.assertEquals(2, counter2);
     Assertions.assertEquals(1, counter3);
   }
 
   @Test
-  public void coalesceF6() {
+  public void coalesceLazy6() {
     Function<TestRecord, Double> fb = (TestRecord s) -> {
       counter2++;
       return s == null ? null : Double.valueOf(s.value());
@@ -99,42 +99,42 @@ public class UtilsTest {
     TestRecord e = new TestRecord("5");
     TestRecord f = new TestRecord("6");
 
-    Assertions.assertEquals(1, Utils.coalesceF(Double.valueOf(a.value()), fb, b, fc, c, fd, d, fe, e, ff, f));
+    Assertions.assertEquals(1, Utils.coalesceLazy(Double.valueOf(a.value()), fb, b, fc, c, fd, d, fe, e, ff, f));
     Assertions.assertEquals(0, counter2);
     Assertions.assertEquals(0, counter3);
     Assertions.assertEquals(0, counter4);
     Assertions.assertEquals(0, counter5);
     Assertions.assertEquals(0, counter6);
 
-    Assertions.assertEquals(2, Utils.coalesceF(null, fb, b, fc, c, fd, d, fe, e, ff, f));
+    Assertions.assertEquals(2, Utils.coalesceLazy(null, fb, b, fc, c, fd, d, fe, e, ff, f));
     Assertions.assertEquals(1, counter2);
     Assertions.assertEquals(0, counter3);
     Assertions.assertEquals(0, counter4);
     Assertions.assertEquals(0, counter5);
     Assertions.assertEquals(0, counter6);
 
-    Assertions.assertEquals(3, Utils.coalesceF(null, fb, null, fc, c, fd, d, fe, e, ff, f));
+    Assertions.assertEquals(3, Utils.coalesceLazy(null, fb, null, fc, c, fd, d, fe, e, ff, f));
     Assertions.assertEquals(2, counter2);
     Assertions.assertEquals(1, counter3);
     Assertions.assertEquals(0, counter4);
     Assertions.assertEquals(0, counter5);
     Assertions.assertEquals(0, counter6);
 
-    Assertions.assertEquals(4, Utils.coalesceF(null, fb, null, fc, null, fd, d, fe, e, ff, f));
+    Assertions.assertEquals(4, Utils.coalesceLazy(null, fb, null, fc, null, fd, d, fe, e, ff, f));
     Assertions.assertEquals(3, counter2);
     Assertions.assertEquals(2, counter3);
     Assertions.assertEquals(1, counter4);
     Assertions.assertEquals(0, counter5);
     Assertions.assertEquals(0, counter6);
 
-    Assertions.assertEquals(5, Utils.coalesceF(null, fb, null, fc, null, fd, null, fe, e, ff, f));
+    Assertions.assertEquals(5, Utils.coalesceLazy(null, fb, null, fc, null, fd, null, fe, e, ff, f));
     Assertions.assertEquals(4, counter2);
     Assertions.assertEquals(3, counter3);
     Assertions.assertEquals(2, counter4);
     Assertions.assertEquals(1, counter5);
     Assertions.assertEquals(0, counter6);
 
-    Assertions.assertEquals(6, Utils.coalesceF(null, fb, null, fc, null, fd, null, fe, null, ff, f));
+    Assertions.assertEquals(6, Utils.coalesceLazy(null, fb, null, fc, null, fd, null, fe, null, ff, f));
     Assertions.assertEquals(5, counter2);
     Assertions.assertEquals(4, counter3);
     Assertions.assertEquals(3, counter4);

@@ -148,7 +148,7 @@ public class Poi implements
     String name = element.name();
     var tags = element.source().tags();
     if ("atm".equals(rawSubclass) && nullOrEmpty(name)) {
-      name = coalesceF(
+      name = coalesceLazy(
         nullIfEmpty(element.operator()),
         Utils::nullIfEmpty, element.network());
       if (name != null) {

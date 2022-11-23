@@ -36,7 +36,7 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 package org.openmaptiles.layers;
 
 import static com.onthegomap.planetiler.collection.FeatureGroup.SORT_KEY_BITS;
-import static org.openmaptiles.util.Utils.coalesceF;
+import static org.openmaptiles.util.Utils.coalesceLazy;
 import static org.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.carrotsearch.hppc.LongIntMap;
@@ -98,7 +98,7 @@ public class Park implements
       protectionTitle = protectionTitle.replace(' ', '_').toLowerCase(Locale.ROOT);
     }
     Function<String, String> f = Utils::nullIfEmpty;
-    String clazz = coalesceF(
+    String clazz = coalesceLazy(
       nullIfEmpty(protectionTitle),
       f, element.boundary(),
       f, element.leisure()

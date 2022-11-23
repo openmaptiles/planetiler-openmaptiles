@@ -37,7 +37,7 @@ package org.openmaptiles.layers;
 
 import static com.onthegomap.planetiler.collection.FeatureGroup.SORT_KEY_BITS;
 import static org.openmaptiles.util.Utils.coalesce;
-import static org.openmaptiles.util.Utils.coalesceF;
+import static org.openmaptiles.util.Utils.coalesceLazy;
 import static org.openmaptiles.util.Utils.nullIfEmpty;
 import static org.openmaptiles.util.Utils.nullOrEmpty;
 
@@ -217,7 +217,7 @@ public class Place implements
       return;
     }
     Function<String, String> f = Utils::nullIfEmpty;
-    String isoA2 = coalesceF(
+    String isoA2 = coalesceLazy(
       nullIfEmpty(element.countryCodeIso31661Alpha2()),
       f, element.iso31661Alpha2(),
       f, element.iso31661()

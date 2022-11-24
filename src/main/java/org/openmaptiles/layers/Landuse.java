@@ -68,20 +68,6 @@ public class Landuse implements
   OpenMapTilesProfile.FeaturePostProcessor,
   Tables.OsmLandusePolygon.Handler {
 
-  /*
-   * Emit all land-use from OSM data at z9 (z6 for some features) to z14.
-   *
-   * From z9 (or z6 for some classes) to z13, emit all land-use at process-time,
-   * but then at tile render-time, merge land-use polygons that are overlapping
-   * or almost touching into combined polygons so that several land-use blocks
-   * show up as a single polygon.
-   *
-   * Unlike merging of buildings, merging land-use at lower zoom levels adds
-   * negligible overhead to the total map generation time. To disable it,
-   * set landuse_merge_z9_to_z13 argument to false.
-   * (See also building_merge_z13 argument.)
-   */
-
   private static final ZoomFunction<Number> MIN_PIXEL_SIZE_THRESHOLDS = ZoomFunction.fromMaxZoomThresholds(Map.of(
     13, 4,
     7, 2,
@@ -94,15 +80,7 @@ public class Landuse implements
     FieldValues.CLASS_NEIGHBOURHOOD
   );
 
-  private final boolean mergeZ9Z13Landuse;
-
-  public Landuse(Translations translations, PlanetilerConfig config, Stats stats) {
-    this.mergeZ9Z13Landuse = config.arguments().getBoolean(
-      "landuse_merge_z9_to_z13",
-      "landuse layer: merge nearby areas from z9 (or z6 for some classes) to z13",
-      true
-    );
-  }
+  public Landuse(Translations translations, PlanetilerConfig config, Stats stats) {}
 
   @Override
   public void processNaturalEarth(String table, SourceFeature feature, FeatureCollector features) {
@@ -130,23 +108,17 @@ public class Landuse implements
       if ("grave_yard".equals(clazz)) {
         clazz = FieldValues.CLASS_CEMETERY;
       }
-      var feature = features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
+      features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
         .setAttr(Fields.CLASS, clazz)
+        .setMinPixelSize(0.1)
+        .setPixelTolerance(0.25)
         .setMinZoom(Z6_CLASSES.contains(clazz) ? 6 : 9);
-      if (mergeZ9Z13Landuse) {
-        feature
-          .setMinPixelSize(0.1)
-          .setPixelTolerance(0.25);
-      } else {
-        feature
-          .setMinPixelSizeOverrides(MIN_PIXEL_SIZE_THRESHOLDS);
-      }
     }
   }
 
   @Override
   public List<VectorTile.Feature> postProcess(int zoom,
     List<VectorTile.Feature> items) throws GeometryException {
-    return (mergeZ9Z13Landuse && zoom <= 13) ? FeatureMerge.mergeNearbyPolygons(items, 4, 4, 0.5, 0.5) : items;
+    return (zoom <= 13) ? FeatureMerge.mergeNearbyPolygons(items, 4, 4, 0.5, 0.5) : items;
   }
 }

@@ -131,12 +131,12 @@ public class Landuse implements
       return items;
     }
     else {
-      Map<Boolean, List<VectorTile.Feature>> splitList =
+      Map<Boolean, List<VectorTile.Feature>> splitLists =
         items.stream().collect(Collectors.partitioningBy(
           i -> FieldValues.CLASS_RESIDENTIAL.equals(i.attrs().get(Fields.CLASS)))
         );
-      List<VectorTile.Feature> result = splitList.get(Boolean.FALSE);
-      List<VectorTile.Feature> toMerge = splitList.get(Boolean.TRUE);
+      List<VectorTile.Feature> result = splitLists.get(Boolean.FALSE);
+      List<VectorTile.Feature> toMerge = splitLists.get(Boolean.TRUE);
       var merged = FeatureMerge.mergeNearbyPolygons(toMerge, 1, 1, 0.1, 0.1);
       result.addAll(merged);
       return result;

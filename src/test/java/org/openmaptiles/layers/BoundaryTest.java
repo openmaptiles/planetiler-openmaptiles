@@ -473,32 +473,41 @@ class BoundaryTest extends AbstractLayerTest {
     profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
     assertEquals(3, features.size());
 
-    // ensure shared edge has country labels on right sides
+    // ensure shared edge has country labels on right sides, from z5
     var sharedEdge = features.stream()
-      .filter(c -> c.getAttrsAtZoom(0).containsKey("adm0_l") && c.getAttrsAtZoom(0).containsKey("adm0_r")).findFirst()
+      .filter(c -> c.getAttrsAtZoom(5).containsKey("adm0_l") && c.getAttrsAtZoom(5).containsKey("adm0_r")).findFirst()
       .get();
     if (sharedEdge.getGeometry().getCoordinate().y == 0.5) { // going up
-      assertEquals("C1", sharedEdge.getAttrsAtZoom(0).get("adm0_r"));
-      assertEquals("C2", sharedEdge.getAttrsAtZoom(0).get("adm0_l"));
+      assertEquals("C1", sharedEdge.getAttrsAtZoom(5).get("adm0_r"));
+      assertEquals("C2", sharedEdge.getAttrsAtZoom(5).get("adm0_l"));
     } else { // going down
-      assertEquals("C2", sharedEdge.getAttrsAtZoom(0).get("adm0_r"));
-      assertEquals("C1", sharedEdge.getAttrsAtZoom(0).get("adm0_l"));
+      assertEquals("C2", sharedEdge.getAttrsAtZoom(5).get("adm0_r"));
+      assertEquals("C1", sharedEdge.getAttrsAtZoom(5).get("adm0_l"));
     }
     var c1 = features.stream()
       .filter(c -> c.getGeometry().getEnvelopeInternal().getMaxX() > 0.5).findFirst()
       .get();
     if (c1.getGeometry().getCoordinate().y == 0.5) { // going up
-      assertEquals("C1", c1.getAttrsAtZoom(0).get("adm0_l"));
+      assertEquals("C1", c1.getAttrsAtZoom(5).get("adm0_l"));
     } else { // going down
-      assertEquals("C1", c1.getAttrsAtZoom(0).get("adm0_r"));
+      assertEquals("C1", c1.getAttrsAtZoom(5).get("adm0_r"));
     }
     var c2 = features.stream()
       .filter(c -> c.getGeometry().getEnvelopeInternal().getMinX() < 0.5).findFirst()
       .get();
     if (c2.getGeometry().getCoordinate().y == 0.5) { // going up
-      assertEquals("C2", c2.getAttrsAtZoom(0).get("adm0_r"));
+      assertEquals("C2", c2.getAttrsAtZoom(5).get("adm0_r"));
     } else { // going down
-      assertEquals("C2", c2.getAttrsAtZoom(0).get("adm0_l"));
+      assertEquals("C2", c2.getAttrsAtZoom(5).get("adm0_l"));
+    }
+
+    // but not at z4, see https://github.com/openmaptiles/planetiler-openmaptiles/issues/18
+    if (sharedEdge.getGeometry().getCoordinate().y == 0.5) { // going up
+      assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_r"));
+      assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_l"));
+    } else { // going down
+      assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_r"));
+      assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_l"));
     }
   }
 

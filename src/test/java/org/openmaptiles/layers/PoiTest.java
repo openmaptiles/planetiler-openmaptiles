@@ -259,4 +259,19 @@ class PoiTest extends AbstractLayerTest {
       "ref", "name"
     ))));
   }
+
+  @Test
+  void testParcelLockerCornerCase() {
+    List<Map<String, Object>> expected = List.of(Map.of(
+        "_layer", "poi",
+        "class", "post",
+        "subclass", "parcel_locker",
+        "name", "Corner Case"
+    ));
+    // no brand, no operator, just ref
+    assertFeatures(14, expected, process(pointFeature(Map.of(
+        "amenity", "parcel_locker",
+        "ref", "Corner Case"
+    ))));
+  }
 }

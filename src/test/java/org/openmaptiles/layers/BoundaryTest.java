@@ -398,8 +398,7 @@ class BoundaryTest extends AbstractLayerTest {
     ));
   }
 
-  @Test
-  void testCountryLeftRightName() {
+  private List<FeatureCollector.Feature> setupCountryLeftRightNameTest(Map<String, Object> tags) {
     var country1 = new OsmElement.Relation(1);
     country1.setTag("type", "boundary");
     country1.setTag("admin_level", "2");
@@ -414,7 +413,7 @@ class BoundaryTest extends AbstractLayerTest {
     // shared edge
     assertFeatures(14, List.of(), process(SimpleFeature.createFakeOsmFeature(
       newLineString(0, 0, 0, 10),
-      Map.of(),
+      tags,
       OpenMapTilesProfile.OSM_SOURCE,
       null,
       3,
@@ -428,7 +427,7 @@ class BoundaryTest extends AbstractLayerTest {
     // other 2 edges of country 1
     assertFeatures(14, List.of(), process(SimpleFeature.createFakeOsmFeature(
       newLineString(0, 0, 5, 10),
-      Map.of(),
+      tags,
       OpenMapTilesProfile.OSM_SOURCE,
       null,
       4,
@@ -438,7 +437,7 @@ class BoundaryTest extends AbstractLayerTest {
     ));
     assertFeatures(14, List.of(), process(SimpleFeature.createFakeOsmFeature(
       newLineString(0, 10, 5, 10),
-      Map.of(),
+      tags,
       OpenMapTilesProfile.OSM_SOURCE,
       null,
       4,
@@ -450,7 +449,7 @@ class BoundaryTest extends AbstractLayerTest {
     // other 2 edges of country 2
     assertFeatures(14, List.of(), process(SimpleFeature.createFakeOsmFeature(
       newLineString(0, 0, -5, 10),
-      Map.of(),
+      tags,
       OpenMapTilesProfile.OSM_SOURCE,
       null,
       4,
@@ -460,7 +459,7 @@ class BoundaryTest extends AbstractLayerTest {
     ));
     assertFeatures(14, List.of(), process(SimpleFeature.createFakeOsmFeature(
       newLineString(0, 10, -5, 10),
-      Map.of(),
+      tags,
       OpenMapTilesProfile.OSM_SOURCE,
       null,
       4,
@@ -471,6 +470,13 @@ class BoundaryTest extends AbstractLayerTest {
 
     List<FeatureCollector.Feature> features = new ArrayList<>();
     profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
+
+    return features;
+  }
+
+  @Test
+  void testCountryLeftRightName() {
+    List<FeatureCollector.Feature> features = setupCountryLeftRightNameTest(Map.of());
     assertEquals(3, features.size());
 
     // ensure shared edge has country labels on right sides, from z5
@@ -508,6 +514,25 @@ class BoundaryTest extends AbstractLayerTest {
     } else { // going down
       assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_r"));
       assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_l"));
+    }
+  }
+
+  @Test
+  void testCountryLeftRightNameDisputed() {
+    Map<String, Object> tags = Map.of("disputed", 1);
+    List<FeatureCollector.Feature> features = setupCountryLeftRightNameTest(tags);
+    assertEquals(3, features.size());
+
+    // ensure shared edge does not have country labels at z5 ...
+    for (var feature : features) {
+      assertNull(feature.getAttrsAtZoom(5).get("adm0_r"));
+      assertNull(feature.getAttrsAtZoom(5).get("adm0_l"));
+    }
+
+    // ... and not even on z4
+    for (var feature : features) {
+      assertNull(feature.getAttrsAtZoom(4).get("adm0_r"));
+      assertNull(feature.getAttrsAtZoom(4).get("adm0_l"));
     }
   }
 

@@ -508,13 +508,8 @@ class BoundaryTest extends AbstractLayerTest {
     }
 
     // but not at z4, see https://github.com/openmaptiles/planetiler-openmaptiles/issues/18
-    if (sharedEdge.getGeometry().getCoordinate().y == 0.5) { // going up
-      assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_r"));
-      assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_l"));
-    } else { // going down
-      assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_r"));
-      assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_l"));
-    }
+    assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_r"));
+    assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_l"));
   }
 
   @Test

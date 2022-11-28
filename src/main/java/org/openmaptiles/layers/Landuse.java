@@ -119,6 +119,6 @@ public class Landuse implements
   @Override
   public List<VectorTile.Feature> postProcess(int zoom,
     List<VectorTile.Feature> items) throws GeometryException {
-    return (zoom <= 13) ? FeatureMerge.mergeNearbyPolygons(items, 4, 4, 0.5, 0.5) : items;
+    return (zoom <= 12) ? FeatureMerge.mergeNearbyPolygons(items, 1, 1, 0.1, 0.1) : items;
   }
 }

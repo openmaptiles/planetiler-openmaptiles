@@ -96,7 +96,7 @@ class LanduseTest extends AbstractLayerTest {
   }
 
   @Test
-  void testMergePolygonsZ13() throws GeometryException {
+  void testMergePolygonsZ12() throws GeometryException {
     var poly1 = new VectorTile.Feature(
       Landuse.LAYER_NAME,
       1,
@@ -114,11 +114,11 @@ class LanduseTest extends AbstractLayerTest {
 
     Assertions.assertEquals(
       2,
-      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 14, List.of(poly1, poly2)).size()
+      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 13, List.of(poly1, poly2)).size()
     );
     Assertions.assertEquals(
       1,
-      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 13, List.of(poly1, poly2)).size()
+      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 12, List.of(poly1, poly2)).size()
     );
   }
 }

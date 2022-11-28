@@ -129,6 +129,7 @@ public class Landuse implements
     if (zoom < 6 || zoom > 12) {
       return items;
     } else {
+      // merging only merges polygons with class "residential" for z6-z12
       Map<Boolean, List<VectorTile.Feature>> splitLists =
         items.stream().collect(Collectors.partitioningBy(
           i -> FieldValues.CLASS_RESIDENTIAL.equals(i.attrs().get(Fields.CLASS)))

@@ -116,8 +116,7 @@ public class Landuse implements
         feature
           .setMinPixelSize(0.1)
           .setPixelTolerance(0.25);
-      }
-      else {
+      } else {
         feature
           .setMinPixelSizeOverrides(MIN_PIXEL_SIZE_THRESHOLDS);
       }
@@ -129,8 +128,7 @@ public class Landuse implements
     List<VectorTile.Feature> items) throws GeometryException {
     if (zoom < 6 || zoom > 12) {
       return items;
-    }
-    else {
+    } else {
       Map<Boolean, List<VectorTile.Feature>> splitLists =
         items.stream().collect(Collectors.partitioningBy(
           i -> FieldValues.CLASS_RESIDENTIAL.equals(i.attrs().get(Fields.CLASS)))

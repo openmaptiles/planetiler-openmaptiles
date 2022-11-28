@@ -112,11 +112,11 @@ class LanduseTest extends AbstractLayerTest {
       0
     );
     var poly3 = new VectorTile.Feature(
-        Landuse.LAYER_NAME,
-        1,
-        VectorTile.encodeGeometry(rectangle(10, 20, 20, 22)),
-        Map.of("class", "suburb"),
-        0
+      Landuse.LAYER_NAME,
+      1,
+      VectorTile.encodeGeometry(rectangle(10, 20, 20, 22)),
+      Map.of("class", "suburb"),
+      0
     );
 
     Assertions.assertEquals(

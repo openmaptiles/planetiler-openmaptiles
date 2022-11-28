@@ -35,14 +35,17 @@ public class OpenMapTilesMain {
       // or osm_path=... osm_url=... in a config file
       .addShapefileSource("EPSG:3857", OpenMapTilesProfile.LAKE_CENTERLINE_SOURCE,
         sourcesDir.resolve("lake_centerline.shp.zip"),
-        // was previously using this old build from 2016: https://github.com/lukasmartinelli/osm-lakelines/releases/download/v0.9/lake_centerline.shp.zip
-        "https://github.com/acalcutt/osm-lakelines/releases/download/latest/lake_centerline.shp.zip")
+        // upstream is at https://github.com/acalcutt/osm-lakelines/releases/download/latest/lake_centerline.shp.zip ,
+        // following is same URL as used in the OpenMapTiles (but SHP format), a mirror maintained by MapTiler
+        "https://dev.maptiler.download/geodata/omt/lake_centerline.shp.zip")
       .addShapefileSource(OpenMapTilesProfile.WATER_POLYGON_SOURCE,
         sourcesDir.resolve("water-polygons-split-3857.zip"),
         "https://osmdata.openstreetmap.de/download/water-polygons-split-3857.zip")
       .addNaturalEarthSource(OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
         sourcesDir.resolve("natural_earth_vector.sqlite.zip"),
-        "https://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip")
+        // upstream is at https://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip ,
+        // following is same URL as used in the OpenMapTiles, a mirror maintained by MapTiler
+        "https://dev.maptiler.download/geodata/omt/natural_earth_vector.sqlite.zip")
       .addOsmSource(OpenMapTilesProfile.OSM_SOURCE,
         sourcesDir.resolve(area.replaceAll("[^a-zA-Z]+", "_") + ".osm.pbf"),
         "planet".equalsIgnoreCase(area) ? ("aws:latest") : ("geofabrik:" + area))

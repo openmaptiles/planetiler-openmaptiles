@@ -592,7 +592,7 @@ class BoundaryTest extends AbstractLayerTest {
 
     List<FeatureCollector.Feature> features = new ArrayList<>();
     profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
-    assertFeatures(0, List.of(Map.of(
+    assertFeatures(5, List.of(Map.of(
       "adm0_l", "C1",
       "adm0_r", "<null>"
     ), Map.of(
@@ -657,7 +657,7 @@ class BoundaryTest extends AbstractLayerTest {
 
     List<FeatureCollector.Feature> features = new ArrayList<>();
     profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
-    assertFeatures(0, List.of(Map.of(
+    assertFeatures(5, List.of(Map.of(
       "adm0_l", "<null>",
       "adm0_r", "<null>"
     ), Map.of(

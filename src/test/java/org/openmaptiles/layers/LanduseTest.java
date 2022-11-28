@@ -101,24 +101,31 @@ class LanduseTest extends AbstractLayerTest {
       Landuse.LAYER_NAME,
       1,
       VectorTile.encodeGeometry(rectangle(10, 20)),
-      Map.of(),
+      Map.of("class", "residential"),
       0
     );
     var poly2 = new VectorTile.Feature(
       Landuse.LAYER_NAME,
       1,
       VectorTile.encodeGeometry(rectangle(20, 10, 22, 20)),
-      Map.of(),
+      Map.of("class", "residential"),
       0
+    );
+    var poly3 = new VectorTile.Feature(
+        Landuse.LAYER_NAME,
+        1,
+        VectorTile.encodeGeometry(rectangle(10, 20, 20, 22)),
+        Map.of("class", "suburb"),
+        0
     );
 
     Assertions.assertEquals(
-      2,
-      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 13, List.of(poly1, poly2)).size()
+      3,
+      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 13, List.of(poly1, poly2, poly3)).size()
     );
     Assertions.assertEquals(
-      1,
-      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 12, List.of(poly1, poly2)).size()
+      2,
+      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 12, List.of(poly1, poly2, poly3)).size()
     );
   }
 }

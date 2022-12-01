@@ -19,7 +19,7 @@ class OmtLanguageUtilsTest {
 
   private final Wikidata.WikidataTranslations wikidataTranslations = new Wikidata.WikidataTranslations();
   private final Translations translations = Translations.defaultProvider(List.of("en", "es", "de"))
-    .addTranslationProvider(wikidataTranslations);
+    .addFallbackTranslationProvider(wikidataTranslations);
 
   @Test
   void testSimpleExample() {
@@ -227,15 +227,15 @@ class OmtLanguageUtilsTest {
   }
 
   @Test
-  void testPreferWikidata() {
+  void testPreferOsm() {
     wikidataTranslations.put(123, "es", "wd es name");
+    wikidataTranslations.put(123, "de", "wd de name");
     assertSubmap(Map.of(
       "name:es", "wd es name",
       "name:de", "de name osm"
     ), OmtLanguageUtils.getNames(Map.of(
       "name", "name",
       "wikidata", "Q123",
-      "name:es", "es name osm",
       "name:de", "de name osm"
     ), translations));
   }

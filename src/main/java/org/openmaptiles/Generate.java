@@ -416,26 +416,26 @@ public class Generate {
     for (var entry : tables.entrySet()) {
       String key = entry.getKey();
       Imposm3Table table = entry.getValue();
-      List<OsmTableField> fields = parseTableFields(table);
-      for (var field : fields) {
-        String existing = fieldNameToType.get(field.name);
-        if (existing == null) {
-          fieldNameToType.put(field.name, field.clazz);
-        } else if (!existing.equals(field.clazz)) {
-          throw new IllegalArgumentException(
-            "Field " + field.name + " has both " + existing + " and " + field.clazz + " types");
-        }
-      }
-      Expression mappingExpression = parseImposm3MappingExpression(table);
-      String mapping = """
-        /** Imposm3 "mapping" to filter OSM elements that should appear in this "table". */
-        public static final Expression MAPPING = %s;
-        """.formatted(
-        mappingExpression.generateJavaCode()
-      );
-      String tableName = "osm_" + key;
-      String className = lowerUnderscoreToUpperCamel(tableName);
       if (!"relation_member".equals(table.type)) {
+        List<OsmTableField> fields = parseTableFields(table);
+        for (var field : fields) {
+          String existing = fieldNameToType.get(field.name);
+          if (existing == null) {
+            fieldNameToType.put(field.name, field.clazz);
+          } else if (!existing.equals(field.clazz)) {
+            throw new IllegalArgumentException(
+              "Field " + field.name + " has both " + existing + " and " + field.clazz + " types");
+          }
+        }
+        Expression mappingExpression = parseImposm3MappingExpression(table);
+        String mapping = """
+          /** Imposm3 "mapping" to filter OSM elements that should appear in this "table". */
+          public static final Expression MAPPING = %s;
+          """.formatted(
+          mappingExpression.generateJavaCode()
+        );
+        String tableName = "osm_" + key;
+        String className = lowerUnderscoreToUpperCamel(tableName);
         classNames.add(className);
 
         tablesClass.append("""

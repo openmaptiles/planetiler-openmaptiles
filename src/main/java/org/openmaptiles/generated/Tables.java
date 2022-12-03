@@ -851,11 +851,6 @@ public class Tables {
     String access();
   }
 
-  /** Rows with a long adminLevel attribute. */
-  public interface WithAdminLevel {
-    long adminLevel();
-  }
-
   /** Rows with a String aerialway attribute. */
   public interface WithAerialway {
     String aerialway();
@@ -924,11 +919,6 @@ public class Tables {
   /** Rows with a String capital attribute. */
   public interface WithCapital {
     String capital();
-  }
-
-  /** Rows with a String claimedBy attribute. */
-  public interface WithClaimedBy {
-    String claimedBy();
   }
 
   /** Rows with a String colour attribute. */
@@ -1151,11 +1141,6 @@ public class Tables {
     String operator();
   }
 
-  /** Rows with a String osmcSymbol attribute. */
-  public interface WithOsmcSymbol {
-    String osmcSymbol();
-  }
-
   /** Rows with a String place attribute. */
   public interface WithPlace {
     String place();
@@ -1191,49 +1176,9 @@ public class Tables {
     String ref();
   }
 
-  /** Rows with a String relbuildingheight attribute. */
-  public interface WithRelbuildingheight {
-    String relbuildingheight();
-  }
-
-  /** Rows with a String relbuildinglevels attribute. */
-  public interface WithRelbuildinglevels {
-    String relbuildinglevels();
-  }
-
-  /** Rows with a String relbuildingminHeight attribute. */
-  public interface WithRelbuildingminHeight {
-    String relbuildingminHeight();
-  }
-
-  /** Rows with a String relbuildingminLevel attribute. */
-  public interface WithRelbuildingminLevel {
-    String relbuildingminLevel();
-  }
-
-  /** Rows with a String relheight attribute. */
-  public interface WithRelheight {
-    String relheight();
-  }
-
   /** Rows with a String religion attribute. */
   public interface WithReligion {
     String religion();
-  }
-
-  /** Rows with a String rellevels attribute. */
-  public interface WithRellevels {
-    String rellevels();
-  }
-
-  /** Rows with a String relminHeight attribute. */
-  public interface WithRelminHeight {
-    String relminHeight();
-  }
-
-  /** Rows with a String relminLevel attribute. */
-  public interface WithRelminLevel {
-    String relminLevel();
   }
 
   /** Rows with a String sacScale attribute. */

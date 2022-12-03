@@ -33,7 +33,7 @@ public abstract class AbstractLayerTest {
 
   final Wikidata.WikidataTranslations wikidataTranslations = new Wikidata.WikidataTranslations();
   final Translations translations = Translations.defaultProvider(List.of("en", "es", "de"))
-    .addTranslationProvider(wikidataTranslations);
+    .addFallbackTranslationProvider(wikidataTranslations);
 
   final PlanetilerConfig params = PlanetilerConfig.defaults();
   final OpenMapTilesProfile profile = new OpenMapTilesProfile(translations, PlanetilerConfig.defaults(),

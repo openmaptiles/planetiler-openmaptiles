@@ -15,7 +15,7 @@ class OpenMapTilesProfileTest {
 
   private final Wikidata.WikidataTranslations wikidataTranslations = new Wikidata.WikidataTranslations();
   private final Translations translations = Translations.defaultProvider(List.of("en", "es", "de"))
-    .addTranslationProvider(wikidataTranslations);
+    .addFallbackTranslationProvider(wikidataTranslations);
   private final OpenMapTilesProfile profile = new OpenMapTilesProfile(translations, PlanetilerConfig.defaults(),
     Stats.inMemory());
 

@@ -398,8 +398,7 @@ class BoundaryTest extends AbstractLayerTest {
     ));
   }
 
-  @Test
-  void testCountryLeftRightName() {
+  private List<FeatureCollector.Feature> setupCountryLeftRightNameTest(Map<String, Object> tags) {
     var country1 = new OsmElement.Relation(1);
     country1.setTag("type", "boundary");
     country1.setTag("admin_level", "2");
@@ -414,7 +413,7 @@ class BoundaryTest extends AbstractLayerTest {
     // shared edge
     assertFeatures(14, List.of(), process(SimpleFeature.createFakeOsmFeature(
       newLineString(0, 0, 0, 10),
-      Map.of(),
+      tags,
       OpenMapTilesProfile.OSM_SOURCE,
       null,
       3,
@@ -428,7 +427,7 @@ class BoundaryTest extends AbstractLayerTest {
     // other 2 edges of country 1
     assertFeatures(14, List.of(), process(SimpleFeature.createFakeOsmFeature(
       newLineString(0, 0, 5, 10),
-      Map.of(),
+      tags,
       OpenMapTilesProfile.OSM_SOURCE,
       null,
       4,
@@ -438,7 +437,7 @@ class BoundaryTest extends AbstractLayerTest {
     ));
     assertFeatures(14, List.of(), process(SimpleFeature.createFakeOsmFeature(
       newLineString(0, 10, 5, 10),
-      Map.of(),
+      tags,
       OpenMapTilesProfile.OSM_SOURCE,
       null,
       4,
@@ -450,7 +449,7 @@ class BoundaryTest extends AbstractLayerTest {
     // other 2 edges of country 2
     assertFeatures(14, List.of(), process(SimpleFeature.createFakeOsmFeature(
       newLineString(0, 0, -5, 10),
-      Map.of(),
+      tags,
       OpenMapTilesProfile.OSM_SOURCE,
       null,
       4,
@@ -460,7 +459,7 @@ class BoundaryTest extends AbstractLayerTest {
     ));
     assertFeatures(14, List.of(), process(SimpleFeature.createFakeOsmFeature(
       newLineString(0, 10, -5, 10),
-      Map.of(),
+      tags,
       OpenMapTilesProfile.OSM_SOURCE,
       null,
       4,
@@ -471,34 +470,64 @@ class BoundaryTest extends AbstractLayerTest {
 
     List<FeatureCollector.Feature> features = new ArrayList<>();
     profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
+
+    return features;
+  }
+
+  @Test
+  void testCountryLeftRightName() {
+    List<FeatureCollector.Feature> features = setupCountryLeftRightNameTest(Map.of());
     assertEquals(3, features.size());
 
-    // ensure shared edge has country labels on right sides
+    // ensure shared edge has country labels on right sides, from z5
     var sharedEdge = features.stream()
-      .filter(c -> c.getAttrsAtZoom(0).containsKey("adm0_l") && c.getAttrsAtZoom(0).containsKey("adm0_r")).findFirst()
+      .filter(c -> c.getAttrsAtZoom(5).containsKey("adm0_l") && c.getAttrsAtZoom(5).containsKey("adm0_r")).findFirst()
       .get();
     if (sharedEdge.getGeometry().getCoordinate().y == 0.5) { // going up
-      assertEquals("C1", sharedEdge.getAttrsAtZoom(0).get("adm0_r"));
-      assertEquals("C2", sharedEdge.getAttrsAtZoom(0).get("adm0_l"));
+      assertEquals("C1", sharedEdge.getAttrsAtZoom(5).get("adm0_r"));
+      assertEquals("C2", sharedEdge.getAttrsAtZoom(5).get("adm0_l"));
     } else { // going down
-      assertEquals("C2", sharedEdge.getAttrsAtZoom(0).get("adm0_r"));
-      assertEquals("C1", sharedEdge.getAttrsAtZoom(0).get("adm0_l"));
+      assertEquals("C2", sharedEdge.getAttrsAtZoom(5).get("adm0_r"));
+      assertEquals("C1", sharedEdge.getAttrsAtZoom(5).get("adm0_l"));
     }
     var c1 = features.stream()
       .filter(c -> c.getGeometry().getEnvelopeInternal().getMaxX() > 0.5).findFirst()
       .get();
     if (c1.getGeometry().getCoordinate().y == 0.5) { // going up
-      assertEquals("C1", c1.getAttrsAtZoom(0).get("adm0_l"));
+      assertEquals("C1", c1.getAttrsAtZoom(5).get("adm0_l"));
     } else { // going down
-      assertEquals("C1", c1.getAttrsAtZoom(0).get("adm0_r"));
+      assertEquals("C1", c1.getAttrsAtZoom(5).get("adm0_r"));
     }
     var c2 = features.stream()
       .filter(c -> c.getGeometry().getEnvelopeInternal().getMinX() < 0.5).findFirst()
       .get();
     if (c2.getGeometry().getCoordinate().y == 0.5) { // going up
-      assertEquals("C2", c2.getAttrsAtZoom(0).get("adm0_r"));
+      assertEquals("C2", c2.getAttrsAtZoom(5).get("adm0_r"));
     } else { // going down
-      assertEquals("C2", c2.getAttrsAtZoom(0).get("adm0_l"));
+      assertEquals("C2", c2.getAttrsAtZoom(5).get("adm0_l"));
+    }
+
+    // but not at z4, see https://github.com/openmaptiles/planetiler-openmaptiles/issues/18
+    assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_r"));
+    assertNull(sharedEdge.getAttrsAtZoom(4).get("adm0_l"));
+  }
+
+  @Test
+  void testCountryLeftRightNameDisputed() {
+    Map<String, Object> tags = Map.of("disputed", 1);
+    List<FeatureCollector.Feature> features = setupCountryLeftRightNameTest(tags);
+    assertEquals(3, features.size());
+
+    // ensure shared edge does not have country labels at z5 ...
+    for (var feature : features) {
+      assertNull(feature.getAttrsAtZoom(5).get("adm0_r"));
+      assertNull(feature.getAttrsAtZoom(5).get("adm0_l"));
+    }
+
+    // ... and not even on z4
+    for (var feature : features) {
+      assertNull(feature.getAttrsAtZoom(4).get("adm0_r"));
+      assertNull(feature.getAttrsAtZoom(4).get("adm0_l"));
     }
   }
 
@@ -563,7 +592,7 @@ class BoundaryTest extends AbstractLayerTest {
 
     List<FeatureCollector.Feature> features = new ArrayList<>();
     profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
-    assertFeatures(0, List.of(Map.of(
+    assertFeatures(5, List.of(Map.of(
       "adm0_l", "C1",
       "adm0_r", "<null>"
     ), Map.of(
@@ -628,7 +657,7 @@ class BoundaryTest extends AbstractLayerTest {
 
     List<FeatureCollector.Feature> features = new ArrayList<>();
     profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
-    assertFeatures(0, List.of(Map.of(
+    assertFeatures(5, List.of(Map.of(
       "adm0_l", "<null>",
       "adm0_r", "<null>"
     ), Map.of(

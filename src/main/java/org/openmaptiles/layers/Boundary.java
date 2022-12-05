@@ -312,16 +312,22 @@ public class Boundary implements
             BorderingRegions borderingRegions = getBorderingRegions(countryBoundaries, key.regions, lineString);
 
             var features = featureCollectors.get(SimpleFeature.fromWorldGeometry(lineString));
-            features.line(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
+            var newFeature = features.line(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
               .setAttr(Fields.ADMIN_LEVEL, key.adminLevel)
               .setAttr(Fields.DISPUTED, key.disputed ? 1 : 0)
               .setAttr(Fields.MARITIME, key.maritime ? 1 : 0)
               .setAttr(Fields.CLAIMED_BY, key.claimedBy)
               .setAttr(Fields.DISPUTED_NAME, key.disputed ? editName(key.name) : null)
-              .setAttr(Fields.ADM0_L, borderingRegions.left == null ? null : regionNames.get(borderingRegions.left))
-              .setAttr(Fields.ADM0_R, borderingRegions.right == null ? null : regionNames.get(borderingRegions.right))
               .setMinPixelSizeAtAllZooms(0)
               .setMinZoom(key.minzoom);
+            if (key.adminLevel == 2 && !key.disputed) {
+              // only non-disputed admin 2 boundaries get to have adm0_{l,r}, at zoom 5 and more
+              newFeature
+                .setAttrWithMinzoom(Fields.ADM0_L,
+                  borderingRegions.left == null ? null : regionNames.get(borderingRegions.left), 5)
+                .setAttrWithMinzoom(Fields.ADM0_R,
+                  borderingRegions.right == null ? null : regionNames.get(borderingRegions.right), 5);
+            }
             for (var feature : features) {
               emit.accept(feature);
             }

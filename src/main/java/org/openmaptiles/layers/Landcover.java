@@ -158,14 +158,14 @@ public class Landcover implements
             } else { // don't merge
               result.add(item);
             }
-          } else if (zoom == 9) {
+          } else if (zoom >= 8 && zoom <= 9) {
             if (WOOD_OR_FOREST.contains(subclass)) {
               attrs.put(tempGroupKey, numPoints < 300 ? "<300" : ">300");
               toMerge.add(item);
             } else { // don't merge
               result.add(item);
             }
-          } else { // zoom between 7 and 8
+          } else { // zoom 7
             toMerge.add(item);
           }
         } else {

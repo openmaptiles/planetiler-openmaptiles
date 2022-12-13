@@ -171,17 +171,17 @@ class LandcoverTest extends AbstractLayerTest {
   }
 
   @Test
-  void testMergeNonForestsBelowZ9() throws GeometryException {
+  void testMergeNonForestsBelowZ8() throws GeometryException {
     Map<String, Object> map = Map.of("subclass", "dune");
 
     assertMerges(List.of(map, map), List.of(
       feature(rectangle(10, 20), Map.of("_numpoints", 48, "subclass", "dune")),
       feature(rectangle(12, 18), Map.of("_numpoints", 301, "subclass", "dune"))
-    ), 9);
+    ), 8);
     assertMerges(List.of(map), List.of(
       feature(rectangle(10, 20), Map.of("_numpoints", 48, "subclass", "dune")),
       feature(rectangle(12, 18), Map.of("_numpoints", 301, "subclass", "dune"))
-    ), 8);
+    ), 7);
     assertMerges(List.of(map, map), List.of(
       feature(rectangle(10, 20), Map.of("_numpoints", 48, "subclass", "dune")),
       feature(rectangle(12, 18), Map.of("_numpoints", 301, "subclass", "dune"))

@@ -161,7 +161,7 @@ public class Poi implements
       name = coalesce(nullIfEmpty(element.brand()), nullIfEmpty(element.operator()));
       String ref = nullIfEmpty(element.ref());
       if (ref != null) {
-        name = name == null ? ref : name + " " + ref;
+        name = name == null ? ref : (name + " " + ref);
       }
       if (name != null) {
         tags.put("name", name);

@@ -39,14 +39,19 @@ import static org.openmaptiles.util.Utils.coalesce;
 import static org.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.FeatureMerge;
+import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
+import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
 import com.onthegomap.planetiler.util.ZoomFunction;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
@@ -61,6 +66,7 @@ import org.openmaptiles.generated.Tables;
 public class Landuse implements
   OpenMapTilesSchema.Landuse,
   OpenMapTilesProfile.NaturalEarthProcessor,
+  OpenMapTilesProfile.FeaturePostProcessor,
   Tables.OsmLandusePolygon.Handler {
 
   private static final ZoomFunction<Number> MIN_PIXEL_SIZE_THRESHOLDS = ZoomFunction.fromMaxZoomThresholds(Map.of(
@@ -103,10 +109,36 @@ public class Landuse implements
       if ("grave_yard".equals(clazz)) {
         clazz = FieldValues.CLASS_CEMETERY;
       }
-      features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
+      var feature = features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
         .setAttr(Fields.CLASS, clazz)
-        .setMinPixelSizeOverrides(MIN_PIXEL_SIZE_THRESHOLDS)
         .setMinZoom(Z6_CLASSES.contains(clazz) ? 6 : 9);
+      if (FieldValues.CLASS_RESIDENTIAL.equals(clazz)) {
+        feature
+          .setMinPixelSize(0.1)
+          .setPixelTolerance(0.25);
+      } else {
+        feature
+          .setMinPixelSizeOverrides(MIN_PIXEL_SIZE_THRESHOLDS);
+      }
+    }
+  }
+
+  @Override
+  public List<VectorTile.Feature> postProcess(int zoom,
+    List<VectorTile.Feature> items) throws GeometryException {
+    if (zoom < 6 || zoom > 12) {
+      return items;
+    } else {
+      // merging only merges polygons with class "residential" for z6-z12
+      Map<Boolean, List<VectorTile.Feature>> splitLists =
+        items.stream().collect(Collectors.partitioningBy(
+          i -> FieldValues.CLASS_RESIDENTIAL.equals(i.attrs().get(Fields.CLASS)))
+        );
+      List<VectorTile.Feature> result = splitLists.get(Boolean.FALSE);
+      List<VectorTile.Feature> toMerge = splitLists.get(Boolean.TRUE);
+      var merged = FeatureMerge.mergeNearbyPolygons(toMerge, 1, 1, 0.1, 0.1);
+      result.addAll(merged);
+      return result;
     }
   }
 }

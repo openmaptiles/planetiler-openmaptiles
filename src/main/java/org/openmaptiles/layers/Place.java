@@ -184,7 +184,7 @@ public class Place implements
           feature.getString("name"),
           feature.getString("wikidataid"),
           (int) feature.getLong("scalerank"),
-          Stream.of("name", "namealt", "meganame", "gn_ascii", "nameascii").map(feature::getString)
+          Stream.of("name", "namealt", "meganame", "name_en", "nameascii").map(feature::getString)
             .filter(Objects::nonNull)
             .map(s -> s.toLowerCase(Locale.ROOT))
             .collect(Collectors.toSet())
@@ -356,10 +356,14 @@ public class Place implements
       feature.setPointLabelGridLimit(LABEL_GRID_LIMITS);
     }
 
-    if ("2".equals(capital) || "yes".equals(capital)) {
-      feature.setAttr(Fields.CAPITAL, 2);
-    } else if ("4".equals(capital)) {
-      feature.setAttr(Fields.CAPITAL, 4);
+    if (capital != null) { // with Java 18, we can handle that with "case null", see https://openjdk.org/jeps/420)
+      switch (capital) {
+        case "2", "yes" -> feature.setAttr(Fields.CAPITAL, 2);
+        case "3" -> feature.setAttr(Fields.CAPITAL, 3);
+        case "4" -> feature.setAttr(Fields.CAPITAL, 4);
+        case "5" -> feature.setAttr(Fields.CAPITAL, 5);
+        case "6" -> feature.setAttr(Fields.CAPITAL, 6);
+      }
     }
   }
 

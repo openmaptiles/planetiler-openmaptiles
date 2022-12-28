@@ -724,6 +724,29 @@ class TransportationTest extends AbstractLayerTest {
     ))));
   }
 
+  @Test
+  void testBusGuideway() {
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "bus_guideway",
+      "brunnel", "tunnel",
+      "_minzoom", 11
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "bus_guideway",
+      "name", "Silver Line",
+      "_minzoom", 12
+    )), process(lineFeature(Map.of(
+      "access", "no",
+      "bus", "yes",
+      "highway", "bus_guideway",
+      "layer", "-1",
+      "name", "Silver Line",
+      "trolley_wire", "yes",
+      "tunnel", "yes"
+    ))));
+  }
+
   final OsmElement.Relation relUS = new OsmElement.Relation(1);
 
   {

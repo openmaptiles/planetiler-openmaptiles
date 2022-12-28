@@ -236,4 +236,42 @@ class PoiTest extends AbstractLayerTest {
       "network", "ATM name"
     ))));
   }
+
+  @Test
+  void testParcelLocker() {
+    List<Map<String, Object>> expected = List.of(Map.of(
+      "_layer", "poi",
+      "class", "post",
+      "subclass", "parcel_locker",
+      "name", "Parcel Locker name"
+    ));
+    assertFeatures(14, expected, process(pointFeature(Map.of(
+      "amenity", "parcel_locker",
+      "brand", "Parcel Locker name"
+    ))));
+    assertFeatures(14, expected, process(pointFeature(Map.of(
+      "amenity", "parcel_locker",
+      "operator", "Parcel Locker name"
+    ))));
+    assertFeatures(14, expected, process(pointFeature(Map.of(
+      "amenity", "parcel_locker",
+      "operator", "Parcel Locker",
+      "ref", "name"
+    ))));
+  }
+
+  @Test
+  void testParcelLockerCornerCase() {
+    List<Map<String, Object>> expected = List.of(Map.of(
+      "_layer", "poi",
+      "class", "post",
+      "subclass", "parcel_locker",
+      "name", "Corner Case"
+    ));
+    // no brand, no operator, just ref
+    assertFeatures(14, expected, process(pointFeature(Map.of(
+      "amenity", "parcel_locker",
+      "ref", "Corner Case"
+    ))));
+  }
 }

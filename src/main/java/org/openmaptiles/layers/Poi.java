@@ -136,7 +136,7 @@ public class Poi implements
     setupPoiFeature(element, features.centroidIfConvex(LAYER_NAME));
   }
 
-  private <T extends Tables.WithSubclass & Tables.WithStation & Tables.WithFunicular & Tables.WithSport & Tables.WithInformation & Tables.WithReligion & Tables.WithMappingKey & Tables.WithName & Tables.WithIndoor & Tables.WithLayer & Tables.WithSource & Tables.WithOperator & Tables.WithNetwork> void setupPoiFeature(
+  private <T extends Tables.WithSubclass & Tables.WithStation & Tables.WithFunicular & Tables.WithSport & Tables.WithInformation & Tables.WithReligion & Tables.WithMappingKey & Tables.WithName & Tables.WithIndoor & Tables.WithLayer & Tables.WithSource & Tables.WithOperator & Tables.WithNetwork & Tables.WithBrand & Tables.WithRef> void setupPoiFeature(
     T element, FeatureCollector.Feature output) {
     String rawSubclass = element.subclass();
     if ("station".equals(rawSubclass) && "subway".equals(element.station())) {
@@ -151,6 +151,18 @@ public class Poi implements
     var tags = element.source().tags();
     if ("atm".equals(rawSubclass) && nullOrEmpty(name)) {
       name = coalesce(nullIfEmpty(element.operator()), nullIfEmpty(element.network()));
+      if (name != null) {
+        tags.put("name", name);
+      }
+    }
+
+    // Parcel locker without name: use either brand or operator and add ref if present
+    if ("parcel_locker".equals(rawSubclass) && nullOrEmpty(name)) {
+      name = coalesce(nullIfEmpty(element.brand()), nullIfEmpty(element.operator()));
+      String ref = nullIfEmpty(element.ref());
+      if (ref != null) {
+        name = name == null ? ref : (name + " " + ref);
+      }
       if (name != null) {
         tags.put("name", name);
       }

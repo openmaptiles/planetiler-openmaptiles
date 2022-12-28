@@ -2,10 +2,13 @@ package org.openmaptiles.layers;
 
 import static com.onthegomap.planetiler.TestUtils.rectangle;
 
+import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.geo.GeoUtils;
+import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SimpleFeature;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openmaptiles.OpenMapTilesProfile;
 
@@ -86,9 +89,43 @@ class LanduseTest extends AbstractLayerTest {
       "class", "residential",
       "_minzoom", 6,
       "_maxzoom", 14,
-      "_minpixelsize", 2d
+      "_minpixelsize", 0.1d
     )), process(polygonFeature(Map.of(
       "landuse", "residential"
     ))));
+  }
+
+  @Test
+  void testMergePolygonsZ12() throws GeometryException {
+    var poly1 = new VectorTile.Feature(
+      Landuse.LAYER_NAME,
+      1,
+      VectorTile.encodeGeometry(rectangle(10, 20)),
+      Map.of("class", "residential"),
+      0
+    );
+    var poly2 = new VectorTile.Feature(
+      Landuse.LAYER_NAME,
+      1,
+      VectorTile.encodeGeometry(rectangle(20, 10, 22, 20)),
+      Map.of("class", "residential"),
+      0
+    );
+    var poly3 = new VectorTile.Feature(
+      Landuse.LAYER_NAME,
+      1,
+      VectorTile.encodeGeometry(rectangle(10, 20, 20, 22)),
+      Map.of("class", "suburb"),
+      0
+    );
+
+    Assertions.assertEquals(
+      3,
+      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 13, List.of(poly1, poly2, poly3)).size()
+    );
+    Assertions.assertEquals(
+      2,
+      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 12, List.of(poly1, poly2, poly3)).size()
+    );
   }
 }

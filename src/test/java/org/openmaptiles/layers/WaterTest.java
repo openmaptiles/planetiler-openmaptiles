@@ -144,20 +144,27 @@ class WaterTest extends AbstractLayerTest {
       "natural", "water",
       "covered", "yes"
     ))));
-    assertFeatures(14, List.of(Map.of(
-      "class", "river",
-      "brunnel", "bridge",
-      "intermittent", 1,
+    assertFeatures(14, List.of(
+      Map.of(
+        "class", "dock",
+        "intermittent", 1,
 
-      "_layer", "water",
-      "_type", "polygon",
-      "_minzoom", 6,
-      "_maxzoom", 14
-    )), process(polygonFeature(Map.of(
-      "waterway", "riverbank",
-      "bridge", "1",
-      "intermittent", "1"
-    ))));
+        "_layer", "water",
+        "_type", "polygon",
+        "_minzoom", 6,
+        "_maxzoom", 14),
+      Map.of(
+        "class", "harbor",
+        "subclass", "dock",
+
+        "_layer", "poi",
+        "_type", "point",
+        "_minzoom", 14,
+        "_maxzoom", 14
+      )), process(polygonFeature(Map.of(
+        "waterway", "dock",
+        "intermittent", "1"
+      ))));
     assertFeatures(11, List.of(Map.of(
       "class", "lake",
       "brunnel", "<null>",
@@ -175,14 +182,19 @@ class WaterTest extends AbstractLayerTest {
   }
 
   @Test
-  void testRiverbank() {
-    assertFeatures(11, List.of(Map.of(
-      "class", "river",
-      "_layer", "water",
-      "_type", "polygon"
-    )), process(polygonFeature(Map.of(
-      "waterway", "riverbank"
-    ))));
+  void testDock() {
+    assertFeatures(11, List.of(
+      Map.of(
+        "class", "dock",
+        "_layer", "water",
+        "_type", "polygon"),
+      Map.of(
+        "class", "harbor",
+        "_layer", "poi",
+        "_type", "point"
+      )), process(polygonFeature(Map.of(
+        "waterway", "dock"
+      ))));
   }
 
   @Test

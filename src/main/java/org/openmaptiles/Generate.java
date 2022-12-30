@@ -269,7 +269,7 @@ public class Generate {
            */
           """.stripTrailing().formatted(javadocDescription,
           valuesForComment.stream().map(v -> "<li>" + v).collect(joining(LINE_SEPARATOR + " * "))),
-        name.toUpperCase(Locale.ROOT),
+        name.toUpperCase(Locale.ROOT).replace(":", "__"),
         Format.quote(name)
       ).indent(4));
 
@@ -280,12 +280,14 @@ public class Generate {
       if (values.size() > 0) {
         fieldValues.append(values.stream()
           .map(v -> "public static final String %s = %s;"
-            .formatted(name.toUpperCase(Locale.ROOT) + "_" + v.toUpperCase(Locale.ROOT).replace('-', '_'),
+            .formatted(
+              name.toUpperCase(Locale.ROOT).replace(":", "__") + "_" +
+                v.toUpperCase(Locale.ROOT).replace('-', '_').replace(":", "__"),
               Format.quote(v)))
           .collect(joining(LINE_SEPARATOR)).indent(2).strip()
           .indent(4));
         fieldValues.append("public static final Set<String> %s = Set.of(%s);".formatted(
-          name.toUpperCase(Locale.ROOT) + "_VALUES",
+          name.toUpperCase(Locale.ROOT).replace(":", "__") + "_VALUES",
           values.stream().map(Format::quote).collect(joining(", "))
         ).indent(4));
       }
@@ -657,11 +659,11 @@ public class Generate {
   }
 
   private static String lowerUnderscoreToLowerCamel(String name) {
-    return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name);
+    return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name.replace(":", "__"));
   }
 
   private static String lowerUnderscoreToUpperCamel(String name) {
-    return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name);
+    return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name.replace(":", "__"));
   }
 
   private static <T> List<T> iterToList(Iterator<T> iter) {

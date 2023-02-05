@@ -34,8 +34,11 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * Generates code in the {@code generated} package from the OpenMapTiles schema crawled from a tag or branch in the
@@ -98,10 +101,12 @@ public class Generate {
   private static final HtmlRenderer renderer = HtmlRenderer.builder().build();
 
   static {
+    var loadOptions = new LoaderOptions();
     // bump the default limit of 50
-    var options = new LoaderOptions();
-    options.setMaxAliasesForCollections(1_000);
-    yaml = new Yaml(options);
+    loadOptions.setMaxAliasesForCollections(1_000);
+    var dumpOptions = new DumperOptions();
+    // SafeConstructor restricts types which can be instantiated during deserialization (CVE-2022-1471)
+    yaml = new Yaml(new SafeConstructor(loadOptions), new Representer(dumpOptions), dumpOptions, loadOptions);
   }
 
   private static <T> T loadAndParseYaml(String url, PlanetilerConfig config, Class<T> clazz) throws IOException {

@@ -987,6 +987,15 @@ class TransportationTest extends AbstractLayerTest {
   }
 
   @Test
+  void testMergesDisconnectedRoadFeaturesUnlessOnewayLong() throws GeometryException {
+    String layer = Transportation.LAYER_NAME;
+    testMergesLinestrings(Map.of("class", "motorway", "oneway", 0L), layer, 10, 14);
+    testMergesLinestrings(Map.of("class", "motorway"), layer, 10, 14);
+    testDoesNotMergeLinestrings(Map.of("class", "motorway", "oneway", 1L), layer, 10, 14);
+    testDoesNotMergeLinestrings(Map.of("class", "motorway", "oneway", -1L), layer, 10, 14);
+  }
+
+  @Test
   void testLightRail() {
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",

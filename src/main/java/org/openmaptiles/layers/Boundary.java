@@ -120,6 +120,7 @@ public class Boundary implements
   private static final double COUNTRY_TEST_OFFSET = GeoUtils.metersToPixelAtEquator(0, 10) / 256d;
   private final Stats stats;
   private final boolean addCountryNames;
+  private final boolean onlyOsmBoundaries;
   // may be updated concurrently by multiple threads
   private final Map<Long, String> regionNames = new ConcurrentHashMap<>();
   // need to synchronize updates to these shared data structures:
@@ -133,6 +134,11 @@ public class Boundary implements
       "boundary_country_names",
       "boundary layer: add left/right codes of neighboring countries",
       true
+    );
+    this.onlyOsmBoundaries = config.arguments().getBoolean(
+      "boundary_osm_only",
+      "boundary layer: only use OSM, even at low zoom levels",
+      false
     );
     this.stats = stats;
   }
@@ -160,6 +166,9 @@ public class Boundary implements
 
   @Override
   public void processNaturalEarth(String table, SourceFeature feature, FeatureCollector features) {
+    if (onlyOsmBoundaries) {
+      return;
+    }
     boolean disputed = feature.getString("featurecla", "").startsWith("Disputed");
     record BoundaryInfo(int adminLevel, int minzoom, int maxzoom) {}
     BoundaryInfo info = switch (table) {
@@ -253,6 +262,9 @@ public class Boundary implements
             minAdminLevel <= 4 ? 5 :
             minAdminLevel <= 6 ? 9 :
             minAdminLevel <= 8 ? 11 : 12;
+        if (onlyOsmBoundaries && minAdminLevel <= 4) {
+          minzoom = minAdminLevel == 2 ? (maritime ? 4 : 0) : 1;
+        }
         if (addCountryNames && !regionIds.isEmpty()) {
           // save for later
           try {
@@ -340,7 +352,8 @@ public class Boundary implements
 
   @Override
   public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
-    double minLength = config.minFeatureSize(zoom);
+    // only omit a segment if it is shorter than a pixel
+    double minLength = config.minFeatureSizeAtMaxZoom();
     double tolerance = config.tolerance(zoom);
     return FeatureMerge.mergeLineStrings(items, attrs -> minLength, tolerance, BUFFER_SIZE);
   }

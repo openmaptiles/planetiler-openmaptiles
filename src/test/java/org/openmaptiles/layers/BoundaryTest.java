@@ -6,11 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.config.Arguments;
+import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.geo.GeoUtils;
 import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SimpleFeature;
+import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmReader;
+import com.onthegomap.planetiler.stats.Stats;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -666,4 +670,48 @@ class BoundaryTest extends AbstractLayerTest {
     )), features);
   }
 
+
+  FeatureCollector processOsmOnly(SourceFeature feature) {
+    var collector = featureCollectorFactory.get(feature);
+    new OpenMapTilesProfile(translations, PlanetilerConfig.from(Arguments.fromArgs("--boundary-osm-only=true")),
+      Stats.inMemory()).processFeature(feature, collector);
+    return collector;
+  }
+
+  @Test
+  void testOsmBoundariesOnly() {
+    assertFeatures(0, List.of(), processOsmOnly(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "featurecla", "International boundary (verify)"
+      ),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_110m_admin_0_boundary_lines_land",
+      0
+    )));
+    assertFeatures(0, List.of(), processOsmOnly(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "min_zoom", 7d
+      ),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_admin_1_states_provinces_lines",
+      0
+    )));
+
+    var relation = new OsmElement.Relation(1);
+    relation.setTag("type", "boundary");
+    relation.setTag("admin_level", "2");
+    relation.setTag("boundary", "administrative");
+
+    assertFeatures(14, List.of(Map.of("_minzoom", 0)),
+      processOsmOnly(lineFeatureWithRelation(profile.preprocessOsmRelation(relation), Map.of())));
+
+    assertFeatures(14, List.of(Map.of("_minzoom", 4)),
+      processOsmOnly(lineFeatureWithRelation(profile.preprocessOsmRelation(relation), Map.of("maritime", 1))));
+
+    relation.setTag("admin_level", "4");
+    assertFeatures(14, List.of(Map.of("_minzoom", 1)),
+      processOsmOnly(lineFeatureWithRelation(profile.preprocessOsmRelation(relation), Map.of())));
+  }
 }

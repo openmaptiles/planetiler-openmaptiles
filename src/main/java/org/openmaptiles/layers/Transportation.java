@@ -527,7 +527,7 @@ public class Transportation implements
     int onewayId = 1;
     for (var item : items) {
       var oneway = item.attrs().get(Fields.ONEWAY);
-      if (oneway instanceof Integer i && ONEWAY_VALUES.contains(i)) {
+      if (oneway instanceof Number n && ONEWAY_VALUES.contains(n.intValue())) {
         item.attrs().put(LIMIT_MERGE_TAG, onewayId++);
       }
     }

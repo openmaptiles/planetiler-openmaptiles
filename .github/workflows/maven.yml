@@ -36,12 +36,9 @@ jobs:
         jdk: [ 17 ]
         include:
           - os: ubuntu-latest
-            jdk: 16
-          - os: ubuntu-latest
             jdk: 18
           - os: ubuntu-latest
-            jdk: 17
-            args: "-DargLine='-Duser.language=fr -Duser.country=FR'"
+            jdk: 19
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:

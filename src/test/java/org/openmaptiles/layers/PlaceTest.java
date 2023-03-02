@@ -508,12 +508,24 @@ class PlaceTest extends AbstractLayerTest {
 
   @Test
   void testCityWithoutNaturalEarthMatch() {
+    assertFeatures(6, List.of(Map.of(
+      "_layer", "place",
+      "class", "city",
+      "rank", "<null>",
+      "_minzoom", 4,
+      "_labelgrid_limit", 15,
+      "_labelgrid_size", 128d
+    )), process(pointFeature(
+      Map.of(
+        "place", "city",
+        "name", "City name"
+      ))));
     assertFeatures(7, List.of(Map.of(
       "_layer", "place",
       "class", "city",
       "rank", "<null>",
-      "_minzoom", 7,
-      "_labelgrid_limit", 4,
+      "_minzoom", 4,
+      "_labelgrid_limit", 15,
       "_labelgrid_size", 128d
     )), process(pointFeature(
       Map.of(
@@ -536,7 +548,7 @@ class PlaceTest extends AbstractLayerTest {
       "_layer", "place",
       "class", "isolated_dwelling",
       "rank", "<null>",
-      "_labelgrid_limit", 14,
+      "_labelgrid_limit", 15,
       "_labelgrid_size", 128d,
       "_minzoom", 14
     )), process(pointFeature(
@@ -545,6 +557,73 @@ class PlaceTest extends AbstractLayerTest {
         "name", "City name"
       ))));
   }
+
+    @Test
+  void testTown() {
+    process(SimpleFeature.create(
+      newPoint(0, 0),
+      Map.of(
+        "name", "Test",
+        "scalerank", 14,
+        "wikidataid", "Q985636"
+      ),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_populated_places",
+      0
+    ));
+    process(SimpleFeature.create(
+      newPoint(0, 10),
+      Map.of(
+        "name", "Test2",
+        "scalerank", 7,
+        "wikidataid", "Q123"
+      ),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_populated_places",
+      0
+    ));
+    // without natural earth data
+    assertFeatures(7, List.of(Map.of(
+      "_layer", "place",
+      "class", "town",
+      "rank", "<null>",
+      "_minzoom", 4,
+      "_labelgrid_limit", 15,
+      "_labelgrid_size", 128d
+    )), process(pointFeature(
+      Map.of(
+        "place", "town",
+        "name", "Town name"
+      ))));
+    // with natural earth data
+    assertFeatures(6, List.of(Map.of(
+      "_layer", "place",
+      "class", "town",
+      "name", "Test",
+      "_type", "point",
+      "_minzoom", 4
+    )), process(pointFeature(
+      Map.of(
+        "place", "town",
+        "name", "Test",
+        "wikidataid", "Q985636",
+        "population", "35999"
+      ))));
+    assertFeatures(5, List.of(Map.of(
+      "_layer", "place",
+      "class", "town",
+      "name", "Test2",
+      "_type", "point",
+      "_minzoom", 4
+    )), process(pointFeature(
+      Map.of(
+        "place", "town",
+        "name", "Test2",
+        "wikidataid", "Q123",
+        "population", "35999"
+      ))));
+  }
+
 
   @Test
   void testCitySetRankFromGridrank() throws GeometryException {

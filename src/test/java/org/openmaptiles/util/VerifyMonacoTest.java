@@ -44,7 +44,7 @@ class VerifyMonacoTest {
   @Test
   void testStilInvalidWithOneTile() throws IOException {
     mbtiles.createTablesWithIndexes();
-    mbtiles.metadata().setName("name");
+    mbtiles.metadataTable().setMetadata("name", "name");
     try (var writer = mbtiles.newBatchedTileWriter()) {
       VectorTile tile = new VectorTile();
       tile.addLayerFeatures("layer", List.of(new VectorTile.Feature(

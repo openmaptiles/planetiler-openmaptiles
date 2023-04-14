@@ -1280,4 +1280,39 @@ class TransportationTest extends AbstractLayerTest {
       "class", "path"
     )), collector);
   }
+
+  @Test
+  void testIssue86() {
+    assertFeatures(14, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "bridge",
+      "_minzoom", 13,
+      "_type", "polygon"
+    )), process(closedWayFeature(Map.of(
+      "layer", "1",
+      "man_made", "bridge",
+      "service", "driveway"
+    ))));
+    assertFeatures(14, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "bridge",
+      "_minzoom", 13,
+      "_type", "polygon"
+    )), process(closedWayFeature(Map.of(
+      "layer", "1",
+      "man_made", "bridge",
+      "service", "driveway",
+      "name", "name"
+    ))));
+    assertFeatures(14, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "pier",
+      "_minzoom", 13,
+      "_type", "polygon"
+    )), process(closedWayFeature(Map.of(
+      "layer", "1",
+      "man_made", "pier",
+      "service", "driveway"
+    ))));
+  }
 }

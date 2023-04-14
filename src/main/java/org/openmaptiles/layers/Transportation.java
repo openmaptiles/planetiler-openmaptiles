@@ -349,6 +349,10 @@ public class Transportation implements
       }
       int minzoom = getMinzoom(element, highwayClass);
 
+      if (minzoom > config.maxzoom()) {
+        return;
+      }
+
       boolean highwayRamp = isLink(highway);
       Integer rampAboveZ12 = (highwayRamp || element.isRamp()) ? 1 : null;
       Integer rampBelowZ12 = highwayRamp ? 1 : null;
@@ -409,7 +413,7 @@ public class Transportation implements
         case FieldValues.CLASS_SERVICE -> isDrivewayOrParkingAisle(service(element.service())) ? 14 : 13;
         case FieldValues.CLASS_TRACK, FieldValues.CLASS_PATH -> routeRank == 1 ? 12 :
           (z13Paths || !nullOrEmpty(element.name()) || routeRank <= 2 || !nullOrEmpty(element.sacScale())) ? 13 : 14;
-        default -> MINZOOMS.get(baseClass);
+        default -> MINZOOMS.getOrDefault(baseClass, Integer.MAX_VALUE);
       };
     }
 

@@ -253,6 +253,9 @@ public class TransportationName implements
 
     // inherit min zoom threshold from visible road, and ensure we never show a label on a road that's not visible yet.
     minzoom = Math.max(minzoom, transportation.getMinzoom(element, highwayClass));
+    if (minzoom > config.maxzoom()) {
+      return;
+    }
 
     FeatureCollector.Feature feature = features.line(LAYER_NAME)
       .setBufferPixels(BUFFER_SIZE)

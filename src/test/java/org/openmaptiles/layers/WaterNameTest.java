@@ -27,7 +27,7 @@ class WaterNameTest extends AbstractLayerTest {
 
       "_layer", "water_name",
       "_type", "point",
-      "_minzoom", 9,
+      "_minzoom", 3,
       "_maxzoom", 14
     )), process(polygonFeatureWithArea(1, Map.of(
       "name", "waterway",
@@ -36,7 +36,8 @@ class WaterNameTest extends AbstractLayerTest {
       "water", "pond",
       "intermittent", "1"
     ))));
-    double z11area = Math.pow((GeoUtils.metersToPixelAtEquator(0, Math.sqrt(70_000)) / 256d), 2) * Math.pow(2, 20 - 11);
+    // 1/4 th of tile area is the threshold, 1/4 = 0.25 => area->side:0.25->0.5 => slightly bigger -> 0.51
+    double z11area = Math.pow(0.51d / Math.pow(2, 11), 2);
     assertFeatures(10, List.of(Map.of(
       "_layer", "water"
     ), Map.of(
@@ -48,6 +49,41 @@ class WaterNameTest extends AbstractLayerTest {
       "name", "waterway",
       "natural", "water",
       "water", "pond"
+    ))));
+  }
+
+  // https://zelonewolf.github.io/openstreetmap-americana/#map=13/41.43989/-71.5716
+  @Test
+  void testWordenPondNamePoint() {
+    assertFeatures(10, List.of(Map.of(
+        "_layer", "water"
+    ), Map.of(
+        "_layer", "water_name",
+        "_type", "point",
+        "_minzoom", 13,
+        "_maxzoom", 14
+    )), process(polygonFeatureWithArea(4.930387948170328E-9, Map.of(
+        "name", "waterway",
+        "natural", "water",
+        "water", "pond"
+    ))));
+  }
+
+  // FIXME later
+  // https://zelonewolf.github.io/openstreetmap-americana/#map=12/41.43989/-71.5716
+  //@Test
+  void testPointJudithPondNamePoint() {
+    assertFeatures(10, List.of(Map.of(
+        "_layer", "water"
+    ), Map.of(
+        "_layer", "water_name",
+        "_type", "point",
+        "_minzoom", 12,
+        "_maxzoom", 14
+    )), process(polygonFeatureWithArea(7.024280929916055E-9, Map.of(
+        "name", "waterway",
+        "natural", "water",
+        "water", "pond"
     ))));
   }
 

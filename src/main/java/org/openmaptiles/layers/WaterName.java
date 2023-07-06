@@ -35,6 +35,7 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 */
 package org.openmaptiles.layers;
 
+import static org.openmaptiles.util.Utils.coalesce;
 import static org.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.carrotsearch.hppc.LongObjectMap;
@@ -48,6 +49,7 @@ import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 import org.locationtech.jts.geom.Geometry;
 import org.openmaptiles.OpenMapTilesProfile;
@@ -80,9 +82,8 @@ public class WaterName implements
    */
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WaterName.class);
-  private static final double WORLD_AREA_FOR_70K_SQUARE_METERS =
-    Math.pow(GeoUtils.metersToPixelAtEquator(0, Math.sqrt(70_000)) / 256d, 2);
   private static final double LOG2 = Math.log(2);
+  private static final Set<String> SEA_OR_OCEAN_PLACE = Set.of("sea", "ocean");
   private final Translations translations;
   // need to synchronize updates from multiple threads
   private final LongObjectMap<Geometry> lakeCenterlines = Hppc.newLongObjectHashMap();
@@ -141,7 +142,10 @@ public class WaterName implements
   @Override
   public void process(Tables.OsmMarinePoint element, FeatureCollector features) {
     if (!element.name().isBlank()) {
-      String place = element.place();
+      String clazz = coalesce(
+        nullIfEmpty(element.natural()),
+        nullIfEmpty(element.place())
+      );
       var source = element.source();
       // use name from OSM, but get min zoom from natural earth based on fuzzy name match...
       Integer rank = Parse.parseIntOrNull(source.getTag("rank"));
@@ -159,11 +163,20 @@ public class WaterName implements
           rank = next.getValue();
         }
       }
-      int minZoom = "ocean".equals(place) ? 0 : rank != null ? rank : 8;
+      int minZoom;
+      if ("ocean".equals(element.place())) {
+        minZoom = 0;
+      } else if (rank != null) {
+        minZoom = rank;
+      } else if ("bay".equals(element.natural())) {
+        minZoom = 13;
+      } else {
+        minZoom = 8;
+      }
       features.point(LAYER_NAME)
         .setBufferPixels(BUFFER_SIZE)
         .putAttrs(OmtLanguageUtils.getNames(source.tags(), translations))
-        .setAttr(Fields.CLASS, place)
+        .setAttr(Fields.CLASS, clazz)
         .setAttr(Fields.INTERMITTENT, element.isIntermittent() ? 1 : 0)
         .setMinZoom(minZoom);
     }
@@ -176,6 +189,7 @@ public class WaterName implements
         Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
         FeatureCollector.Feature feature;
         int minzoom = 9;
+        String place = element.place();
         if (centerlineGeometry != null) {
           // prefer lake centerline if it exists
           feature = features.geometry(LAYER_NAME, centerlineGeometry)
@@ -185,11 +199,22 @@ public class WaterName implements
           feature = features.pointOnSurface(LAYER_NAME);
           Geometry geometry = element.source().worldGeometry();
           double area = geometry.getArea();
-          minzoom = (int) Math.floor(20 - Math.log(area / WORLD_AREA_FOR_70K_SQUARE_METERS) / LOG2);
-          minzoom = Math.min(14, Math.max(9, minzoom));
+          if (place != null && SEA_OR_OCEAN_PLACE.contains(place)) {
+            minzoom = 0;
+          } else {
+            minzoom = areaToMinZoom(area);
+          }
+        }
+        String clazz;
+        if ("bay".equals(element.natural())) {
+          clazz = FieldValues.CLASS_BAY;
+        } else if ("sea".equals(place)) {
+          clazz = FieldValues.CLASS_SEA;
+        } else {
+          clazz = FieldValues.CLASS_LAKE;
         }
         feature
-          .setAttr(Fields.CLASS, FieldValues.CLASS_LAKE)
+          .setAttr(Fields.CLASS, clazz)
           .setBufferPixels(BUFFER_SIZE)
           .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
           .setAttr(Fields.INTERMITTENT, element.isIntermittent() ? 1 : 0)
@@ -198,5 +223,14 @@ public class WaterName implements
         e.log(stats, "omt_water_polygon", "Unable to get geometry for water polygon " + element.source().id());
       }
     }
+  }
+
+  public static int areaToMinZoom(double areaWorld) {
+    double oneSideWorld = Math.sqrt(areaWorld);
+    // 1/4 of area => 1/2 of side => 256 / 2 = 128
+    int zoom = (int) Math.round(
+        Math.log(128d / oneSideWorld) / LOG2) -
+        8;
+    return Math.min(14, Math.max(3, zoom));
   }
 }

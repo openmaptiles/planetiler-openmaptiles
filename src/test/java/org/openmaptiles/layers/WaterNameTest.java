@@ -59,16 +59,16 @@ class WaterNameTest extends AbstractLayerTest {
   @Test
   void testWordenPondNamePoint() {
     assertFeatures(10, List.of(Map.of(
-        "_layer", "water"
+      "_layer", "water"
     ), Map.of(
-        "_layer", "water_name",
-        "_type", "point",
-        "_minzoom", 13,
-        "_maxzoom", 14
+      "_layer", "water_name",
+      "_type", "point",
+      "_minzoom", 13,
+      "_maxzoom", 14
     )), process(polygonFeatureWithArea(4.930387948170328E-9, Map.of(
-        "name", "waterway",
-        "natural", "water",
-        "water", "pond"
+      "name", "waterway",
+      "natural", "water",
+      "water", "pond"
     ))));
   }
 
@@ -224,19 +224,19 @@ class WaterNameTest extends AbstractLayerTest {
   }
 
   private record TestEntry(
-      SourceFeature feature,
-      int expectedZoom
+    SourceFeature feature,
+    int expectedZoom
   ) {}
 
   private void createAreaForMinZoomTest(List<TestEntry> testEntries, double side, int expectedZoom, String name) {
     double area = Math.pow(side, 2);
     var feature = polygonFeatureWithArea(area, Map.of(
-        "name", name,
-        "natural", "water"
+      "name", name,
+      "natural", "water"
     ));
     testEntries.add(new TestEntry(
-        feature,
-        Math.min(14, Math.max(3, expectedZoom))
+      feature,
+      Math.min(14, Math.max(3, expectedZoom))
     ));
   }
 
@@ -251,7 +251,7 @@ class WaterNameTest extends AbstractLayerTest {
 
     final List<TestEntry> testEntries = new ArrayList<>();
     for (int zoom = 14; zoom >= 0; zoom--) {
-      double testAreaSide = Math.pow(2, - zoom - 1);
+      double testAreaSide = Math.pow(2, -zoom - 1);
 
       // slightly bellow the threshold
       createAreaForMinZoomTest(testEntries, testAreaSide * 0.999, zoom + 1, "waterway-");
@@ -263,12 +263,12 @@ class WaterNameTest extends AbstractLayerTest {
 
     for (var entry : testEntries) {
       assertFeatures(10, List.of(Map.of(
-          "_layer", "water"
+        "_layer", "water"
       ), Map.of(
-          "_layer", "water_name",
-          "_type", "point",
-          "_minzoom", entry.expectedZoom,
-          "_maxzoom", 14
+        "_layer", "water_name",
+        "_type", "point",
+        "_minzoom", entry.expectedZoom,
+        "_maxzoom", 14
       )), process(entry.feature));
     }
   }

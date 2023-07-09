@@ -226,7 +226,7 @@ public class WaterName implements
 
   public static int areaToMinZoom(double areaWorld) {
     double oneSideWorld = Math.sqrt(areaWorld);
-    // 1/4 of area => 1/2 of side => 256 / 2 = 128
+    // full(-er) formula (along with comments) is in WaterNameTest.testAreaToMinZoom(), here is simplified reverse of that
     double zoom = - ( Math.log(oneSideWorld) / LOG2) - 1;
 
     // Say Z13.01 means bellow threshold, Z13.00 is exactly threshold, Z12.99 is over threshold,

@@ -197,8 +197,7 @@ public class WaterName implements
         } else {
           // otherwise just use a label point inside the lake
           feature = features.pointOnSurface(LAYER_NAME);
-          Geometry geometry = element.source().worldGeometry();
-          double area = geometry.getArea();
+          double area = element.source().area();
           if (place != null && SEA_OR_OCEAN_PLACE.contains(place)) {
             minzoom = 0;
           } else {
@@ -228,7 +227,7 @@ public class WaterName implements
   public static int areaToMinZoom(double areaWorld) {
     double oneSideWorld = Math.sqrt(areaWorld);
     // 1/4 of area => 1/2 of side => 256 / 2 = 128
-    double zoom = (Math.log(128d / oneSideWorld) / LOG2) - 8;
+    double zoom = - ( Math.log(oneSideWorld) / LOG2) - 1;
 
     // Say Z13.01 means bellow threshold, Z13.00 is exactly threshold, Z12.99 is over threshold,
     // hence Z13.01 and Z13.00 will be rounded to Z14 and Z12.99 to Z13 (e.g. `floor() + 1`).

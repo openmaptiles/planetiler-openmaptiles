@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -136,6 +137,9 @@ public class Transportation implements
   );
   private static final Set<String> ACCESS_NO_VALUES = Set.of(
     "private", "no"
+  );
+  private static final Set<String> TRUNK_AS_MOTORWAY_BY_NETWORK = Set.of(
+    RouteNetwork.CA_TRANSCANADA.toString(), RouteNetwork.US_INTERSTATE.toString()
   );
   private static final ZoomFunction.MeterToPixelThresholds MIN_LENGTH = ZoomFunction.meterThresholds()
     .put(7, 50)
@@ -413,6 +417,15 @@ public class Transportation implements
         case FieldValues.CLASS_SERVICE -> isDrivewayOrParkingAisle(service(element.service())) ? 14 : 13;
         case FieldValues.CLASS_TRACK, FieldValues.CLASS_PATH -> routeRank == 1 ? 12 :
           (z13Paths || !nullOrEmpty(element.name()) || routeRank <= 2 || !nullOrEmpty(element.sacScale())) ? 13 : 14;
+        case FieldValues.CLASS_TRUNK -> {
+          // trunks in some networks to have same min. zoom as highway = "motorway"
+          String clazz = routeRelations.stream()
+            .map(RouteRelation::networkType)
+            .filter(Objects::nonNull)
+            .map(Enum::toString)
+            .anyMatch(TRUNK_AS_MOTORWAY_BY_NETWORK::contains) ? FieldValues.CLASS_MOTORWAY : FieldValues.CLASS_TRUNK;
+          yield MINZOOMS.getOrDefault(clazz, Integer.MAX_VALUE);
+        }
         default -> MINZOOMS.getOrDefault(baseClass, Integer.MAX_VALUE);
       };
     }

@@ -910,6 +910,26 @@ class TransportationTest extends AbstractLayerTest {
   }
 
   @Test
+  void testTransCanadaTrunk() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:transcanada:namedRoute");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "_minzoom", 4
+    )), features);
+  }
+
+  @Test
   void testGreatBritainHighway() {
     process(SimpleFeature.create(
       rectangle(0, 0.1),

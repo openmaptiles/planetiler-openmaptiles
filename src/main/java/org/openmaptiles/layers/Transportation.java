@@ -139,7 +139,15 @@ public class Transportation implements
     "private", "no"
   );
   private static final Set<String> TRUNK_AS_MOTORWAY_BY_NETWORK = Set.of(
-    RouteNetwork.CA_TRANSCANADA.toString(), RouteNetwork.US_INTERSTATE.toString()
+    RouteNetwork.CA_TRANSCANADA.toString(),
+    RouteNetwork.CA_PROVINCIAL_ARTERIAL.toString(),
+    RouteNetwork.US_INTERSTATE.toString()
+  );
+  private static final Set<String> CA_AB_PRIMARY_AS_ARTERIAL_BY_REF = Set.of(
+    "2", "3", "4"
+  );
+  private static final Set<String> CA_BC_AS_ARTERIAL_BY_REF = Set.of(
+    "3", "5", "99"
   );
   private static final ZoomFunction.MeterToPixelThresholds MIN_LENGTH = ZoomFunction.meterThresholds()
     .put(7, 50)
@@ -272,6 +280,27 @@ public class Transportation implements
         networkType = RouteNetwork.US_STATE;
       } else if (network != null && network.startsWith("CA:transcanada")) {
         networkType = RouteNetwork.CA_TRANSCANADA;
+      } else if (network != null && network.equals("CA:QC:A")) {
+        networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL; // CA:QC:A
+      } else if (network != null && network.equals("CA:ON:primary")) {
+        if (ref != null && ref.length() == 3 && ref.startsWith("4")) {
+          networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL; // CA:ON:primary|420
+        } else if ("QEW".equals(ref)) {
+          networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL; // CA:ON:primary|QEW
+        } else {
+          networkType = RouteNetwork.CA_PROVINCIAL; // CA:ON:primary|85
+        }
+      } else if (network != null && network.equals("CA:MB:PTH") && "75".equals(ref)) {
+        networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL; // CA:MB:PTH|75
+      } else if (network != null && network.equals("CA:AB:primary") && ref != null &&
+        CA_AB_PRIMARY_AS_ARTERIAL_BY_REF.contains(ref)) {
+        networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL; // CA:AB:primary|4
+      } else if (network != null && network.equals("CA:BC") && ref != null && CA_BC_AS_ARTERIAL_BY_REF.contains(ref)) {
+        networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL; // CA:BC|5
+      } else if (network != null && ((network.length() == 5 && network.startsWith("CA:")) ||
+        (network.length() >= 6 && network.startsWith("CA:") && network.charAt(5) == ':'))) {
+        // in SQL: LIKE 'CA:__' OR network LIKE 'CA:__:%'; but wanted to avoid regexp hence more ugly
+        networkType = RouteNetwork.CA_PROVINCIAL; // network|ref: CA:AB:primary|11 CA:ON:private_toll|407
       }
 
       int rank = switch (coalesce(network, "")) {
@@ -563,6 +592,8 @@ public class Transportation implements
     US_HIGHWAY("us-highway"),
     US_STATE("us-state"),
     CA_TRANSCANADA("ca-transcanada"),
+    CA_PROVINCIAL_ARTERIAL("ca-provincial-arterial"),
+    CA_PROVINCIAL("ca-provincial"),
     GB_MOTORWAY("gb-motorway"),
     GB_TRUNK("gb-trunk");
 

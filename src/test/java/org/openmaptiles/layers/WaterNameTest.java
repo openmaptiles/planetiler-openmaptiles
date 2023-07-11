@@ -5,7 +5,10 @@ import static com.onthegomap.planetiler.TestUtils.rectangle;
 
 import com.onthegomap.planetiler.TestUtils;
 import com.onthegomap.planetiler.geo.GeoUtils;
+import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SimpleFeature;
+import com.onthegomap.planetiler.reader.SourceFeature;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +30,7 @@ class WaterNameTest extends AbstractLayerTest {
 
       "_layer", "water_name",
       "_type", "point",
-      "_minzoom", 9,
+      "_minzoom", 3,
       "_maxzoom", 14
     )), process(polygonFeatureWithArea(1, Map.of(
       "name", "waterway",
@@ -36,7 +39,8 @@ class WaterNameTest extends AbstractLayerTest {
       "water", "pond",
       "intermittent", "1"
     ))));
-    double z11area = Math.pow((GeoUtils.metersToPixelAtEquator(0, Math.sqrt(70_000)) / 256d), 2) * Math.pow(2, 20 - 11);
+    // 1/4 th of tile area is the threshold, 1/4 = 0.25 => area->side:0.25->0.5 => slightly bigger -> 0.51
+    double z11area = Math.pow(0.51d / Math.pow(2, 11), 2);
     assertFeatures(10, List.of(Map.of(
       "_layer", "water"
     ), Map.of(
@@ -45,6 +49,23 @@ class WaterNameTest extends AbstractLayerTest {
       "_minzoom", 11,
       "_maxzoom", 14
     )), process(polygonFeatureWithArea(z11area, Map.of(
+      "name", "waterway",
+      "natural", "water",
+      "water", "pond"
+    ))));
+  }
+
+  // https://zelonewolf.github.io/openstreetmap-americana/#map=13/41.43989/-71.5716
+  @Test
+  void testWordenPondNamePoint() {
+    assertFeatures(10, List.of(Map.of(
+      "_layer", "water"
+    ), Map.of(
+      "_layer", "water_name",
+      "_type", "point",
+      "_minzoom", 13,
+      "_maxzoom", 14
+    )), process(polygonFeatureWithArea(4.930387948170328E-9, Map.of(
       "name", "waterway",
       "natural", "water",
       "water", "pond"
@@ -200,5 +221,55 @@ class WaterNameTest extends AbstractLayerTest {
       "name", "Atlantic",
       "place", "sea"
     ))));
+  }
+
+  private record TestEntry(
+    SourceFeature feature,
+    int expectedZoom
+  ) {}
+
+  private void createAreaForMinZoomTest(List<TestEntry> testEntries, double side, int expectedZoom, String name) {
+    double area = Math.pow(side, 2);
+    var feature = polygonFeatureWithArea(area, Map.of(
+      "name", name,
+      "natural", "water"
+    ));
+    testEntries.add(new TestEntry(
+      feature,
+      Math.min(14, Math.max(3, expectedZoom))
+    ));
+  }
+
+  @Test
+  void testAreaToMinZoom() throws GeometryException {
+    // threshold is 1/4 of tile area, hence ...
+    // ... side if 1/2 tile side: from pixels to world coord, for say Z14 ...
+    //final double HALF_OF_TILE_SIDE = 128d / Math.pow(2d, 14d + 8d);
+    // ... and then for some lower zoom:
+    //double testAreaSide = HALF_OF_TILE_SIDE * Math.pow(2, 14 - zoom);
+    // all this then simplified to `testAreaSide` calculation bellow
+
+    final List<TestEntry> testEntries = new ArrayList<>();
+    for (int zoom = 14; zoom >= 0; zoom--) {
+      double testAreaSide = Math.pow(2, -zoom - 1);
+
+      // slightly bellow the threshold
+      createAreaForMinZoomTest(testEntries, testAreaSide * 0.999, zoom + 1, "waterway-");
+      // precisely at the threshold
+      createAreaForMinZoomTest(testEntries, testAreaSide, zoom, "waterway=");
+      // slightly over the threshold
+      createAreaForMinZoomTest(testEntries, testAreaSide * 1.001, zoom, "waterway+");
+    }
+
+    for (var entry : testEntries) {
+      assertFeatures(10, List.of(Map.of(
+        "_layer", "water"
+      ), Map.of(
+        "_layer", "water_name",
+        "_type", "point",
+        "_minzoom", entry.expectedZoom,
+        "_maxzoom", 14
+      )), process(entry.feature));
+    }
   }
 }

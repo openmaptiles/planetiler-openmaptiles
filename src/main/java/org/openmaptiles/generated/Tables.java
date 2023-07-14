@@ -51,7 +51,7 @@ import java.util.Map;
 /**
  * OSM element parsers generated from the <a href="https://github.com/omniscale/imposm3">imposm3</a> table definitions
  * in the <a href=
- * "https://github.com/openmaptiles/openmaptiles/blob/07f243c5d9efa558fa539d7a31b2ae50507aaa9d/openmaptiles.yaml">OpenMapTiles
+ * "https://github.com/openmaptiles/openmaptiles/blob/5f7b2c11b3224759a21133381ca7d959a1f3cf51/openmaptiles.yaml">OpenMapTiles
  * vector tile schema</a>.
  *
  * These filter and parse the raw OSM key/value attribute pairs on tags into records with fields that match the columns

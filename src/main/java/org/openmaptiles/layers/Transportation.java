@@ -412,11 +412,11 @@ public class Transportation implements
                 }
               }
               result.add(new RouteRelation(refMatcher.group(), network, networkType, (byte) -1,
-                  0));
+                0));
             }
           } catch (GeometryException e) {
             e.log(stats, "omt_transportation_name_ie_test",
-                "Unable to test highway against IE route network: " + element.source().id());
+              "Unable to test highway against IE route network: " + element.source().id());
           }
         }
       }

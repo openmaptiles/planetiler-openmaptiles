@@ -92,7 +92,7 @@ class WaterNameTest extends AbstractLayerTest {
       "_layer", "water_name",
       "_type", "line",
       "_geom", new TestUtils.NormGeometry(GeoUtils.latLonToWorldCoords(newLineString(0, 0, 1, 1))),
-      "_minzoom", 9,
+      "_minzoom", 3,
       "_maxzoom", 14,
       "_minpixelsize", "waterway".length() * 6d
     )), process(SimpleFeature.create(
@@ -142,7 +142,7 @@ class WaterNameTest extends AbstractLayerTest {
           newLineString(0, 0, 1, 1),
           newLineString(2, 2, 3, 3)
         }))),
-      "_minzoom", 9,
+      "_minzoom", 3,
       "_maxzoom", 14,
       "_minpixelsize", "waterway".length() * 6d
     )), process(SimpleFeature.create(
@@ -152,6 +152,40 @@ class WaterNameTest extends AbstractLayerTest {
         "name:es", "waterway es",
         "natural", "water",
         "water", "pond"
+      )),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      10
+    )));
+  }
+
+  @Test
+  void testWaterNameBay() {
+    assertFeatures(11, List.of(), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      new HashMap<>(Map.<String, Object>of(
+        "OSM_ID", -10
+      )),
+      OpenMapTilesProfile.LAKE_CENTERLINE_SOURCE,
+      null,
+      0
+    )));
+    assertFeatures(10, List.of(Map.of(
+      "name", "bay",
+      "name:es", "bay es",
+
+      "_layer", "water_name",
+      "_type", "line",
+      "_geom", new TestUtils.NormGeometry(GeoUtils.latLonToWorldCoords(newLineString(0, 0, 1, 1))),
+      "_minzoom", 9,
+      "_maxzoom", 14,
+      "_minpixelsize", "bay".length() * 6d
+    )), process(SimpleFeature.create(
+      GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1))),
+      new HashMap<>(Map.<String, Object>of(
+        "name", "bay",
+        "name:es", "bay es",
+        "natural", "bay"
       )),
       OpenMapTilesProfile.OSM_SOURCE,
       null,

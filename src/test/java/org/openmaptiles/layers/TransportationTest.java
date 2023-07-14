@@ -1421,6 +1421,171 @@ class TransportationTest extends AbstractLayerTest {
   }
 
   @Test
+  void testIrelandHighway() {
+    process(SimpleFeature.create(
+        rectangle(0, 0.1),
+        Map.of("iso_a2", "IE"),
+        OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+        "ne_10m_admin_0_countries",
+        0
+    ));
+
+    // in IE
+    assertFeatures(13, List.of(Map.of(
+        "_layer", "transportation",
+        "class", "motorway",
+        "oneway", 1,
+        "ramp", "<null>",
+        "_minzoom", 4
+    ), Map.of(
+        "_layer", "transportation_name",
+        "class", "motorway",
+        "ref", "M18",
+        "ref_length", 3,
+        "network", "ie-motorway",
+        "_minzoom", 6
+    )), process(SimpleFeature.create(
+        newLineString(0, 0, 1, 1),
+        Map.of(
+            "highway", "motorway",
+            "oneway", "yes",
+            "ref", "M18"
+        ),
+        OpenMapTilesProfile.OSM_SOURCE,
+        null,
+        0
+    )));
+
+    // not in IE
+    assertFeatures(13, List.of(Map.of(
+        "_layer", "transportation",
+        "class", "motorway",
+        "oneway", 1,
+        "ramp", "<null>",
+        "_minzoom", 4
+    ), Map.of(
+        "_layer", "transportation_name",
+        "class", "motorway",
+        "ref", "M18",
+        "ref_length", 3,
+        "network", "road",
+        "_minzoom", 6
+    )), process(SimpleFeature.create(
+        newLineString(1, 0, 0, 1),
+        Map.of(
+            "highway", "motorway",
+            "oneway", "yes",
+            "ref", "M18"
+        ),
+        OpenMapTilesProfile.OSM_SOURCE,
+        null,
+        0
+    )));
+  }
+
+  @Test
+  void testIrelandTrunk() {
+    process(SimpleFeature.create(
+        rectangle(0, 0.1),
+        Map.of("iso_a2", "IE"),
+        OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+        "ne_10m_admin_0_countries",
+        0
+    ));
+
+    // in IE
+    assertFeatures(13, List.of(Map.of(
+        "_layer", "transportation",
+        "class", "trunk",
+        "_minzoom", 5
+    ), Map.of(
+        "_layer", "transportation_name",
+        "class", "trunk",
+        "ref", "N8",
+        "ref_length", 2,
+        "network", "ie-national",
+        "_minzoom", 8
+    )), process(SimpleFeature.create(
+        newLineString(0, 0, 1, 1),
+        Map.of(
+            "highway", "trunk",
+            "ref", "N8"
+        ),
+        OpenMapTilesProfile.OSM_SOURCE,
+        null,
+        0
+    )));
+  }
+
+  @Test
+  void testIrelandPrimary() {
+    process(SimpleFeature.create(
+        rectangle(0, 0.1),
+        Map.of("iso_a2", "IE"),
+        OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+        "ne_10m_admin_0_countries",
+        0
+    ));
+
+    // in IE
+    assertFeatures(13, List.of(Map.of(
+        "_layer", "transportation",
+        "class", "primary",
+        "_minzoom", 7
+    ), Map.of(
+        "_layer", "transportation_name",
+        "class", "primary",
+        "ref", "N59",
+        "ref_length", 3,
+        "network", "ie-national",
+        "_minzoom", 12
+    )), process(SimpleFeature.create(
+        newLineString(0, 0, 1, 1),
+        Map.of(
+            "highway", "primary",
+            "ref", "N59"
+        ),
+        OpenMapTilesProfile.OSM_SOURCE,
+        null,
+        0
+    )));
+  }
+
+  @Test
+  void testIrelandSecondary() {
+    process(SimpleFeature.create(
+        rectangle(0, 0.1),
+        Map.of("iso_a2", "IE"),
+        OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+        "ne_10m_admin_0_countries",
+        0
+    ));
+
+    // in IE
+    assertFeatures(13, List.of(Map.of(
+        "_layer", "transportation",
+        "class", "secondary",
+        "_minzoom", 9
+    ), Map.of(
+        "_layer", "transportation_name",
+        "class", "secondary",
+        "ref", "R813",
+        "ref_length", 4,
+        "network", "ie-regional",
+        "_minzoom", 12
+    )), process(SimpleFeature.create(
+        newLineString(0, 0, 1, 1),
+        Map.of(
+            "highway", "secondary",
+            "ref", "R813"
+        ),
+        OpenMapTilesProfile.OSM_SOURCE,
+        null,
+        0
+    )));
+  }
+
+  @Test
   void testMergesDisconnectedRoadNameFeatures() throws GeometryException {
     testMergesLinestrings(Map.of("class", "motorway"), TransportationName.LAYER_NAME, 10, 14);
   }

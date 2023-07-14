@@ -1372,7 +1372,7 @@ class TransportationTest extends AbstractLayerTest {
       "class", "secondary",
       "ref", "B4558",
       "ref_length", 5,
-      "network", "road",
+      "network", "gb-primary",
       "_minzoom", 12
     )), process(SimpleFeature.create(
       newLineString(0, 0, 1, 1),

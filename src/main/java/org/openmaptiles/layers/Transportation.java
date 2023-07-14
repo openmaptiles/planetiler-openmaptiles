@@ -365,12 +365,8 @@ public class Transportation implements
                   networkType = RouteNetwork.GB_TRUNK;
                   network = "omt-gb-trunk";
                 }
-                case "primary" -> {
+                case "primary", "secondary" -> {
                   networkType = RouteNetwork.GB_PRIMARY;
-                  network = "omt-gb-primary";
-                }
-                case "secondary" -> {
-                  networkType = null;
                   network = "omt-gb-primary";
                 }
                 default -> {

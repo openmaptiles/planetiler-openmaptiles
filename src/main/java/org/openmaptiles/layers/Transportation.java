@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -136,6 +137,17 @@ public class Transportation implements
   );
   private static final Set<String> ACCESS_NO_VALUES = Set.of(
     "private", "no"
+  );
+  private static final Set<String> TRUNK_AS_MOTORWAY_BY_NETWORK = Set.of(
+    RouteNetwork.CA_TRANSCANADA.toString(),
+    RouteNetwork.CA_PROVINCIAL_ARTERIAL.toString(),
+    RouteNetwork.US_INTERSTATE.toString()
+  );
+  private static final Set<String> CA_AB_PRIMARY_AS_ARTERIAL_BY_REF = Set.of(
+    "2", "3", "4"
+  );
+  private static final Set<String> CA_BC_AS_ARTERIAL_BY_REF = Set.of(
+    "3", "5", "99"
   );
   private static final ZoomFunction.MeterToPixelThresholds MIN_LENGTH = ZoomFunction.meterThresholds()
     .put(7, 50)
@@ -268,6 +280,26 @@ public class Transportation implements
         networkType = RouteNetwork.US_STATE;
       } else if (network != null && network.startsWith("CA:transcanada")) {
         networkType = RouteNetwork.CA_TRANSCANADA;
+      } else if ("CA:QC:A".equals(network)) {
+        networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL;
+      } else if ("CA:ON:primary".equals(network)) {
+        if (ref != null && ref.length() == 3 && ref.startsWith("4")) {
+          networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL;
+        } else if ("QEW".equals(ref)) {
+          networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL;
+        } else {
+          networkType = RouteNetwork.CA_PROVINCIAL;
+        }
+      } else if ("CA:MB:PTH".equals(network) && "75".equals(ref)) {
+        networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL;
+      } else if ("CA:AB:primary".equals(network) && ref != null && CA_AB_PRIMARY_AS_ARTERIAL_BY_REF.contains(ref)) {
+        networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL;
+      } else if ("CA:BC".equals(network) && ref != null && CA_BC_AS_ARTERIAL_BY_REF.contains(ref)) {
+        networkType = RouteNetwork.CA_PROVINCIAL_ARTERIAL;
+      } else if (network != null && ((network.length() == 5 && network.startsWith("CA:")) ||
+        (network.length() >= 6 && network.startsWith("CA:") && network.charAt(5) == ':'))) {
+        // in SQL: LIKE 'CA:__' OR network LIKE 'CA:__:%'; but wanted to avoid regexp hence more ugly
+        networkType = RouteNetwork.CA_PROVINCIAL;
       }
 
       int rank = switch (coalesce(network, "")) {
@@ -413,6 +445,15 @@ public class Transportation implements
         case FieldValues.CLASS_SERVICE -> isDrivewayOrParkingAisle(service(element.service())) ? 14 : 13;
         case FieldValues.CLASS_TRACK, FieldValues.CLASS_PATH -> routeRank == 1 ? 12 :
           (z13Paths || !nullOrEmpty(element.name()) || routeRank <= 2 || !nullOrEmpty(element.sacScale())) ? 13 : 14;
+        case FieldValues.CLASS_TRUNK -> {
+          // trunks in some networks to have same min. zoom as highway = "motorway"
+          String clazz = routeRelations.stream()
+            .map(RouteRelation::networkType)
+            .filter(Objects::nonNull)
+            .map(Enum::toString)
+            .anyMatch(TRUNK_AS_MOTORWAY_BY_NETWORK::contains) ? FieldValues.CLASS_MOTORWAY : FieldValues.CLASS_TRUNK;
+          yield MINZOOMS.getOrDefault(clazz, Integer.MAX_VALUE);
+        }
         default -> MINZOOMS.getOrDefault(baseClass, Integer.MAX_VALUE);
       };
     }
@@ -550,6 +591,8 @@ public class Transportation implements
     US_HIGHWAY("us-highway"),
     US_STATE("us-state"),
     CA_TRANSCANADA("ca-transcanada"),
+    CA_PROVINCIAL_ARTERIAL("ca-provincial-arterial"),
+    CA_PROVINCIAL("ca-provincial"),
     GB_MOTORWAY("gb-motorway"),
     GB_TRUNK("gb-trunk");
 

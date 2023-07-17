@@ -3,6 +3,7 @@ package org.openmaptiles.layers;
 import static com.onthegomap.planetiler.TestUtils.newLineString;
 import static com.onthegomap.planetiler.TestUtils.newPoint;
 import static com.onthegomap.planetiler.TestUtils.rectangle;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.config.Arguments;
@@ -15,6 +16,7 @@ import com.onthegomap.planetiler.stats.Stats;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -907,6 +909,316 @@ class TransportationTest extends AbstractLayerTest {
       "network", "ca-transcanada",
       "_minzoom", 6
     )), features);
+  }
+
+  @Test
+  void testTransCanadaTrunk() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:transcanada:namedRoute");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "_minzoom", 4
+    )), features);
+  }
+
+  @Test
+  void testTransCanadaProvincialCaQcA() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:QC:A");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "ca-provincial-arterial",
+      "_minzoom", 4
+    )), features);
+  }
+
+  @Test
+  void testTransCanadaProvincialCaOnPrimaryRef4xx() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:ON:primary");
+    rel.setTag("ref", "420");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "ca-provincial-arterial",
+      "_minzoom", 4
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "420",
+      "network", "ca-provincial-arterial"
+    )), features);
+  }
+
+  @Test
+  void testTransCanadaProvincialCaOnPrimaryRefQew() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:ON:primary");
+    rel.setTag("ref", "QEW");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "ca-provincial-arterial",
+      "_minzoom", 4
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "QEW",
+      "network", "ca-provincial-arterial"
+    )), features);
+  }
+
+  @Test
+  void testTransCanadaProvincialCaOnPrimaryRefOther() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:ON:primary");
+    rel.setTag("ref", "85");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "ca-provincial",
+      "_minzoom", 5
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "85",
+      "network", "ca-provincial"
+    )), features);
+  }
+
+  @Test
+  void testTransCanadaProvincialCaMbPthRef75() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:MB:PTH");
+    rel.setTag("ref", "75");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "ca-provincial-arterial",
+      "_minzoom", 4
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "75",
+      "network", "ca-provincial-arterial"
+    )), features);
+  }
+
+  @Test
+  void testTransCanadaProvincialCaMbPthRefOther() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:MB:PTH");
+    rel.setTag("ref", "77");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "ca-provincial",
+      "_minzoom", 5
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "77",
+      "network", "ca-provincial"
+    )), features);
+  }
+
+  @Test
+  void testTransCanadaProvincialCaAbPrimaryRef3() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:AB:primary");
+    rel.setTag("ref", "3");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "ca-provincial-arterial",
+      "_minzoom", 4
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "3",
+      "network", "ca-provincial-arterial"
+    )), features);
+  }
+
+  @Test
+  void testTransCanadaProvincialCaAbPrimaryRefOther() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:AB:primary");
+    rel.setTag("ref", "10");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "ca-provincial",
+      "_minzoom", 5
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "10",
+      "network", "ca-provincial"
+    )), features);
+  }
+
+  @Test
+  void testTransCanadaProvincialCaBcRef3() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:BC");
+    rel.setTag("ref", "3");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "ca-provincial-arterial",
+      "_minzoom", 4
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "3",
+      "network", "ca-provincial-arterial"
+    )), features);
+  }
+
+  @Test
+  void testTransCanadaProvincialCaBcRefOther() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:BC");
+    rel.setTag("ref", "10");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "ca-provincial",
+      "_minzoom", 5
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "10",
+      "network", "ca-provincial"
+    )), features);
+  }
+
+  @Test
+  void testTransCanadaProvincialCaOther() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "CA:yellowhead");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "_minzoom", 5
+    )), features);
+    boolean caProvPresent = StreamSupport.stream(features.spliterator(), false)
+      .flatMap(f -> f.getAttrsAtZoom(13).entrySet().stream())
+      .filter(e -> "network".equals(e.getKey()))
+      .map(Map.Entry::getValue)
+      .anyMatch(v -> "ca-provincial".equals(v) || "ca-provincial-arterial".equals(v));
+    assertFalse(caProvPresent, "ca-provincial present");
   }
 
   @Test

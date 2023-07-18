@@ -105,6 +105,7 @@ public class Transportation implements
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Transportation.class);
   private static final Pattern GREAT_BRITAIN_REF_NETWORK_PATTERN = Pattern.compile("^[ABM][0-9ABM()]+");
+  private static final Pattern IRELAND_REF_NETWORK_PATTERN = Pattern.compile("^[MNRL][0-9]+");
   private static final MultiExpression.Index<String> classMapping = FieldMappings.Class.index();
   private static final Set<String> RAILWAY_RAIL_VALUES = Set.of(
     FieldValues.SUBCLASS_RAIL,
@@ -164,11 +165,13 @@ public class Transportation implements
   private static final Set<Integer> ONEWAY_VALUES = Set.of(-1, 1);
   private static final String LIMIT_MERGE_TAG = "__limit_merge";
   private final AtomicBoolean loggedNoGb = new AtomicBoolean(false);
+  private final AtomicBoolean loggedNoIreland = new AtomicBoolean(false);
   private final boolean z13Paths;
   private final Map<String, Integer> MINZOOMS;
   private final Stats stats;
   private final PlanetilerConfig config;
   private PreparedGeometry greatBritain = null;
+  private PreparedGeometry ireland = null;
 
   public Transportation(Translations translations, PlanetilerConfig config, Stats stats) {
     this.config = config;
@@ -251,13 +254,25 @@ public class Transportation implements
   @Override
   public void processNaturalEarth(String table, SourceFeature feature,
     FeatureCollector features) {
-    if ("ne_10m_admin_0_countries".equals(table) && feature.hasTag("iso_a2", "GB")) {
-      // multiple threads call this method concurrently, GB polygon *should* only be found
-      // once, but just to be safe synchronize updates to that field
+    if (!"ne_10m_admin_0_countries".equals(table)) {
+      return;
+    }
+    // multiple threads call this method concurrently, GB (or IE) polygon *should* only be found
+    // once, but just to be safe synchronize updates to that field
+    if (feature.hasTag("iso_a2", "GB")) {
       synchronized (this) {
         try {
           Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
           greatBritain = PreparedGeometryFactory.prepare(boundary);
+        } catch (GeometryException e) {
+          LOGGER.error("Failed to get Great Britain Polygon: " + e);
+        }
+      }
+    } else if (feature.hasTag("iso_a2", "IE")) {
+      synchronized (this) {
+        try {
+          Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+          ireland = PreparedGeometryFactory.prepare(boundary);
         } catch (GeometryException e) {
           LOGGER.error("Failed to get Great Britain Polygon: " + e);
         }
@@ -365,6 +380,43 @@ public class Transportation implements
           } catch (GeometryException e) {
             e.log(stats, "omt_transportation_name_gb_test",
               "Unable to test highway against GB route network: " + element.source().id());
+          }
+        }
+      }
+      // Similarly Ireland.
+      refMatcher = IRELAND_REF_NETWORK_PATTERN.matcher(ref);
+      if (refMatcher.find()) {
+        if (ireland == null) {
+          if (!loggedNoIreland.get() && loggedNoIreland.compareAndSet(false, true)) {
+            LOGGER.warn("No IE polygon for inferring route network types");
+          }
+        } else {
+          try {
+            Geometry wayGeometry = element.source().worldGeometry();
+            if (ireland.intersects(wayGeometry)) {
+              Transportation.RouteNetwork networkType;
+              String network;
+              String highway = coalesce(element.highway(), "");
+              switch (highway) {
+                case "motorway" -> {
+                  networkType = Transportation.RouteNetwork.IE_MOTORWAY;
+                  network = "omt-ie-motorway";
+                }
+                case "trunk", "primary" -> {
+                  networkType = RouteNetwork.IE_NATIONAL;
+                  network = "omt-ie-national";
+                }
+                default -> {
+                  networkType = RouteNetwork.IE_REGIONAL;
+                  network = "omt-ie-regional";
+                }
+              }
+              result.add(new RouteRelation(refMatcher.group(), network, networkType, (byte) -1,
+                0));
+            }
+          } catch (GeometryException e) {
+            e.log(stats, "omt_transportation_name_ie_test",
+              "Unable to test highway against IE route network: " + element.source().id());
           }
         }
       }
@@ -611,7 +663,10 @@ public class Transportation implements
     CA_PROVINCIAL("ca-provincial"),
     GB_MOTORWAY("gb-motorway"),
     GB_TRUNK("gb-trunk"),
-    GB_PRIMARY("gb-primary");
+    GB_PRIMARY("gb-primary"),
+    IE_MOTORWAY("ie-motorway"),
+    IE_NATIONAL("ie-national"),
+    IE_REGIONAL("ie-regional");
 
     final String name;
 

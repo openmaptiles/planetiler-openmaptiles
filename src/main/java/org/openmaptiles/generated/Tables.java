@@ -51,7 +51,7 @@ import java.util.Map;
 /**
  * OSM element parsers generated from the <a href="https://github.com/omniscale/imposm3">imposm3</a> table definitions
  * in the <a href=
- * "https://github.com/openmaptiles/openmaptiles/blob/5f7b2c11b3224759a21133381ca7d959a1f3cf51/openmaptiles.yaml">OpenMapTiles
+ * "https://github.com/openmaptiles/openmaptiles/blob/edb42f2db3c2b0ec37045367720eed84d7bbd71f/openmaptiles.yaml">OpenMapTiles
  * vector tile schema</a>.
  *
  * These filter and parse the raw OSM key/value attribute pairs on tags into records with fields that match the columns
@@ -111,7 +111,7 @@ public class Tables {
     public static final Expression MAPPING = and(
       or(matchAny("landuse", "reservoir", "basin", "salt_pond"), matchAny("leisure", "swimming_pool"),
         matchAny("natural", "water", "bay", "spring"), matchAny("waterway", "dock"),
-        matchAny("water", "river", "pond", "basin", "wastewater")),
+        matchAny("water", "river", "stream", "canal", "ditch", "drain", "pond", "basin", "wastewater")),
       not(matchAny("covered", "yes")), matchType("polygon"));
 
     /**
@@ -662,9 +662,8 @@ public class Tables {
     }
 
     /** Imposm3 "mapping" to filter OSM elements that should appear in this "table". */
-    public static final Expression MAPPING = and(
-      matchAny("place", "city", "town", "village", "hamlet", "suburb", "quarter", "neighbourhood", "isolated_dwelling"),
-      matchField("name"), matchType("point"));
+    public static final Expression MAPPING = and(matchAny("place", "city", "town", "village", "hamlet", "borough",
+      "suburb", "quarter", "neighbourhood", "isolated_dwelling"), matchField("name"), matchType("point"));
 
     /**
      * Interface for layer implementations to extend to subscribe to OSM elements filtered and parsed as

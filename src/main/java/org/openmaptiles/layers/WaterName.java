@@ -188,8 +188,8 @@ public class WaterName implements
       try {
         Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
         FeatureCollector.Feature feature;
-        String place = element.place();
         int minzoom = 9;
+        String place = element.place();
         String clazz;
         if ("bay".equals(element.natural())) {
           clazz = FieldValues.CLASS_BAY;

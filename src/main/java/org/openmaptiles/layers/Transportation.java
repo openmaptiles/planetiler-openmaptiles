@@ -104,7 +104,7 @@ public class Transportation implements
    */
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Transportation.class);
-  private static final Pattern GREAT_BRITAIN_REF_NETWORK_PATTERN = Pattern.compile("^[AM][0-9AM()]+");
+  private static final Pattern GREAT_BRITAIN_REF_NETWORK_PATTERN = Pattern.compile("^[ABM][0-9ABM()]+");
   private static final MultiExpression.Index<String> classMapping = FieldMappings.Class.index();
   private static final Set<String> RAILWAY_RAIL_VALUES = Set.of(
     FieldValues.SUBCLASS_RAIL,
@@ -339,10 +339,26 @@ public class Transportation implements
           try {
             Geometry wayGeometry = element.source().worldGeometry();
             if (greatBritain.intersects(wayGeometry)) {
-              Transportation.RouteNetwork networkType =
-                "motorway".equals(element.highway()) ? Transportation.RouteNetwork.GB_MOTORWAY :
-                  Transportation.RouteNetwork.GB_TRUNK;
-              String network = "motorway".equals(element.highway()) ? "omt-gb-motorway" : "omt-gb-trunk";
+              Transportation.RouteNetwork networkType;
+              String network;
+              switch (element.highway()) {
+                case "motorway" -> {
+                  networkType = Transportation.RouteNetwork.GB_MOTORWAY;
+                  network = "omt-gb-motorway";
+                }
+                case "trunk" -> {
+                  networkType = RouteNetwork.GB_TRUNK;
+                  network = "omt-gb-trunk";
+                }
+                case "primary", "secondary" -> {
+                  networkType = RouteNetwork.GB_PRIMARY;
+                  network = "omt-gb-primary";
+                }
+                default -> {
+                  networkType = null;
+                  network = null;
+                }
+              }
               result.add(new RouteRelation(refMatcher.group(), network, networkType, (byte) -1,
                 0));
             }
@@ -594,7 +610,8 @@ public class Transportation implements
     CA_PROVINCIAL_ARTERIAL("ca-provincial-arterial"),
     CA_PROVINCIAL("ca-provincial"),
     GB_MOTORWAY("gb-motorway"),
-    GB_TRUNK("gb-trunk");
+    GB_TRUNK("gb-trunk"),
+    GB_PRIMARY("gb-primary");
 
     final String name;
 

@@ -1285,6 +1285,142 @@ class TransportationTest extends AbstractLayerTest {
   }
 
   @Test
+  void testGreatBritainTrunk() {
+    process(SimpleFeature.create(
+      rectangle(0, 0.1),
+      Map.of("iso_a2", "GB"),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_admin_0_countries",
+      0
+    ));
+
+    // in GB
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "_minzoom", 5
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "A272",
+      "ref_length", 4,
+      "network", "gb-trunk",
+      "_minzoom", 8
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "highway", "trunk",
+        "ref", "A272"
+      ),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      0
+    )));
+  }
+
+  @Test
+  void testGreatBritainPrimary() {
+    process(SimpleFeature.create(
+      rectangle(0, 0.1),
+      Map.of("iso_a2", "GB"),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_admin_0_countries",
+      0
+    ));
+
+    // in GB
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "primary",
+      "_minzoom", 7
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "primary",
+      "ref", "A598",
+      "ref_length", 4,
+      "network", "gb-primary",
+      "_minzoom", 12
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "highway", "primary",
+        "ref", "A598"
+      ),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      0
+    )));
+  }
+
+  @Test
+  void testGreatBritainSecondary() {
+    process(SimpleFeature.create(
+      rectangle(0, 0.1),
+      Map.of("iso_a2", "GB"),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_admin_0_countries",
+      0
+    ));
+
+    // in GB
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "secondary",
+      "_minzoom", 9
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "secondary",
+      "ref", "B4558",
+      "ref_length", 5,
+      "network", "gb-primary",
+      "_minzoom", 12
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "highway", "secondary",
+        "ref", "B4558"
+      ),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      0
+    )));
+  }
+
+  @Test
+  void testGreatBritainTertiary() {
+    process(SimpleFeature.create(
+      rectangle(0, 0.1),
+      Map.of("iso_a2", "GB"),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_admin_0_countries",
+      0
+    ));
+
+    // in GB
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "tertiary",
+      "_minzoom", 11
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "tertiary",
+      "ref", "B4086",
+      "ref_length", 5,
+      "network", "road",
+      "_minzoom", 12
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "highway", "tertiary",
+        "ref", "B4086"
+      ),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      0
+    )));
+  }
+
+  @Test
   void testMergesDisconnectedRoadNameFeatures() throws GeometryException {
     testMergesLinestrings(Map.of("class", "motorway"), TransportationName.LAYER_NAME, 10, 14);
   }

@@ -48,11 +48,13 @@ import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.collection.Hppc;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.expression.MultiExpression;
+import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.util.OmtLanguageUtils;
@@ -99,12 +101,17 @@ public class Poi implements
     entry(FieldValues.CLASS_CLOTHING_STORE, 700),
     entry(FieldValues.CLASS_BAR, 800)
   );
+  private static final Set<String> UNIVERSITY_POI_SUBCLASSES = Set.of("university", "college");
+  private static final double LOG2 = Math.log(2);
+  private static final double SQRT10 = Math.sqrt(10);
   private final MultiExpression.Index<String> classMapping;
   private final Translations translations;
+  private final Stats stats;
 
   public Poi(Translations translations, PlanetilerConfig config, Stats stats) {
     this.classMapping = FieldMappings.Class.index();
     this.translations = translations;
+    this.stats = stats;
   }
 
   static int poiClassRank(String clazz) {
@@ -123,6 +130,19 @@ public class Poi implements
     boolean lowZoom = ("station".equals(subclass) && "railway".equals(mappingKey)) ||
       "halt".equals(subclass) || "ferry_terminal".equals(subclass);
     return lowZoom ? 12 : 14;
+  }
+
+  public static int uniAreaToMinZoom(double areaWorld) {
+    double oneSideWorld = Math.sqrt(areaWorld);
+    // full(-er) formula (along with comments) is in PoiTest.testUniAreaToMinZoom(), here is simplified reverse of that
+    double zoom = -(Math.log(oneSideWorld * SQRT10) / LOG2);
+
+    // Say Z13.01 means bellow threshold, Z13.00 is exactly threshold, Z12.99 is over threshold,
+    // hence Z13.01 and Z13.00 will be rounded to Z14 and Z12.99 to Z13 (e.g. `floor() + 1`).
+    // And to accommodate for some precision errors (observed for Z9-Z11) we do also `- 0.1e-10`.
+    int result = (int) Math.floor(zoom - 0.1e-10) + 1;
+
+    return Math.min(14, Math.max(10, result));
   }
 
   @Override
@@ -178,6 +198,18 @@ public class Poi implements
     int poiClassRank = poiClassRank(poiClass);
     int rankOrder = poiClassRank + ((nullOrEmpty(name)) ? 2000 : 0);
 
+    int minzoom;
+    if (UNIVERSITY_POI_SUBCLASSES.contains(rawSubclass)) {
+      minzoom = 14;
+      try {
+        minzoom = uniAreaToMinZoom(element.source().area());
+      } catch (GeometryException e) {
+        e.log(stats, "omt_poi_polygon", "Unable to get geometry for water polygon " + element.source().id());
+      }
+    } else {
+      minzoom = minzoom(element.subclass(), element.mappingKey());
+    }
+
     output.setBufferPixels(BUFFER_SIZE)
       .setAttr(Fields.CLASS, poiClass)
       .setAttr(Fields.SUBCLASS, subclass)
@@ -187,7 +219,7 @@ public class Poi implements
       .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
       .setPointLabelGridPixelSize(14, 64)
       .setSortKey(rankOrder)
-      .setMinZoom(minzoom(element.subclass(), element.mappingKey()));
+      .setMinZoom(minzoom);
   }
 
   @Override

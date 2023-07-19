@@ -2,6 +2,7 @@ package org.openmaptiles.layers;
 
 import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SourceFeature;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
@@ -273,5 +274,57 @@ class PoiTest extends AbstractLayerTest {
       "amenity", "parcel_locker",
       "ref", "Corner Case"
     ))));
+  }
+
+  private record TestEntry(
+    SourceFeature feature,
+    int expectedZoom
+  ) {}
+
+  private void createUniAreaForMinZoomTest(List<TestEntry> testEntries, double side, int expectedZoom, String name) {
+    double area = Math.pow(side, 2);
+    var feature = polygonFeatureWithArea(area, Map.of(
+      "name", name,
+      "amenity", "university"
+    ));
+    testEntries.add(new TestEntry(
+      feature,
+      Math.min(14, Math.max(10, expectedZoom))
+    ));
+  }
+
+  @Test
+  void testUniAreaToMinZoom() throws GeometryException {
+    // threshold is 1/10 of tile area, hence ...
+    // ... side is 1/sqrt(10) tile side: from pixels to world coord, for say Z14 ...
+    //final double PORTION_OF_TILE_SIDE = (256d / Math.sqrt(10)) / Math.pow(2d, 14d + 8d);
+    // ... and then for some lower zoom:
+    //double testAreaSide = PORTION_OF_TILE_SIDE * Math.pow(2, 14 - zoom);
+    // all this then simplified to `testAreaSide` calculation bellow
+
+    final double SQRT10 = Math.sqrt(10);
+    final List<TestEntry> testEntries = new ArrayList<>();
+    for (int zoom = 14; zoom >= 0; zoom--) {
+      double testAreaSide = Math.pow(2, -zoom) / SQRT10;
+
+      // slightly bellow the threshold
+      createUniAreaForMinZoomTest(testEntries, testAreaSide * 0.999, zoom + 1, "uni-");
+      // precisely at the threshold
+      createUniAreaForMinZoomTest(testEntries, testAreaSide, zoom, "uni=");
+      // slightly over the threshold
+      createUniAreaForMinZoomTest(testEntries, testAreaSide * 1.001, zoom, "uni+");
+    }
+
+    for (var entry : testEntries) {
+      assertFeatures(14, List.of(Map.of(
+        "_layer", "landuse",
+        "class", "university"
+      ), Map.of(
+        "_layer", "poi",
+        "_type", "point",
+        "_minzoom", entry.expectedZoom,
+        "_maxzoom", 14
+      )), process(entry.feature));
+    }
   }
 }

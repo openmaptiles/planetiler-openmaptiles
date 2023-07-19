@@ -190,6 +190,15 @@ public class WaterName implements
         FeatureCollector.Feature feature;
         int minzoom = 9;
         String place = element.place();
+        String clazz;
+        if ("bay".equals(element.natural())) {
+          clazz = FieldValues.CLASS_BAY;
+        } else if ("sea".equals(place)) {
+          clazz = FieldValues.CLASS_SEA;
+        } else {
+          clazz = FieldValues.CLASS_LAKE;
+          minzoom = 3;
+        }
         if (centerlineGeometry != null) {
           // prefer lake centerline if it exists
           feature = features.geometry(LAYER_NAME, centerlineGeometry)
@@ -203,14 +212,6 @@ public class WaterName implements
           } else {
             minzoom = areaToMinZoom(area);
           }
-        }
-        String clazz;
-        if ("bay".equals(element.natural())) {
-          clazz = FieldValues.CLASS_BAY;
-        } else if ("sea".equals(place)) {
-          clazz = FieldValues.CLASS_SEA;
-        } else {
-          clazz = FieldValues.CLASS_LAKE;
         }
         feature
           .setAttr(Fields.CLASS, clazz)

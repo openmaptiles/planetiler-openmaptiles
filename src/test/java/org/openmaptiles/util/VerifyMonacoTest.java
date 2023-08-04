@@ -5,9 +5,9 @@ import static com.onthegomap.planetiler.util.Gzip.gzip;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.onthegomap.planetiler.VectorTile;
+import com.onthegomap.planetiler.archive.TileEncodingResult;
 import com.onthegomap.planetiler.geo.TileCoord;
 import com.onthegomap.planetiler.mbtiles.Mbtiles;
-import com.onthegomap.planetiler.mbtiles.TileEncodingResult;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;

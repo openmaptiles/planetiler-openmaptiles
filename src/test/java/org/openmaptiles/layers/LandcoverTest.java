@@ -103,7 +103,7 @@ class LandcoverTest extends AbstractLayerTest {
       "_layer", "landcover",
       "subclass", "wood",
       "class", "wood",
-      "_minpixelsize", 8d,
+      "_minpixelsize", 4d,
       "_numpointsattr", "_numpoints",
       "_minzoom", 7,
       "_maxzoom", 14
@@ -114,7 +114,7 @@ class LandcoverTest extends AbstractLayerTest {
       "_layer", "landcover",
       "subclass", "forest",
       "class", "wood",
-      "_minpixelsize", 8d,
+      "_minpixelsize", 4d,
       "_minzoom", 7,
       "_maxzoom", 14
     )), process(polygonFeature(Map.of(
@@ -124,7 +124,7 @@ class LandcoverTest extends AbstractLayerTest {
       "_layer", "landcover",
       "subclass", "dune",
       "class", "sand",
-      "_minpixelsize", 4d,
+      "_minpixelsize", 2d,
       "_minzoom", 7,
       "_maxzoom", 14
     )), process(polygonFeature(Map.of(

@@ -16,7 +16,7 @@ public class OpenMapTilesMain {
 
   static void run(Arguments arguments) throws Exception {
     Path dataDir = Path.of("data");
-    Path sourcesDir = dataDir.resolve("sources");
+    Path sourcesDir = arguments.file("download_dir", "download directory", dataDir.resolve("sources"));
     // use --area=... argument, AREA=... env var or area=... in config to set the region of the world to use
     // will be ignored if osm_path or osm_url are set
     String area = arguments.getString(

@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout this PR planetiler-openmaptiles repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -43,7 +43,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout this PR planetiler-openmaptiles repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up JDK ${{ matrix.jdk }}
         uses: actions/setup-java@v3
         with:
@@ -65,7 +65,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout this PR planetiler-openmaptiles repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -82,7 +82,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout this PR planetiler-openmaptiles repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Cache data/sources
         uses: ./.github/cache-sources-action
       - name: Set up JDK
@@ -111,13 +111,13 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout parent Planetiler repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: onthegomap/planetiler
           ref: main
           path: planetiler
       - name: Checkout this PR planetiler-openmaptiles repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: planetiler-openmaptiles
       - name: Move planetiler-openmaptiles into planetiler

@@ -28,12 +28,12 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: 'Checkout PT-OMT PR branch'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: branch
 
       - name: 'Checkout PT-OMT base'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: base
           ref: ${{ github.event.pull_request.base.sha }}

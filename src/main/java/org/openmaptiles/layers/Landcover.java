@@ -125,6 +125,8 @@ public class Landcover implements
     if (clazz != null) {
       features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
         .setMinPixelSizeOverrides(MIN_PIXEL_SIZE_THRESHOLDS)
+        // default is 0.1, this helps reduce size of some heavy z7-10 tiles
+        .setPixelToleranceBelowZoom(10, 0.25)
         .setAttr(Fields.CLASS, clazz)
         .setAttr(Fields.SUBCLASS, subclass)
         .setNumPointsAttr(TEMP_NUM_POINTS_ATTR)

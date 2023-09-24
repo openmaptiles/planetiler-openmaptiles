@@ -143,12 +143,23 @@ class BuildingTest extends AbstractLayerTest {
     );
 
     Assertions.assertEquals(
-      2,
+      1, // merged into 1 multipolygon
       profile.postProcessLayerFeatures(Building.LAYER_NAME, 14, List.of(poly1, poly2)).size()
+    );
+
+    Assertions.assertEquals(
+      2, // merged into 1 multipolygon
+      profile.postProcessLayerFeatures(Building.LAYER_NAME, 14, List.of(poly1, poly2)).get(0).geometry().decode()
+        .getNumGeometries()
     );
     Assertions.assertEquals(
       1,
       profile.postProcessLayerFeatures(Building.LAYER_NAME, 13, List.of(poly1, poly2)).size()
+    );
+    Assertions.assertEquals(
+      1,
+      profile.postProcessLayerFeatures(Building.LAYER_NAME, 13, List.of(poly1, poly2)).get(0).geometry().decode()
+        .getNumGeometries()
     );
   }
 

@@ -48,10 +48,10 @@ import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
 import com.onthegomap.planetiler.util.ZoomFunction;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
@@ -126,19 +126,20 @@ public class Landuse implements
   @Override
   public List<VectorTile.Feature> postProcess(int zoom,
     List<VectorTile.Feature> items) throws GeometryException {
-    if (zoom < 6 || zoom > 12) {
-      return items;
-    } else {
-      // merging only merges polygons with class "residential" for z6-z12
-      Map<Boolean, List<VectorTile.Feature>> splitLists =
-        items.stream().collect(Collectors.partitioningBy(
-          i -> FieldValues.CLASS_RESIDENTIAL.equals(i.attrs().get(Fields.CLASS)))
-        );
-      List<VectorTile.Feature> result = splitLists.get(Boolean.FALSE);
-      List<VectorTile.Feature> toMerge = splitLists.get(Boolean.TRUE);
-      var merged = FeatureMerge.mergeNearbyPolygons(toMerge, 1, 1, 0.1, 0.1);
-      result.addAll(merged);
-      return result;
+    List<VectorTile.Feature> toMerge = new ArrayList<>();
+    List<VectorTile.Feature> result = new ArrayList<>();
+    for (var item : items) {
+      if (FieldValues.CLASS_RESIDENTIAL.equals(item.attrs().get(Fields.CLASS))) {
+        toMerge.add(item);
+      } else {
+        result.add(item);
+      }
     }
+    var merged = zoom <= 12 ?
+      FeatureMerge.mergeNearbyPolygons(toMerge, 1, 1, 0.1, 0.1) :
+      // reduces size of some heavy z13-14 tiles with lots of small polygons
+      FeatureMerge.mergeMultiPolygon(toMerge);
+    result.addAll(merged);
+    return result;
   }
 }

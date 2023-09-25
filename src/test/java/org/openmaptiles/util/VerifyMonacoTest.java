@@ -42,7 +42,7 @@ class VerifyMonacoTest {
   }
 
   @Test
-  void testStilInvalidWithOneTile() throws IOException {
+  void testStillInvalidWithOneTile() throws IOException {
     mbtiles.createTablesWithIndexes();
     mbtiles.metadataTable().setMetadata("name", "name");
     try (var writer = mbtiles.newBatchedTileWriter()) {

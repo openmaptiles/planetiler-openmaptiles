@@ -134,7 +134,7 @@ public class Transportation implements
   );
   private static final Set<String> SURFACE_PAVED_VALUES = Set.of(
     "paved", "asphalt", "cobblestone", "concrete", "concrete:lanes", "concrete:plates", "metal",
-    "paving_stones", "sett", "unhewn_cobblestone", "wood"
+    "paving_stones", "sett", "unhewn_cobblestone", "wood", "grade1"
   );
   private static final Set<String> ACCESS_NO_VALUES = Set.of(
     "private", "no"
@@ -479,7 +479,7 @@ public class Transportation implements
         // z12+
         .setAttrWithMinzoom(Fields.SERVICE, service, 12)
         .setAttrWithMinzoom(Fields.ONEWAY, nullIfInt(element.isOneway(), 0), 12)
-        .setAttrWithMinzoom(Fields.SURFACE, surface(element.surface()), 12)
+        .setAttrWithMinzoom(Fields.SURFACE, surface(coalesce(element.surface(), element.tracktype())), 12)
         .setMinPixelSize(0) // merge during post-processing, then limit by size
         .setSortKey(element.zOrder())
         .setMinZoom(minzoom);

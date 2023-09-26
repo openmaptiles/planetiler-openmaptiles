@@ -120,12 +120,26 @@ class LanduseTest extends AbstractLayerTest {
     );
 
     Assertions.assertEquals(
-      3,
-      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 13, List.of(poly1, poly2, poly3)).size()
+      List.of(1, 2),
+      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 13, List.of(poly1, poly2, poly3)).stream()
+        .map(d -> {
+          try {
+            return d.geometry().decode().getNumGeometries();
+          } catch (GeometryException e) {
+            throw new AssertionError(e);
+          }
+        }).toList()
     );
     Assertions.assertEquals(
-      2,
-      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 12, List.of(poly1, poly2, poly3)).size()
+      List.of(1, 1),
+      profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 12, List.of(poly1, poly2, poly3)).stream()
+        .map(d -> {
+          try {
+            return d.geometry().decode().getNumGeometries();
+          } catch (GeometryException e) {
+            throw new AssertionError(e);
+          }
+        }).toList()
     );
   }
 }

@@ -267,6 +267,8 @@ public class Place implements
           .putAttrs(names)
           .setAttr(Fields.CLASS, element.place())
           .setAttr(Fields.RANK, rank)
+          // TODO: This starts including every "state" point at z2, even before many countries show up.
+          //       Instead we might want to set state min zooms based on rank from natural earth?
           .setMinZoom(2)
           .setSortKey(rank);
       }

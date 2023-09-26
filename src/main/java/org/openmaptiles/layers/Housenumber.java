@@ -36,9 +36,14 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 package org.openmaptiles.layers;
 
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.FeatureMerge;
+import com.onthegomap.planetiler.ForwardingProfile;
+import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
+import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
+import java.util.List;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 
@@ -51,7 +56,8 @@ import org.openmaptiles.generated.Tables;
  */
 public class Housenumber implements
   OpenMapTilesSchema.Housenumber,
-  Tables.OsmHousenumberPoint.Handler {
+  Tables.OsmHousenumberPoint.Handler,
+  ForwardingProfile.FeaturePostProcessor {
 
   public Housenumber(Translations translations, PlanetilerConfig config, Stats stats) {}
 
@@ -61,5 +67,11 @@ public class Housenumber implements
       .setBufferPixels(BUFFER_SIZE)
       .setAttr(Fields.HOUSENUMBER, element.housenumber())
       .setMinZoom(14);
+  }
+
+  @Override
+  public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> list) throws GeometryException {
+    // reduces the size of some heavy z14 tiles with many repeated housenumber values by 60% or more
+    return FeatureMerge.mergeMultiPoint(list);
   }
 }

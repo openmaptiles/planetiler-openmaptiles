@@ -1,6 +1,10 @@
 package org.openmaptiles.layers;
 
+import static com.onthegomap.planetiler.TestUtils.newPoint;
+
+import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.geo.GeometryException;
+import com.onthegomap.planetiler.reader.SimpleFeature;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +13,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.openmaptiles.OpenMapTilesProfile;
 
 class PoiTest extends AbstractLayerTest {
 
@@ -62,6 +67,159 @@ class PoiTest extends AbstractLayerTest {
       "station", "subway",
       "name", "station"
     ))));
+  }
+
+  private List<FeatureCollector.Feature> testAggStops(List<SourceFeature> sourceFeatures) {
+    sourceFeatures.forEach(this::process);
+
+    List<FeatureCollector.Feature> features = new ArrayList<>();
+    profile.finish(OpenMapTilesProfile.OSM_SOURCE, featureCollectorFactory, features::add);
+
+    return features;
+  }
+
+  @Test
+  void testAggStopJustOne() {
+    var result = testAggStops(List.of(pointFeature(Map.of(
+      "highway", "bus_stop",
+      "name", "station",
+      "uic_ref", "1"
+    ))));
+    assertFeatures(14, List.of(Map.of(
+      "_layer", "poi",
+      "class", "bus",
+      "subclass", "bus_stop",
+      "agg_stop", 1,
+      "_minzoom", 14
+    )), result);
+  }
+
+  @Test
+  void testAggStopTwoWithSameSubclass() {
+    var result = testAggStops(List.of(
+      pointFeature(Map.of(
+        "railway", "tram_stop",
+        "name", "station 1",
+        "uic_ref", "1"
+      )),
+      pointFeature(Map.of(
+        "railway", "tram_stop",
+        "name", "station 2",
+        "uic_ref", "1"
+      ))
+    ));
+    assertFeatures(14, List.of(
+      Map.of(
+        "_layer", "poi",
+        "name", "station 1",
+        "class", "railway",
+        "subclass", "tram_stop",
+        "agg_stop", 1,
+        "_minzoom", 14
+      ),
+      Map.of(
+        "_layer", "poi",
+        "name", "station 2",
+        "class", "railway",
+        "subclass", "tram_stop",
+        "agg_stop", "<null>",
+        "_minzoom", 14
+      )
+    ), result);
+  }
+
+  @Test
+  void testAggStopThreeWithMixedSubclass() {
+    var result = testAggStops(List.of(
+      pointFeature(Map.of(
+        "highway", "bus_stop",
+        "name", "station 1",
+        "uic_ref", "1"
+      )),
+      pointFeature(Map.of(
+        "highway", "bus_stop",
+        "name", "station 2",
+        "uic_ref", "1"
+      )),
+      pointFeature(Map.of(
+        "railway", "tram_stop",
+        "name", "station 3",
+        "uic_ref", "1"
+      ))
+    ));
+    assertFeatures(14, List.of(
+      Map.of(
+        "_layer", "poi",
+        "name", "station 3",
+        "class", "railway",
+        "subclass", "tram_stop",
+        "agg_stop", 1,
+        "_minzoom", 14
+      ),
+      Map.of(
+        "_layer", "poi",
+        "name", "station 1",
+        "class", "bus",
+        "subclass", "bus_stop",
+        "agg_stop", "<null>",
+        "_minzoom", 14
+      ),
+      Map.of(
+        "_layer", "poi",
+        "name", "station 2",
+        "class", "bus",
+        "subclass", "bus_stop",
+        "agg_stop", "<null>",
+        "_minzoom", 14
+      )
+    ), result);
+  }
+
+  @Test
+  void testAggStopThreeWithSameSubclass() {
+    var result = testAggStops(List.of(
+      SimpleFeature.create(newPoint(0, 0), Map.of(
+        "highway", "bus_stop",
+        "name", "station 1",
+        "uic_ref", "1"
+      ), OpenMapTilesProfile.OSM_SOURCE, null, 0),
+      SimpleFeature.create(newPoint(1, 0), Map.of(
+        "highway", "bus_stop",
+        "name", "station 2",
+        "uic_ref", "1"
+      ), OpenMapTilesProfile.OSM_SOURCE, null, 1),
+      SimpleFeature.create(newPoint(2, 0), Map.of(
+        "highway", "bus_stop",
+        "name", "station 3",
+        "uic_ref", "1"
+      ), OpenMapTilesProfile.OSM_SOURCE, null, 2)
+    ));
+    assertFeatures(14, List.of(
+      Map.of(
+        "_layer", "poi",
+        "name", "station 2",
+        "class", "bus",
+        "subclass", "bus_stop",
+        "agg_stop", 1,
+        "_minzoom", 14
+      ),
+      Map.of(
+        "_layer", "poi",
+        "name", "station 1",
+        "class", "bus",
+        "subclass", "bus_stop",
+        "agg_stop", "<null>",
+        "_minzoom", 14
+      ),
+      Map.of(
+        "_layer", "poi",
+        "name", "station 3",
+        "class", "bus",
+        "subclass", "bus_stop",
+        "agg_stop", "<null>",
+        "_minzoom", 14
+      )
+    ), result);
   }
 
   @ParameterizedTest

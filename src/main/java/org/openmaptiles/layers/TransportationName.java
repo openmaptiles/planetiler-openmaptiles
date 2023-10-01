@@ -57,8 +57,10 @@ import com.onthegomap.planetiler.util.Translations;
 import com.onthegomap.planetiler.util.ZoomFunction;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
@@ -111,14 +113,6 @@ public class TransportationName implements
     .put(9, 8_000)
     .put(10, 8_000)
     .put(11, 8_000);
-  private static final List<String> CONCURRENT_ROUTE_KEYS = List.of(
-    Fields.ROUTE_1,
-    Fields.ROUTE_2,
-    Fields.ROUTE_3,
-    Fields.ROUTE_4,
-    Fields.ROUTE_5,
-    Fields.ROUTE_6
-  );
   private final boolean brunnel;
   private final boolean sizeForShield;
   private final boolean limitMerge;
@@ -273,11 +267,13 @@ public class TransportationName implements
       .setSortKey(element.zOrder())
       .setMinZoom(minzoom);
 
-    // populate route_1, route_2, ... tags
-    for (int i = 0; i < Math.min(CONCURRENT_ROUTE_KEYS.size(), relations.size()); i++) {
-      Transportation.RouteRelation routeRelation = relations.get(i);
-      feature.setAttr(CONCURRENT_ROUTE_KEYS.get(i), routeRelation.network() == null ? null :
-        routeRelation.network() + "=" + coalesce(routeRelation.ref(), ""));
+    // populate route_1, route_2, ... route_n tags and remove duplicates
+    Set<String> routes = new HashSet<>();
+    for (var route : relations) {
+      String routeString = route.network() + "=" + coalesce(route.ref(), "");
+      if (routes.add(routeString)) {
+        feature.setAttr("route_" + routes.size(), routeString);
+      }
     }
 
     if (brunnel) {

@@ -11,7 +11,9 @@ import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SimpleFeature;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.reader.osm.OsmElement;
+import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
 import com.onthegomap.planetiler.stats.Stats;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -379,6 +381,46 @@ class TransportationTest extends AbstractLayerTest {
       "route_1", "US:I=95",
       "route_2", "US:NJ:NJTP=NJTP",
       "_minzoom", 6
+    )), rendered);
+  }
+
+  @Test
+  void testSegmentWithManyRoutes() {
+    List<OsmRelationInfo> relations = new ArrayList<>();
+    for (int route = 1; route <= 16; route++) {
+      int num = (route + 1) / 2; // to make dups
+      var rel = new OsmElement.Relation(route);
+      rel.setTag("type", "route");
+      rel.setTag("route", "road");
+      rel.setTag("network", "US:I");
+      rel.setTag("ref", Integer.toString(num));
+      rel.setTag("name", "Route " + num);
+      relations.addAll(profile.preprocessOsmRelation(rel));
+    }
+
+    FeatureCollector rendered = process(lineFeatureWithRelation(
+      relations,
+      Map.of(
+        "highway", "motorway",
+        "name", "New Jersey Turnpike",
+        "ref", "I 95;NJTP"
+      )));
+
+    assertFeatures(13, List.of(mapOf(
+      "_layer", "transportation",
+      "class", "motorway",
+      "_minzoom", 4
+    ), mapOf(
+      "_layer", "transportation_name",
+      "route_1", "US:I=1",
+      "route_2", "US:I=2",
+      "route_3", "US:I=3",
+      "route_4", "US:I=4",
+      "route_5", "US:I=5",
+      "route_6", "US:I=6",
+      "route_7", "US:I=7",
+      "route_8", "US:I=8",
+      "route_9", "<null>"
     )), rendered);
   }
 

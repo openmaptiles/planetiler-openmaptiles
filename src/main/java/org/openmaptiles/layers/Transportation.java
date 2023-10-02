@@ -609,7 +609,7 @@ public class Transportation implements
       .setAttr(Fields.LAYER, nullIfLong(element.layer(), 0))
       .setSortKey(element.zOrder())
       .setMinPixelSize(0) // merge during post-processing, then limit by size
-      .setMinZoom(11);
+      .setMinZoom(4);
   }
 
   @Override

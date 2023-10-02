@@ -51,7 +51,7 @@ import java.util.Map;
 /**
  * OSM element parsers generated from the <a href="https://github.com/omniscale/imposm3">imposm3</a> table definitions
  * in the <a href=
- * "https://github.com/openmaptiles/openmaptiles/blob/5e9b7c475d53a5bd5ea394da361594d3f4ce2d66/openmaptiles.yaml">OpenMapTiles
+ * "https://github.com/openmaptiles/openmaptiles/blob/b3d67ed5b327c9059aeea0b3304772c6b4c8c7e9/openmaptiles.yaml">OpenMapTiles
  * vector tile schema</a>.
  *
  * These filter and parse the raw OSM key/value attribute pairs on tags into records with fields that match the columns
@@ -249,9 +249,8 @@ public class Tables {
     }
 
     /** Imposm3 "mapping" to filter OSM elements that should appear in this "table". */
-    public static final Expression MAPPING =
-      and(or(matchAny("leisure", "nature_reserve"), matchAny("boundary", "national_park", "protected_area")),
-        matchType("polygon"));
+    public static final Expression MAPPING = and(or(matchAny("leisure", "nature_reserve"),
+      matchAny("boundary", "national_park", "protected_area", "aboriginal_lands")), matchType("polygon"));
 
     /**
      * Interface for layer implementations to extend to subscribe to OSM elements filtered and parsed as

@@ -1932,24 +1932,24 @@ class TransportationTest extends AbstractLayerTest {
   @Test
   void testGrade1SurfacePath() {
     assertFeatures(14, List.of(Map.of(
-        "_layer", "transportation",
-        "class", "track",
-        "surface", "paved"
+      "_layer", "transportation",
+      "class", "track",
+      "surface", "paved"
     )), process(lineFeature(Map.of(
-        "surface", "grade1",
-        "highway", "track"
+      "surface", "grade1",
+      "highway", "track"
     ))));
   }
 
   @Test
   void testGrade1TracktypePath() {
     assertFeatures(14, List.of(Map.of(
-        "_layer", "transportation",
-        "class", "track",
-        "surface", "paved"
+      "_layer", "transportation",
+      "class", "track",
+      "surface", "paved"
     )), process(lineFeature(Map.of(
-        "tracktype", "grade1",
-        "highway", "track"
+      "tracktype", "grade1",
+      "highway", "track"
     ))));
   }
 }

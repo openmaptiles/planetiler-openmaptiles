@@ -50,9 +50,8 @@ import java.util.Map;
 
 /**
  * OSM element parsers generated from the <a href="https://github.com/omniscale/imposm3">imposm3</a> table definitions
- * in the <a href=
- * "https://github.com/openmaptiles/openmaptiles/blob/5e9b7c475d53a5bd5ea394da361594d3f4ce2d66/openmaptiles.yaml">OpenMapTiles
- * vector tile schema</a>.
+ * in the <a href="https://github.com/openmaptiles/openmaptiles/blob/master/openmaptiles.yaml">OpenMapTiles vector tile
+ * schema</a>.
  *
  * These filter and parse the raw OSM key/value attribute pairs on tags into records with fields that match the columns
  * in the tables that imposm3 would generate. Layer implementations can "subscribe" to elements from each "table" but
@@ -249,9 +248,8 @@ public class Tables {
     }
 
     /** Imposm3 "mapping" to filter OSM elements that should appear in this "table". */
-    public static final Expression MAPPING =
-      and(or(matchAny("leisure", "nature_reserve"), matchAny("boundary", "national_park", "protected_area")),
-        matchType("polygon"));
+    public static final Expression MAPPING = and(or(matchAny("leisure", "nature_reserve"),
+      matchAny("boundary", "national_park", "protected_area", "aboriginal_lands")), matchType("polygon"));
 
     /**
      * Interface for layer implementations to extend to subscribe to OSM elements filtered and parsed as
@@ -740,9 +738,9 @@ public class Tables {
         "erotic", "fabric", "florist", "frozen_food", "furniture", "garden_centre", "general", "gift", "greengrocer",
         "hairdresser", "hardware", "hearing_aids", "hifi", "ice_cream", "interior_decoration", "jewelry", "kiosk",
         "lamps", "laundry", "locksmith", "mall", "massage", "mobile_phone", "motorcycle", "music", "musical_instrument",
-        "newsagent", "optician", "outdoor", "perfume", "perfumery", "pet", "photo", "second_hand", "shoes", "sports",
-        "stationery", "supermarket", "tailor", "tattoo", "ticket", "tobacco", "toys", "travel_agency", "video",
-        "video_games", "watches", "weapons", "wholesale", "wine"),
+        "newsagent", "optician", "outdoor", "paint", "perfume", "perfumery", "pet", "photo", "second_hand", "shoes",
+        "sports", "stationery", "supermarket", "tailor", "tattoo", "ticket", "tobacco", "toys", "travel_agency",
+        "video", "video_games", "watches", "weapons", "wholesale", "wine"),
       matchAny("sport", "american_football", "archery", "athletics", "australian_football", "badminton", "baseball",
         "basketball", "beachvolleyball", "billiards", "bmx", "boules", "bowls", "boxing", "canadian_football", "canoe",
         "chess", "climbing", "climbing_adventure", "cricket", "cricket_nets", "croquet", "curling", "cycling",
@@ -810,9 +808,9 @@ public class Tables {
         "erotic", "fabric", "florist", "frozen_food", "furniture", "garden_centre", "general", "gift", "greengrocer",
         "hairdresser", "hardware", "hearing_aids", "hifi", "ice_cream", "interior_decoration", "jewelry", "kiosk",
         "lamps", "laundry", "locksmith", "mall", "massage", "mobile_phone", "motorcycle", "music", "musical_instrument",
-        "newsagent", "optician", "outdoor", "perfume", "perfumery", "pet", "photo", "second_hand", "shoes", "sports",
-        "stationery", "supermarket", "tailor", "tattoo", "ticket", "tobacco", "toys", "travel_agency", "video",
-        "video_games", "watches", "weapons", "wholesale", "wine"),
+        "newsagent", "optician", "outdoor", "paint", "perfume", "perfumery", "pet", "photo", "second_hand", "shoes",
+        "sports", "stationery", "supermarket", "tailor", "tattoo", "ticket", "tobacco", "toys", "travel_agency",
+        "video", "video_games", "watches", "weapons", "wholesale", "wine"),
       matchAny("sport", "american_football", "archery", "athletics", "australian_football", "badminton", "baseball",
         "basketball", "beachvolleyball", "billiards", "bmx", "boules", "bowls", "boxing", "canadian_football", "canoe",
         "chess", "climbing", "climbing_adventure", "cricket", "cricket_nets", "croquet", "curling", "cycling",

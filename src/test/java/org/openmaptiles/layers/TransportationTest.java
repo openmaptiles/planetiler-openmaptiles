@@ -13,6 +13,7 @@ import com.onthegomap.planetiler.reader.SimpleFeature;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.stats.Stats;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -1932,24 +1933,85 @@ class TransportationTest extends AbstractLayerTest {
   @Test
   void testGrade1SurfacePath() {
     assertFeatures(14, List.of(Map.of(
-        "_layer", "transportation",
-        "class", "track",
-        "surface", "paved"
+      "_layer", "transportation",
+      "class", "track",
+      "surface", "paved"
     )), process(lineFeature(Map.of(
-        "surface", "grade1",
-        "highway", "track"
+      "surface", "grade1",
+      "highway", "track"
     ))));
   }
 
   @Test
   void testGrade1TracktypePath() {
     assertFeatures(14, List.of(Map.of(
-        "_layer", "transportation",
-        "class", "track",
-        "surface", "paved"
+      "_layer", "transportation",
+      "class", "track",
+      "surface", "paved"
     )), process(lineFeature(Map.of(
-        "tracktype", "grade1",
-        "highway", "track"
+      "tracktype", "grade1",
+      "highway", "track"
     ))));
+  }
+
+  private record TestEntry(
+    SourceFeature feature,
+    int expectedZoom
+  ) {}
+
+  private void createBrunnelForMinZoomTest(List<TestEntry> testEntries, double length, int expectedZoom, String name) {
+    var feature = lineFeatureWithLength(length, Map.of(
+      "name", name,
+      "bridge", "yes",
+      "highway", "motorway"
+    ));
+    testEntries.add(new TestEntry(
+      feature,
+      Math.min(14, Math.max(9, expectedZoom))
+    ));
+  }
+
+  @Test
+  void testGetBrunnelMinzoom() throws GeometryException {
+    // Threshold is 2% of tile size, but that is not a nice number when working with 2^N and LOG2
+    // so 1/64-th (e.g. around 1.6%) is used here, hence ...
+    // ... side is 1/64 tile side: from pixels to world coord, for say Z14 ...
+    //final double PORTION_OF_TILE_SIDE = (256d / 64) / Math.pow(2d, 14d + 8d);
+    // ... and then for some lower zoom:
+    //double testLineSide = PORTION_OF_TILE_SIDE * Math.pow(2, 14 - zoom);
+    // all this then simplified to `testLength` calculation bellow
+
+    final List<TestEntry> testEntries = new ArrayList<>();
+    for (int zoom = 14; zoom >= 0; zoom--) {
+      double testLength = Math.pow(2, -zoom - 6);
+
+      // slightly bellow the threshold
+      createBrunnelForMinZoomTest(testEntries, testLength * 0.999, zoom + 1, "brunnel-");
+      // precisely at the threshold
+      createBrunnelForMinZoomTest(testEntries, testLength, zoom, "brunnel=");
+      // slightly over the threshold
+      createBrunnelForMinZoomTest(testEntries, testLength * 1.001, zoom, "brunnel+");
+    }
+
+    for (var entry : testEntries) {
+      var result = process(entry.feature);
+
+      assertFeatures(entry.expectedZoom, List.of(Map.of(
+        "_layer", "transportation",
+        "_type", "line",
+        "class", "motorway",
+        "brunnel", "bridge"
+      ), Map.of(
+        "_layer", "transportation_name",
+        "_type", "line"
+      )), result);
+
+      assertFeatures(entry.expectedZoom - 1, List.of(Map.of(
+        "_layer", "transportation",
+        "brunnel", "<null>"
+      ), Map.of(
+        "_layer", "transportation_name"
+      )), result);
+    }
   }
 }

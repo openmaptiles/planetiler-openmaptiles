@@ -281,7 +281,14 @@ public class TransportationName implements
     }
 
     if (brunnel) {
-      feature.setAttr(Fields.BRUNNEL, brunnel(element.isBridge(), element.isTunnel(), element.isFord()));
+      String brunnelValue = brunnel(element.isBridge(), element.isTunnel(), element.isFord());
+      int brunnelMinzoom;
+      if (brunnelValue != null) {
+        brunnelMinzoom = transportation.getBrunnelMinzoom(element);
+      } else {
+        brunnelMinzoom = minzoom;
+      }
+      feature.setAttrWithMinzoom(Fields.BRUNNEL, brunnelValue, brunnelMinzoom);
     }
 
     /*

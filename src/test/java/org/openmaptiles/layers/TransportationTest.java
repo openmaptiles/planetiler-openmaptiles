@@ -326,7 +326,7 @@ class TransportationTest extends AbstractLayerTest {
       "bicycle", "<null>",
       "foot", "<null>",
       "horse", "<null>",
-      "brunnel", "bridge",
+      "brunnel", "<null>",
       "_minzoom", 4
     ), Map.of(
       "_layer", "transportation_name",

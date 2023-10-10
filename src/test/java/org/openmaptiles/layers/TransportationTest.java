@@ -268,31 +268,6 @@ class TransportationTest extends AbstractLayerTest {
         "bridge", "yes"
       )));
 
-    assertFeatures(13, List.of(mapOf(
-      "_layer", "transportation",
-      "class", "motorway",
-      "surface", "paved",
-      "oneway", 1,
-      "ramp", "<null>",
-      "bicycle", "no",
-      "foot", "no",
-      "horse", "no",
-      "brunnel", "bridge",
-      "network", "us-interstate",
-      "_minzoom", 4
-    ), Map.of(
-      "_layer", "transportation_name",
-      "class", "motorway",
-      "name", "Massachusetts Turnpike",
-      "name_en", "Massachusetts Turnpike",
-      "ref", "90",
-      "ref_length", 2,
-      "network", "us-interstate",
-      "brunnel", "<null>",
-      "route_1", "US:I=90",
-      "_minzoom", 6
-    )), features);
-
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "motorway",

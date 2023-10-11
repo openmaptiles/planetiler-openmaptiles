@@ -342,6 +342,51 @@ class TransportationTest extends AbstractLayerTest {
   }
 
   @Test
+  void testDuplicateRoute() {
+    var rel1 = new OsmElement.Relation(1);
+    rel1.setTag("type", "route");
+    rel1.setTag("route", "road");
+    rel1.setTag("network", "US:OK");
+    rel1.setTag("ref", "104");
+    rel1.setTag("direction", "north");
+    var rel2 = new OsmElement.Relation(2);
+    rel2.setTag("type", "route");
+    rel2.setTag("route", "road");
+    rel2.setTag("network", "US:OK");
+    rel2.setTag("ref", "104");
+    rel2.setTag("direction", "south");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      Stream.concat(
+        profile.preprocessOsmRelation(rel2).stream(),
+        profile.preprocessOsmRelation(rel1).stream()
+      ).toList(),
+      Map.of(
+        "highway", "trunk",
+        "ref", "US 23;SR 104",
+        "lanes", 5,
+        "maxspeed", "55 mph",
+        "expressway", "no"
+      )));
+
+    assertFeatures(13, List.of(mapOf(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "us-state",
+      "_minzoom", 5
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "104",
+      "ref_length", 3,
+      "network", "us-state",
+      "route_1", "US:OK=104",
+      "route_2", "<null>",
+      "_minzoom", 8
+    )), features);
+  }
+
+  @Test
   void testRouteWithoutNetworkType() {
     var rel1 = new OsmElement.Relation(1);
     rel1.setTag("type", "route");

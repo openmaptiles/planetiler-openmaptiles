@@ -37,25 +37,25 @@ class HousenumberTest extends AbstractLayerTest {
   }
 
   @Test
-  void testDisplayHousenumberNumericRange() {
+  void testDisplayHousenumberNonnumericRange() {
     final String HOUSENUMBER = "1;1a;2;2/b;20;3";
     assertEquals("1–3", Housenumber.displayHousenumber(HOUSENUMBER));
   }
 
   @Test
-  void testDisplayHousenumberNumericRangeBroken() {
+  void testDisplayHousenumberNonnumericRangeBroken() {
     final String HOUSENUMBER = "1;1a;2;2/b;20;3;";
     assertEquals("1–3", Housenumber.displayHousenumber(HOUSENUMBER));
   }
 
   @Test
-  void testDisplayHousenumberNonnumericRange() {
+  void testDisplayHousenumberNumericRange() {
     final String HOUSENUMBER = "1;2;20;3";
     assertEquals("1–20", Housenumber.displayHousenumber(HOUSENUMBER));
   }
 
   @Test
-  void testDisplayHousenumberNonnumericRangeBroken() {
+  void testDisplayHousenumberNumericRangeBroken() {
     final String HOUSENUMBER = "1;2;20;3;";
     assertEquals("1–20", Housenumber.displayHousenumber(HOUSENUMBER));
   }

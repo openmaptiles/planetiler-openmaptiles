@@ -220,12 +220,12 @@ public class OpenMapTilesProfile extends ForwardingProfile {
 
   /**
    * Layers should implement this interface to subscribe to elements from
-   * <a href="https://github.com/lukasmartinelli/osm-lakelines">OSM lake centerlines source</a>.
+   * <a href="https://github.com/openmaptiles/osm-lakelines">OSM lake centerlines source</a>.
    */
   public interface LakeCenterlineProcessor {
 
     /**
-     * Process an element from the <a href="https://github.com/lukasmartinelli/osm-lakelines">OSM lake centerlines
+     * Process an element from the <a href="https://github.com/openmaptiles/osm-lakelines">OSM lake centerlines
      * source</a>
      *
      * @see Profile#processFeature(SourceFeature, FeatureCollector)

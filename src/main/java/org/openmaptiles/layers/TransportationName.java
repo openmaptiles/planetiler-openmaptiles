@@ -109,8 +109,8 @@ public class TransportationName implements
     .put(7, 20_000)
     .put(8, 14_000)
     .put(9, 8_000)
-    .put(10, 8_000)
-    .put(11, 8_000);
+    .put(10, 4_000)
+    .put(11, 2_000);
   private static final List<String> CONCURRENT_ROUTE_KEYS = List.of(
     Fields.ROUTE_1,
     Fields.ROUTE_2,

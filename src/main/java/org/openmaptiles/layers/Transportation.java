@@ -606,7 +606,7 @@ public class Transportation implements
     try {
       // In OpenMapTiles there are different limits (in kilometers) per zoom level which we are not able to do here.
       // Hence, we do at least filter on `min(ZRES5, ZRES4, ...)`, e.g. ZRES5, for all zoom levels here:
-      // we get what we want at Z10 and only "few more" are Z4-Z9.
+      // we get what we want at Z10 and only "few more" at Z4-Z9.
       if (element.source().length() < FERRY_MIN_LENTH) {
         return;
       }

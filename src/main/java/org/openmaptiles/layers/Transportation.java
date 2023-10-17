@@ -156,12 +156,9 @@ public class Transportation implements
     .put(5, 500)
     .put(4, 1_000);
   // "shipway_linestring_gen_z10: ... sql_filter: ST_Length(geometry)>ZRES5", in "world coordinates"
-  private static final double FERRY_MIN_LENTH_XXX = GeoUtils.metersPerPixelAtEquator(5) / GeoUtils.WORLD_CIRCUMFERENCE_METERS;
-  private static final double FERRY_MIN_LENTH = 1 / Math.pow(2d, 5d + 8d);  // TODO: 5 + 8 -> 13
+  private static final double FERRY_MIN_LENTH = 1 / Math.pow(2d, 13d);
   // "shipway_linestring_gen_z5: ... tolerance: ZRES6", etc. when recalculated from meters to pixels is always:
   private static final double FERRY_TOLERANCE = 0.5;
-  // "ST_Length(geometry)>ZRES5 for Z10", etc. when recalculated from meters to pixels is always:
-  private static final double FERRY_MIN_PIXEL_SIZE = 32;
   // ORDER BY network_type, network, LENGTH(ref), ref)
   private static final Comparator<RouteRelation> RELATION_ORDERING = Comparator
     .<RouteRelation>comparingInt(
@@ -651,7 +648,9 @@ public class Transportation implements
     }
   }
 
-  private List<VectorTile.Feature> postProcessItems(List<VectorTile.Feature> items, double minLength, double tolerance) {
+  private List<VectorTile.Feature> postProcessItems(int zoom, List<VectorTile.Feature> items, double tolerance) {
+    double minLength = coalesce(MIN_LENGTH.apply(zoom), 0).doubleValue();
+
     // don't merge road segments with oneway tag
     // TODO merge preserving oneway instead ignoring
     int onewayId = 1;
@@ -672,13 +671,13 @@ public class Transportation implements
 
   private List<VectorTile.Feature> postProcessAllOrNonFerry(int zoom, List<VectorTile.Feature> items) {
     return postProcessItems(
+        zoom,
         items,
-        coalesce(MIN_LENGTH.apply(zoom), 0).doubleValue(),
         config.tolerance(zoom));
   }
 
-  private List<VectorTile.Feature> postProcessFerry(List<VectorTile.Feature> items) {
-    return postProcessItems(items, FERRY_MIN_PIXEL_SIZE, FERRY_TOLERANCE);
+  private List<VectorTile.Feature> postProcessFerry(int zoom, List<VectorTile.Feature> items) {
+    return postProcessItems(zoom, items, FERRY_TOLERANCE);
   }
 
   @Override
@@ -696,7 +695,7 @@ public class Transportation implements
           otherItems.add(item);
         }
       }
-      var result = postProcessFerry(ferryItems);
+      var result = postProcessFerry(zoom, ferryItems);
       result.addAll(postProcessAllOrNonFerry(zoom, otherItems));
       return  result;
     }

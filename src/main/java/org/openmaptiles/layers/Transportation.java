@@ -670,10 +670,7 @@ public class Transportation implements
   }
 
   private List<VectorTile.Feature> postProcessAllOrNonFerry(int zoom, List<VectorTile.Feature> items) {
-    return postProcessItems(
-      zoom,
-      items,
-      config.tolerance(zoom));
+    return postProcessItems(zoom, items, config.tolerance(zoom));
   }
 
   private List<VectorTile.Feature> postProcessFerry(int zoom, List<VectorTile.Feature> items) {

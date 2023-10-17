@@ -155,6 +155,13 @@ public class Transportation implements
     .put(6, 100)
     .put(5, 500)
     .put(4, 1_000);
+  // "shipway_linestring_gen_z10: ... sql_filter: ST_Length(geometry)>ZRES5", in "world coordinates"
+  private static final double FERRY_MIN_LENTH_XXX = GeoUtils.metersPerPixelAtEquator(5) / GeoUtils.WORLD_CIRCUMFERENCE_METERS;
+  private static final double FERRY_MIN_LENTH = 1 / Math.pow(2d, 5d + 8d);  // TODO: 5 + 8 -> 13
+  // "shipway_linestring_gen_z5: ... tolerance: ZRES6", etc. when recalculated from meters to pixels is always:
+  private static final double FERRY_TOLERANCE = 0.5;
+  // "ST_Length(geometry)>ZRES5 for Z10", etc. when recalculated from meters to pixels is always:
+  private static final double FERRY_MIN_PIXEL_SIZE = 32;
   // ORDER BY network_type, network, LENGTH(ref), ref)
   private static final Comparator<RouteRelation> RELATION_ORDERING = Comparator
     .<RouteRelation>comparingInt(
@@ -599,6 +606,18 @@ public class Transportation implements
 
   @Override
   public void process(Tables.OsmShipwayLinestring element, FeatureCollector features) {
+    try {
+      // In OpenMapTiles there are different limits (in kilometers) per zoom level which we are not able to do here.
+      // Hence, we do at least filter on `min(ZRES5, ZRES4, ...)`, e.g. ZRES5, for all zoom levels here:
+      // we get what we want at Z10 and only "few more" are Z4-Z9.
+      if (element.source().length() < FERRY_MIN_LENTH) {
+        return;
+      }
+    } catch (GeometryException e) {
+      e.log(stats, "omt_ferry_length", "Unable to check length: " + element);
+      return;
+    }
+
     features.line(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
       .setAttr(Fields.CLASS, element.shipway()) // "ferry"
       // no subclass
@@ -632,11 +651,7 @@ public class Transportation implements
     }
   }
 
-  @Override
-  public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
-    double tolerance = config.tolerance(zoom);
-    double minLength = coalesce(MIN_LENGTH.apply(zoom), 0).doubleValue();
-
+  private List<VectorTile.Feature> postProcessItems(List<VectorTile.Feature> items, double minLength, double tolerance) {
     // don't merge road segments with oneway tag
     // TODO merge preserving oneway instead ignoring
     int onewayId = 1;
@@ -653,6 +668,38 @@ public class Transportation implements
       item.attrs().remove(LIMIT_MERGE_TAG);
     }
     return merged;
+  }
+
+  private List<VectorTile.Feature> postProcessAllOrNonFerry(int zoom, List<VectorTile.Feature> items) {
+    return postProcessItems(
+        items,
+        coalesce(MIN_LENGTH.apply(zoom), 0).doubleValue(),
+        config.tolerance(zoom));
+  }
+
+  private List<VectorTile.Feature> postProcessFerry(List<VectorTile.Feature> items) {
+    return postProcessItems(items, FERRY_MIN_PIXEL_SIZE, FERRY_TOLERANCE);
+  }
+
+  @Override
+  public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
+    if (zoom < 4 || zoom > 10) {
+      return postProcessAllOrNonFerry(zoom, items);
+    } else {
+      // ferries at Z4-Z10 need different treatment
+      List<VectorTile.Feature> ferryItems = new ArrayList<>();
+      List<VectorTile.Feature> otherItems = new ArrayList<>();
+      for (var item : items) {
+        if (FieldValues.CLASS_FERRY.equals(item.attrs().get(Fields.CLASS))) {
+          ferryItems.add(item);
+        } else {
+          otherItems.add(item);
+        }
+      }
+      var result = postProcessFerry(ferryItems);
+      result.addAll(postProcessAllOrNonFerry(zoom, otherItems));
+      return  result;
+    }
   }
 
   enum RouteNetwork {

@@ -273,11 +273,14 @@ public class TransportationName implements
       .setSortKey(element.zOrder())
       .setMinZoom(minzoom);
 
-    // populate route_1, route_2, ... tags
-    for (int i = 0; i < Math.min(CONCURRENT_ROUTE_KEYS.size(), relations.size()); i++) {
-      Transportation.RouteRelation routeRelation = relations.get(i);
-      feature.setAttr(CONCURRENT_ROUTE_KEYS.get(i), routeRelation.network() == null ? null :
-        routeRelation.network() + "=" + coalesce(routeRelation.ref(), ""));
+    // populate route_1, route_2, ... tags; take only unique ones
+    Object[] routes = relations.stream()
+      .map(r -> r.network() == null ? null : r.network() + "=" + coalesce(r.ref(), ""))
+      .distinct()
+      .limit(CONCURRENT_ROUTE_KEYS.size())
+      .toArray();
+    for (int i = 0; i < routes.length; i++) {
+      feature.setAttr(CONCURRENT_ROUTE_KEYS.get(i), routes[i]);
     }
 
     if (brunnel) {

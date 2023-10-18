@@ -318,6 +318,51 @@ class TransportationTest extends AbstractLayerTest {
   }
 
   @Test
+  void testDuplicateRoute() {
+    var rel1 = new OsmElement.Relation(1);
+    rel1.setTag("type", "route");
+    rel1.setTag("route", "road");
+    rel1.setTag("network", "US:OK");
+    rel1.setTag("ref", "104");
+    rel1.setTag("direction", "north");
+    var rel2 = new OsmElement.Relation(2);
+    rel2.setTag("type", "route");
+    rel2.setTag("route", "road");
+    rel2.setTag("network", "US:OK");
+    rel2.setTag("ref", "104");
+    rel2.setTag("direction", "south");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      Stream.concat(
+        profile.preprocessOsmRelation(rel2).stream(),
+        profile.preprocessOsmRelation(rel1).stream()
+      ).toList(),
+      Map.of(
+        "highway", "trunk",
+        "ref", "US 23;SR 104",
+        "lanes", 5,
+        "maxspeed", "55 mph",
+        "expressway", "no"
+      )));
+
+    assertFeatures(13, List.of(mapOf(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "us-state",
+      "_minzoom", 5
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "104",
+      "ref_length", 3,
+      "network", "us-state",
+      "route_1", "US:OK=104",
+      "route_2", "<null>",
+      "_minzoom", 8
+    )), features);
+  }
+
+  @Test
   void testRouteWithoutNetworkType() {
     var rel1 = new OsmElement.Relation(1);
     rel1.setTag("type", "route");
@@ -1723,7 +1768,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "ferry",
 
-      "_minzoom", 11,
+      "_minzoom", 5,
       "_maxzoom", 14,
       "_type", "line"
     ), Map.of(
@@ -1987,6 +2032,54 @@ class TransportationTest extends AbstractLayerTest {
       ), Map.of(
         "_layer", "transportation_name"
       )), result);
+    }
+  }
+
+  private void createFerryForMinZoomTest(List<TestEntry> testEntries, double length, int expectedZoom, String name) {
+    var feature = lineFeatureWithLength(length, Map.of(
+      "name", name,
+      "route", "ferry"
+    ));
+    testEntries.add(new TestEntry(
+      feature,
+      Math.min(11, Math.max(4, expectedZoom))
+    ));
+  }
+
+  @Test
+  void testGetFerryMinzoom() throws GeometryException {
+    // Threshold is 1/8 of tile size, hence ...
+    // ... side is 1/8 tile side: from pixels to world coord, for say Z14 ...
+    //final double PORTION_OF_TILE_SIDE = (256d / 8) / Math.pow(2d, 14d + 8d);
+    // ... and then for some lower zoom:
+    //double testLineSide = PORTION_OF_TILE_SIDE * Math.pow(2, 14 - zoom);
+    // all this then simplified to `testLength` calculation bellow
+
+    final List<TestEntry> testEntries = new ArrayList<>();
+    for (int zoom = 14; zoom >= 0; zoom--) {
+      double testLength = Math.pow(2, -zoom - 3);
+
+      // slightly bellow the threshold
+      createFerryForMinZoomTest(testEntries, testLength * 0.999, zoom + 1, "ferry-");
+      // precisely at the threshold
+      createFerryForMinZoomTest(testEntries, testLength, zoom, "ferry=");
+      // slightly over the threshold
+      createFerryForMinZoomTest(testEntries, testLength * 1.001, zoom, "ferry+");
+    }
+
+    for (var entry : testEntries) {
+      assertFeatures(14, List.of(Map.of(
+        "_layer", "transportation",
+        "class", "ferry",
+        "_minzoom", entry.expectedZoom,
+        "_maxzoom", 14
+      ), Map.of(
+        "_layer", "transportation_name",
+        "_type", "line"
+      )), process(entry.feature));
+      /*
+      process(entry.feature);
+       */
     }
   }
 }

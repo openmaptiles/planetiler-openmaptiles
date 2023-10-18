@@ -155,6 +155,8 @@ public class Transportation implements
     .put(6, 100)
     .put(5, 500)
     .put(4, 1_000);
+  // "shipway_linestring_gen_z5: ... tolerance: ZRES6", etc. when recalculated from meters to pixels is always:
+  private static final double FERRY_TOLERANCE = 0.5;
   // ORDER BY network_type, network, LENGTH(ref), ref)
   private static final Comparator<RouteRelation> RELATION_ORDERING = Comparator
     .<RouteRelation>comparingInt(
@@ -637,7 +639,28 @@ public class Transportation implements
       .setAttr(Fields.LAYER, nullIfLong(element.layer(), 0))
       .setSortKey(element.zOrder())
       .setMinPixelSize(0) // merge during post-processing, then limit by size
-      .setMinZoom(11);
+      .setMinZoom(getFerryMinzoom(element));
+  }
+
+  // We will have several of those for 3.15 => TODO: unify/simplify.
+  int getFerryMinzoom(Tables.OsmShipwayLinestring element) {
+    // full(-er) formula (along with comments) is in TranportationTest.testGetFerryMinzoom(), here is simplified reverse of that
+    double zoom;
+    try {
+      zoom = -(Math.log(element.source().length()) / LOG2) - 3;
+    } catch (GeometryException e) {
+      e.log(stats, "omt_ferry_minzoom",
+        "Unable to calculate ferry minzoom for " + element.source().id());
+      // ferries are supposed to be included in Z4-Z10 depending on their length (=this min. zoom calculation), for Z11+ always, hence 11 as fallback
+      return 11;
+    }
+
+    // Say Z13.01 means bellow threshold, Z13.00 is exactly threshold, Z12.99 is over threshold,
+    // hence Z13.01 and Z13.00 will be rounded to Z14 and Z12.99 to Z13 (e.g. `floor() + 1`).
+    // And to accommodate for some precision errors (observed for Z9-Z11) we do also `- 0.1e-10`.
+    int result = (int) Math.floor(zoom - 0.1e-10) + 1;
+
+    return Math.min(11, Math.max(4, result));
   }
 
   @Override
@@ -660,9 +683,7 @@ public class Transportation implements
     }
   }
 
-  @Override
-  public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
-    double tolerance = config.tolerance(zoom);
+  private List<VectorTile.Feature> postProcessItems(int zoom, List<VectorTile.Feature> items, double tolerance) {
     double minLength = coalesce(MIN_LENGTH.apply(zoom), 0).doubleValue();
 
     // don't merge road segments with oneway tag
@@ -681,6 +702,35 @@ public class Transportation implements
       item.attrs().remove(LIMIT_MERGE_TAG);
     }
     return merged;
+  }
+
+  private List<VectorTile.Feature> postProcessAllOrNonFerry(int zoom, List<VectorTile.Feature> items) {
+    return postProcessItems(zoom, items, config.tolerance(zoom));
+  }
+
+  private List<VectorTile.Feature> postProcessFerry(int zoom, List<VectorTile.Feature> items) {
+    return postProcessItems(zoom, items, FERRY_TOLERANCE);
+  }
+
+  @Override
+  public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
+    if (zoom < 4 || zoom > 10) {
+      return postProcessAllOrNonFerry(zoom, items);
+    } else {
+      // ferries at Z4-Z10 need different treatment
+      List<VectorTile.Feature> ferryItems = new ArrayList<>();
+      List<VectorTile.Feature> otherItems = new ArrayList<>();
+      for (var item : items) {
+        if (FieldValues.CLASS_FERRY.equals(item.attrs().get(Fields.CLASS))) {
+          ferryItems.add(item);
+        } else {
+          otherItems.add(item);
+        }
+      }
+      var result = postProcessFerry(zoom, ferryItems);
+      result.addAll(postProcessAllOrNonFerry(zoom, otherItems));
+      return result;
+    }
   }
 
   enum RouteNetwork {

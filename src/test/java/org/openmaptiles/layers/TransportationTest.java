@@ -1993,14 +1993,6 @@ class TransportationTest extends AbstractLayerTest {
 
   @Test
   void testGetBrunnelMinzoom() throws GeometryException {
-    // Threshold is 2% of tile size, but that is not a nice number when working with 2^N and LOG2
-    // so 1/64-th (e.g. around 1.6%) is used here, hence ...
-    // ... side is 1/64 tile side: from pixels to world coord, for say Z14 ...
-    //final double PORTION_OF_TILE_SIDE = (256d / 64) / Math.pow(2d, 14d + 8d);
-    // ... and then for some lower zoom:
-    //double testLineSide = PORTION_OF_TILE_SIDE * Math.pow(2, 14 - zoom);
-    // all this then simplified to `testLength` calculation bellow
-
     final List<TestEntry> testEntries = new ArrayList<>();
     for (int zoom = 14; zoom >= 0; zoom--) {
       double testLength = Math.pow(2, -zoom - 6);
@@ -2048,13 +2040,6 @@ class TransportationTest extends AbstractLayerTest {
 
   @Test
   void testGetFerryMinzoom() throws GeometryException {
-    // Threshold is 1/8 of tile size, hence ...
-    // ... side is 1/8 tile side: from pixels to world coord, for say Z14 ...
-    //final double PORTION_OF_TILE_SIDE = (256d / 8) / Math.pow(2d, 14d + 8d);
-    // ... and then for some lower zoom:
-    //double testLineSide = PORTION_OF_TILE_SIDE * Math.pow(2, 14 - zoom);
-    // all this then simplified to `testLength` calculation bellow
-
     final List<TestEntry> testEntries = new ArrayList<>();
     for (int zoom = 14; zoom >= 0; zoom--) {
       double testLength = Math.pow(2, -zoom - 3);

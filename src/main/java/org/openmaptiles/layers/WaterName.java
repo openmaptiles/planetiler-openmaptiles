@@ -56,6 +56,7 @@ import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.util.OmtLanguageUtils;
+import org.openmaptiles.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -227,14 +228,7 @@ public class WaterName implements
 
   public static int areaToMinZoom(double areaWorld) {
     double oneSideWorld = Math.sqrt(areaWorld);
-    // full(-er) formula (along with comments) is in WaterNameTest.testAreaToMinZoom(), here is simplified reverse of that
-    double zoom = -(Math.log(oneSideWorld) / LOG2) - 1;
-
-    // Say Z13.01 means bellow threshold, Z13.00 is exactly threshold, Z12.99 is over threshold,
-    // hence Z13.01 and Z13.00 will be rounded to Z14 and Z12.99 to Z13 (e.g. `floor() + 1`).
-    // And to accommodate for some precision errors (observed for Z9-Z11) we do also `- 0.1e-11`.
-    int result = (int) Math.floor(zoom - 0.1e-11) + 1;
-
-    return Math.min(14, Math.max(3, result));
+    // OMT does "feature area is 1/4 of tile area", which is same as "feature side is 1/2 of tile side"
+    return Utils.getClippedMinZoomForLength(oneSideWorld, 1, 3, 14);
   }
 }

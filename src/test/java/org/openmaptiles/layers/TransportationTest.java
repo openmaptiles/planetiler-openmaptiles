@@ -1987,7 +1987,7 @@ class TransportationTest extends AbstractLayerTest {
     ));
     testEntries.add(new TestEntry(
       feature,
-      Math.min(14, Math.max(9, expectedZoom))
+      Math.min(12, Math.max(9, expectedZoom))
     ));
   }
 

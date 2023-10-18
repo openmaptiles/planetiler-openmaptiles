@@ -100,9 +100,9 @@ public class Park implements
         protectionTitle = protectionTitle.replace(' ', '_').toLowerCase(Locale.ROOT);
       }
       clazz = coalesce(
-          nullIfEmpty(protectionTitle),
-          nullIfEmpty(element.boundary()),
-          nullIfEmpty(element.leisure())
+        nullIfEmpty(protectionTitle),
+        nullIfEmpty(element.boundary()),
+        nullIfEmpty(element.leisure())
       );
     }
 

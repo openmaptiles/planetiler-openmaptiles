@@ -168,6 +168,7 @@ public class Transportation implements
     .thenComparing(RouteRelation::ref);
   private static final Set<Integer> ONEWAY_VALUES = Set.of(-1, 1);
   private static final String LIMIT_MERGE_TAG = "__limit_merge";
+  private static final double LOG2 = Math.log(2);
   private final AtomicBoolean loggedNoGb = new AtomicBoolean(false);
   private final AtomicBoolean loggedNoIreland = new AtomicBoolean(false);
   private final boolean z13Paths;
@@ -603,18 +604,6 @@ public class Transportation implements
 
   @Override
   public void process(Tables.OsmShipwayLinestring element, FeatureCollector features) {
-    try {
-      // In OpenMapTiles there are different limits (in kilometers) per zoom level which we are not able to do here.
-      // Hence, we do at least filter on `min(ZRES5, ZRES4, ...)`, e.g. ZRES5, for all zoom levels here:
-      // we get what we want at Z10 and only "few more" at Z4-Z9.
-      if (element.source().length() < FERRY_MIN_LENTH) {
-        return;
-      }
-    } catch (GeometryException e) {
-      e.log(stats, "omt_ferry_length", "Unable to check length: " + element);
-      return;
-    }
-
     features.line(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
       .setAttr(Fields.CLASS, element.shipway()) // "ferry"
       // no subclass
@@ -625,7 +614,28 @@ public class Transportation implements
       .setAttr(Fields.LAYER, nullIfLong(element.layer(), 0))
       .setSortKey(element.zOrder())
       .setMinPixelSize(0) // merge during post-processing, then limit by size
-      .setMinZoom(4);
+      .setMinZoom(getFerryMinzoom(element));
+  }
+
+  // We will have several of those for 3.15 => TODO: unify/simplify.
+  int getFerryMinzoom(Tables.OsmShipwayLinestring element) {
+    // full(-er) formula (along with comments) is in TranportationTest.testGetFerryMinzoom(), here is simplified reverse of that
+    double zoom;
+    try {
+      zoom = -(Math.log(element.source().length()) / LOG2) - 3;
+    } catch (GeometryException e) {
+      e.log(stats, "omt_ferry_minzoom",
+          "Unable to calculate ferry minzoom for " + element.source().id());
+      // ferries are supposed to be included in Z4-Z10 depending on their length (=this min. zoom calculation), for Z11+ always, hence 11 as fallback
+      return 11;
+    }
+
+    // Say Z13.01 means bellow threshold, Z13.00 is exactly threshold, Z12.99 is over threshold,
+    // hence Z13.01 and Z13.00 will be rounded to Z14 and Z12.99 to Z13 (e.g. `floor() + 1`).
+    // And to accommodate for some precision errors (observed for Z9-Z11) we do also `- 0.1e-10`.
+    int result = (int) Math.floor(zoom - 0.1e-10) + 1;
+
+    return Math.min(11, Math.max(4, result));
   }
 
   @Override

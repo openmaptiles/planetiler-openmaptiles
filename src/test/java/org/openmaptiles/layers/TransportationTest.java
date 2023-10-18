@@ -2038,13 +2038,13 @@ class TransportationTest extends AbstractLayerTest {
 
     for (var entry : testEntries) {
       assertFeatures(14, List.of(Map.of(
-          "_layer", "transportation",
-          "class", "ferry",
-          "_minzoom", entry.expectedZoom,
-          "_maxzoom", 14
+        "_layer", "transportation",
+        "class", "ferry",
+        "_minzoom", entry.expectedZoom,
+        "_maxzoom", 14
       ), Map.of(
-          "_layer", "transportation_name",
-          "_type", "line"
+        "_layer", "transportation_name",
+        "_type", "line"
       )), process(entry.feature));
       /*
       process(entry.feature);

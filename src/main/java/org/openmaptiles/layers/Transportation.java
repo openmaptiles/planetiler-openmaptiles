@@ -155,8 +155,6 @@ public class Transportation implements
     .put(6, 100)
     .put(5, 500)
     .put(4, 1_000);
-  // "shipway_linestring_gen_z10: ... sql_filter: ST_Length(geometry)>ZRES5", in "world coordinates"
-  private static final double FERRY_MIN_LENTH = 1 / Math.pow(2d, 13d);
   // "shipway_linestring_gen_z5: ... tolerance: ZRES6", etc. when recalculated from meters to pixels is always:
   private static final double FERRY_TOLERANCE = 0.5;
   // ORDER BY network_type, network, LENGTH(ref), ref)
@@ -625,7 +623,7 @@ public class Transportation implements
       zoom = -(Math.log(element.source().length()) / LOG2) - 3;
     } catch (GeometryException e) {
       e.log(stats, "omt_ferry_minzoom",
-          "Unable to calculate ferry minzoom for " + element.source().id());
+        "Unable to calculate ferry minzoom for " + element.source().id());
       // ferries are supposed to be included in Z4-Z10 depending on their length (=this min. zoom calculation), for Z11+ always, hence 11 as fallback
       return 11;
     }

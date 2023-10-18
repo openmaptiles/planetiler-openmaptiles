@@ -705,6 +705,7 @@ public class Transportation implements
   }
 
   private List<VectorTile.Feature> postProcessAllOrNonFerry(int zoom, List<VectorTile.Feature> items) {
+    // TODO: use same tolerance as for ferries (see tolerances in OMT `transportation/mapping.yaml`), hence no need to split ferries from the rest in postProcess()
     return postProcessItems(zoom, items, config.tolerance(zoom));
   }
 

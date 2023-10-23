@@ -13,6 +13,7 @@ import com.onthegomap.planetiler.reader.SimpleFeature;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.stats.Stats;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -1792,7 +1793,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "ferry",
 
-      "_minzoom", 11,
+      "_minzoom", 5,
       "_maxzoom", 14,
       "_type", "line"
     ), Map.of(
@@ -1977,24 +1978,77 @@ class TransportationTest extends AbstractLayerTest {
   @Test
   void testGrade1SurfacePath() {
     assertFeatures(14, List.of(Map.of(
-        "_layer", "transportation",
-        "class", "track",
-        "surface", "paved"
+      "_layer", "transportation",
+      "class", "track",
+      "surface", "paved"
     )), process(lineFeature(Map.of(
-        "surface", "grade1",
-        "highway", "track"
+      "surface", "grade1",
+      "highway", "track"
     ))));
   }
 
   @Test
   void testGrade1TracktypePath() {
     assertFeatures(14, List.of(Map.of(
-        "_layer", "transportation",
-        "class", "track",
-        "surface", "paved"
+      "_layer", "transportation",
+      "class", "track",
+      "surface", "paved"
     )), process(lineFeature(Map.of(
-        "tracktype", "grade1",
-        "highway", "track"
+      "tracktype", "grade1",
+      "highway", "track"
     ))));
+  }
+
+  private record TestEntry(
+    SourceFeature feature,
+    int expectedZoom
+  ) {}
+
+  private void createFerryForMinZoomTest(List<TestEntry> testEntries, double length, int expectedZoom, String name) {
+    var feature = lineFeatureWithLength(length, Map.of(
+      "name", name,
+      "route", "ferry"
+    ));
+    testEntries.add(new TestEntry(
+      feature,
+      Math.min(11, Math.max(4, expectedZoom))
+    ));
+  }
+
+  @Test
+  void testGetFerryMinzoom() throws GeometryException {
+    // Threshold is 1/8 of tile size, hence ...
+    // ... side is 1/8 tile side: from pixels to world coord, for say Z14 ...
+    //final double PORTION_OF_TILE_SIDE = (256d / 8) / Math.pow(2d, 14d + 8d);
+    // ... and then for some lower zoom:
+    //double testLineSide = PORTION_OF_TILE_SIDE * Math.pow(2, 14 - zoom);
+    // all this then simplified to `testLength` calculation bellow
+
+    final List<TestEntry> testEntries = new ArrayList<>();
+    for (int zoom = 14; zoom >= 0; zoom--) {
+      double testLength = Math.pow(2, -zoom - 3);
+
+      // slightly bellow the threshold
+      createFerryForMinZoomTest(testEntries, testLength * 0.999, zoom + 1, "ferry-");
+      // precisely at the threshold
+      createFerryForMinZoomTest(testEntries, testLength, zoom, "ferry=");
+      // slightly over the threshold
+      createFerryForMinZoomTest(testEntries, testLength * 1.001, zoom, "ferry+");
+    }
+
+    for (var entry : testEntries) {
+      assertFeatures(14, List.of(Map.of(
+        "_layer", "transportation",
+        "class", "ferry",
+        "_minzoom", entry.expectedZoom,
+        "_maxzoom", 14
+      ), Map.of(
+        "_layer", "transportation_name",
+        "_type", "line"
+      )), process(entry.feature));
+      /*
+      process(entry.feature);
+       */
+    }
   }
 }

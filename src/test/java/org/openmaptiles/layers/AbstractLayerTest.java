@@ -137,6 +137,16 @@ public abstract class AbstractLayerTest {
     );
   }
 
+  SourceFeature lineFeatureWithLength(double length, Map<String, Object> props) {
+    return SimpleFeature.create(
+      GeoUtils.worldToLatLonCoords(newLineString(0, 0, 0, length)),
+      new HashMap<>(props),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      0
+    );
+  }
+
   SourceFeature closedWayFeature(Map<String, Object> props) {
     return SimpleFeature.createFakeOsmFeature(
       newLineString(0, 0, 1, 0, 1, 1, 0, 1, 0, 0),

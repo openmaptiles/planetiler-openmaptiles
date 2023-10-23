@@ -48,24 +48,24 @@ class ParkTest extends AbstractLayerTest {
   @Test
   void testAbotiginalLand() {
     assertFeatures(13, List.of(Map.of(
-        "_layer", "park",
-        "_type", "polygon",
-        "class", "aboriginal_lands",
-        "name", "Hualapai Tribe",
-        "_minpixelsize", 2d,
-        "_minzoom", 4,
-        "_maxzoom", 14
+      "_layer", "park",
+      "_type", "polygon",
+      "class", "aboriginal_lands",
+      "name", "Hualapai Tribe",
+      "_minpixelsize", 2d,
+      "_minzoom", 4,
+      "_maxzoom", 14
     ), Map.of(
-        "_layer", "park",
-        "_type", "point",
-        "class", "aboriginal_lands",
-        "name", "Hualapai Tribe",
-        "_minzoom", 5,
-        "_maxzoom", 14
+      "_layer", "park",
+      "_type", "point",
+      "class", "aboriginal_lands",
+      "name", "Hualapai Tribe",
+      "_minzoom", 5,
+      "_maxzoom", 14
     )), process(polygonFeature(Map.of(
-        "boundary", "aboriginal_lands",
-        "name", "Hualapai Tribe",
-        "protection_title", "National Park"
+      "boundary", "aboriginal_lands",
+      "name", "Hualapai Tribe",
+      "protection_title", "National Park"
     ))));
   }
 

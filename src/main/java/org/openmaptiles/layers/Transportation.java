@@ -157,7 +157,7 @@ public class Transportation implements
     .put(5, 500)
     .put(4, 1_000);
   // "shipway_linestring_gen_z5: ... tolerance: ZRES6", etc. when recalculated from meters to pixels is always:
-  private static final double FERRY_TOLERANCE = 0.5;
+  private static final double TOLERANCE = 0.5;
   // ORDER BY network_type, network, LENGTH(ref), ref)
   private static final Comparator<RouteRelation> RELATION_ORDERING = Comparator
     .<RouteRelation>comparingInt(
@@ -680,12 +680,11 @@ public class Transportation implements
   }
 
   private List<VectorTile.Feature> postProcessAllOrNonFerry(int zoom, List<VectorTile.Feature> items) {
-    // TODO: use same tolerance as for ferries (see tolerances in OMT `transportation/mapping.yaml`), hence no need to split ferries from the rest in postProcess()
-    return postProcessItems(zoom, items, config.tolerance(zoom));
+    return postProcessItems(zoom, items, TOLERANCE);
   }
 
   private List<VectorTile.Feature> postProcessFerry(int zoom, List<VectorTile.Feature> items) {
-    return postProcessItems(zoom, items, FERRY_TOLERANCE);
+    return postProcessItems(zoom, items, TOLERANCE);
   }
 
   @Override

@@ -167,9 +167,7 @@ public class Transportation implements
     .thenComparing(RouteRelation::ref);
   private static final Set<Integer> ONEWAY_VALUES = Set.of(-1, 1);
   private final Map<String, Integer> MINZOOMS;
-  private static final int BRUNNEL_FALLBACK_MINZOOM = 12;
   private static final String LIMIT_MERGE_TAG = "__limit_merge";
-  private static final double LOG2 = Math.log(2);
   private final AtomicBoolean loggedNoGb = new AtomicBoolean(false);
   private final AtomicBoolean loggedNoIreland = new AtomicBoolean(false);
   private final boolean z13Paths;
@@ -455,12 +453,7 @@ public class Transportation implements
       int minzoom = getMinzoom(element, highwayClass);
 
       String brunnelValue = brunnel(element.isBridge(), element.isTunnel(), element.isFord());
-      int brunnelMinzoom;
-      if (brunnelValue != null) {
-        brunnelMinzoom = getBrunnelMinzoom(element);
-      } else {
-        brunnelMinzoom = minzoom;
-      }
+      int brunnelMinzoom = brunnelValue != null ? getBrunnelMinzoom(element) : minzoom;
 
       if (minzoom > config.maxzoom()) {
         return;

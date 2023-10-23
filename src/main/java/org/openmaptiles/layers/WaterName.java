@@ -83,7 +83,6 @@ public class WaterName implements
    */
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WaterName.class);
-  private static final double LOG2 = Math.log(2);
   private static final Set<String> SEA_OR_OCEAN_PLACE = Set.of("sea", "ocean");
   private final Translations translations;
   // need to synchronize updates from multiple threads

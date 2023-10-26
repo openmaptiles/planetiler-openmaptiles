@@ -268,31 +268,6 @@ class TransportationTest extends AbstractLayerTest {
         "bridge", "yes"
       )));
 
-    assertFeatures(13, List.of(mapOf(
-      "_layer", "transportation",
-      "class", "motorway",
-      "surface", "paved",
-      "oneway", 1,
-      "ramp", "<null>",
-      "bicycle", "no",
-      "foot", "no",
-      "horse", "no",
-      "brunnel", "bridge",
-      "network", "us-interstate",
-      "_minzoom", 4
-    ), Map.of(
-      "_layer", "transportation_name",
-      "class", "motorway",
-      "name", "Massachusetts Turnpike",
-      "name_en", "Massachusetts Turnpike",
-      "ref", "90",
-      "ref_length", 2,
-      "network", "us-interstate",
-      "brunnel", "<null>",
-      "route_1", "US:I=90",
-      "_minzoom", 6
-    )), features);
-
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "motorway",
@@ -326,7 +301,7 @@ class TransportationTest extends AbstractLayerTest {
       "bicycle", "<null>",
       "foot", "<null>",
       "horse", "<null>",
-      "brunnel", "bridge",
+      "brunnel", "<null>",
       "_minzoom", 4
     ), Map.of(
       "_layer", "transportation_name",
@@ -2004,6 +1979,54 @@ class TransportationTest extends AbstractLayerTest {
     int expectedZoom
   ) {}
 
+  private void createBrunnelForMinZoomTest(List<TestEntry> testEntries, double length, int expectedZoom, String name) {
+    var feature = lineFeatureWithLength(length, Map.of(
+      "name", name,
+      "bridge", "yes",
+      "highway", "motorway"
+    ));
+    testEntries.add(new TestEntry(
+      feature,
+      Math.min(12, Math.max(9, expectedZoom))
+    ));
+  }
+
+  @Test
+  void testGetBrunnelMinzoom() throws GeometryException {
+    final List<TestEntry> testEntries = new ArrayList<>();
+    for (int zoom = 14; zoom >= 0; zoom--) {
+      double testLength = Math.pow(2, -zoom - 6);
+
+      // slightly bellow the threshold
+      createBrunnelForMinZoomTest(testEntries, testLength * 0.999, zoom + 1, "brunnel-");
+      // precisely at the threshold
+      createBrunnelForMinZoomTest(testEntries, testLength, zoom, "brunnel=");
+      // slightly over the threshold
+      createBrunnelForMinZoomTest(testEntries, testLength * 1.001, zoom, "brunnel+");
+    }
+
+    for (var entry : testEntries) {
+      var result = process(entry.feature);
+
+      assertFeatures(entry.expectedZoom, List.of(Map.of(
+        "_layer", "transportation",
+        "_type", "line",
+        "class", "motorway",
+        "brunnel", "bridge"
+      ), Map.of(
+        "_layer", "transportation_name",
+        "_type", "line"
+      )), result);
+
+      assertFeatures(entry.expectedZoom - 1, List.of(Map.of(
+        "_layer", "transportation",
+        "brunnel", "<null>"
+      ), Map.of(
+        "_layer", "transportation_name"
+      )), result);
+    }
+  }
+
   private void createFerryForMinZoomTest(List<TestEntry> testEntries, double length, int expectedZoom, String name) {
     var feature = lineFeatureWithLength(length, Map.of(
       "name", name,
@@ -2017,13 +2040,6 @@ class TransportationTest extends AbstractLayerTest {
 
   @Test
   void testGetFerryMinzoom() throws GeometryException {
-    // Threshold is 1/8 of tile size, hence ...
-    // ... side is 1/8 tile side: from pixels to world coord, for say Z14 ...
-    //final double PORTION_OF_TILE_SIDE = (256d / 8) / Math.pow(2d, 14d + 8d);
-    // ... and then for some lower zoom:
-    //double testLineSide = PORTION_OF_TILE_SIDE * Math.pow(2, 14 - zoom);
-    // all this then simplified to `testLength` calculation bellow
-
     final List<TestEntry> testEntries = new ArrayList<>();
     for (int zoom = 14; zoom >= 0; zoom--) {
       double testLength = Math.pow(2, -zoom - 3);

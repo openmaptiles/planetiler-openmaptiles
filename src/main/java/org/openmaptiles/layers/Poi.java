@@ -155,7 +155,7 @@ public class Poi implements
 
   public static int uniAreaToMinZoom(double areaWorld) {
     double oneSideWorld = Math.sqrt(areaWorld);
-    // full(-er) formula (along with comments) is in PoiTest.testUniAreaToMinZoom(), here is simplified reverse of that
+    // adjusted formula from `Utils.getMinZoomForLength()`, given that 1/10 does not match `1 / (2^<something>)`
     double zoom = -(Math.log(oneSideWorld * SQRT10) / LOG2);
 
     // Say Z13.01 means bellow threshold, Z13.00 is exactly threshold, Z12.99 is over threshold,

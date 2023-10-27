@@ -74,6 +74,7 @@ import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
+import org.openmaptiles.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,6 +156,8 @@ public class Transportation implements
     .put(6, 100)
     .put(5, 500)
     .put(4, 1_000);
+  // "shipway_linestring_gen_z5: ... tolerance: ZRES6", etc. when recalculated from meters to pixels is always:
+  private static final double FERRY_TOLERANCE = 0.5;
   // ORDER BY network_type, network, LENGTH(ref), ref)
   private static final Comparator<RouteRelation> RELATION_ORDERING = Comparator
     .<RouteRelation>comparingInt(
@@ -164,9 +167,7 @@ public class Transportation implements
     .thenComparing(RouteRelation::ref);
   private static final Set<Integer> ONEWAY_VALUES = Set.of(-1, 1);
   private final Map<String, Integer> MINZOOMS;
-  private static final int BRUNNEL_FALLBACK_MINZOOM = 12;
   private static final String LIMIT_MERGE_TAG = "__limit_merge";
-  private static final double LOG2 = Math.log(2);
   private final AtomicBoolean loggedNoGb = new AtomicBoolean(false);
   private final AtomicBoolean loggedNoIreland = new AtomicBoolean(false);
   private final boolean z13Paths;
@@ -452,12 +453,7 @@ public class Transportation implements
       int minzoom = getMinzoom(element, highwayClass);
 
       String brunnelValue = brunnel(element.isBridge(), element.isTunnel(), element.isFord());
-      int brunnelMinzoom;
-      if (brunnelValue != null) {
-        brunnelMinzoom = getBrunnelMinzoom(element);
-      } else {
-        brunnelMinzoom = minzoom;
-      }
+      int brunnelMinzoom = brunnelValue != null ? getBrunnelMinzoom(element) : minzoom;
 
       if (minzoom > config.maxzoom()) {
         return;
@@ -543,23 +539,14 @@ public class Transportation implements
   }
 
   int getBrunnelMinzoom(Tables.OsmHighwayLinestring element) {
-    // full(-er) formula (along with comments) is in TranportationTest.testGetBrunnelMinzoom(), here is simplified reverse of that
-    double zoom;
     try {
-      zoom = -(Math.log(element.source().length()) / LOG2) - 6;
+      return Utils.getClippedMinZoomForLength(element.source().length(), 6, 9, 12);
     } catch (GeometryException e) {
       e.log(stats, "omt_brunnel_minzoom",
         "Unable to calculate brunnel minzoom for " + element.source().id());
       // brunnel is optional (depends on feature size) for Z9-Z11, it is always present for Z12+, hence 12 as fallback
-      return BRUNNEL_FALLBACK_MINZOOM;
+      return 12;
     }
-
-    // Say Z13.01 means bellow threshold, Z13.00 is exactly threshold, Z12.99 is over threshold,
-    // hence Z13.01 and Z13.00 will be rounded to Z14 and Z12.99 to Z13 (e.g. `floor() + 1`).
-    // And to accommodate for some precision errors (observed for Z9-Z11) we do also `- 0.1e-10`.
-    int result = (int) Math.floor(zoom - 0.1e-10) + 1;
-
-    return Math.min(config.maxzoom(), Math.max(9, result));
   }
 
   private boolean isPierPolygon(Tables.OsmHighwayLinestring element) {
@@ -637,7 +624,18 @@ public class Transportation implements
       .setAttr(Fields.LAYER, nullIfLong(element.layer(), 0))
       .setSortKey(element.zOrder())
       .setMinPixelSize(0) // merge during post-processing, then limit by size
-      .setMinZoom(11);
+      .setMinZoom(getFerryMinzoom(element));
+  }
+
+  int getFerryMinzoom(Tables.OsmShipwayLinestring element) {
+    try {
+      return Utils.getClippedMinZoomForLength(element.source().length(), 3, 4, 11);
+    } catch (GeometryException e) {
+      e.log(stats, "omt_ferry_minzoom",
+        "Unable to calculate ferry minzoom for " + element.source().id());
+      // ferries are supposed to be included in Z4-Z10 depending on their length (=this min. zoom calculation), for Z11+ always, hence 11 as fallback
+      return 11;
+    }
   }
 
   @Override
@@ -660,9 +658,7 @@ public class Transportation implements
     }
   }
 
-  @Override
-  public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
-    double tolerance = config.tolerance(zoom);
+  private List<VectorTile.Feature> postProcessItems(int zoom, List<VectorTile.Feature> items, double tolerance) {
     double minLength = coalesce(MIN_LENGTH.apply(zoom), 0).doubleValue();
 
     // don't merge road segments with oneway tag
@@ -681,6 +677,36 @@ public class Transportation implements
       item.attrs().remove(LIMIT_MERGE_TAG);
     }
     return merged;
+  }
+
+  private List<VectorTile.Feature> postProcessAllOrNonFerry(int zoom, List<VectorTile.Feature> items) {
+    // TODO: use same tolerance as for ferries (see tolerances in OMT `transportation/mapping.yaml`), hence no need to split ferries from the rest in postProcess()
+    return postProcessItems(zoom, items, config.tolerance(zoom));
+  }
+
+  private List<VectorTile.Feature> postProcessFerry(int zoom, List<VectorTile.Feature> items) {
+    return postProcessItems(zoom, items, FERRY_TOLERANCE);
+  }
+
+  @Override
+  public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
+    if (zoom < 4 || zoom > 10) {
+      return postProcessAllOrNonFerry(zoom, items);
+    } else {
+      // ferries at Z4-Z10 need different treatment
+      List<VectorTile.Feature> ferryItems = new ArrayList<>();
+      List<VectorTile.Feature> otherItems = new ArrayList<>();
+      for (var item : items) {
+        if (FieldValues.CLASS_FERRY.equals(item.attrs().get(Fields.CLASS))) {
+          ferryItems.add(item);
+        } else {
+          otherItems.add(item);
+        }
+      }
+      var result = postProcessFerry(zoom, ferryItems);
+      result.addAll(postProcessAllOrNonFerry(zoom, otherItems));
+      return result;
+    }
   }
 
   enum RouteNetwork {

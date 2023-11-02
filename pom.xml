@@ -7,9 +7,9 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
-    <planetiler.version>0.6-SNAPSHOT</planetiler.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <planetiler.version>0.7-SNAPSHOT</planetiler.version>
     <junit.version>5.10.0</junit.version>
 
     <mainClass>org.openmaptiles.OpenMapTilesMain</mainClass>
@@ -99,18 +99,18 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
+        <version>3.2.1</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.1.2</version>
+        <version>3.2.1</version>
       </plugin>
 
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>2.38.0</version>
+        <version>2.40.0</version>
         <configuration>
           <java>
             <importOrder/>
@@ -140,7 +140,7 @@
         </executions>
       </plugin>
 
-      <!-- require building with jdk 17 -->
+      <!-- require building with jdk 21 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
@@ -154,7 +154,7 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>17</version>
+                  <version>21</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -209,7 +209,7 @@
         <configuration>
           <from>
             <image>
-              eclipse-temurin:17-jre
+              eclipse-temurin:21-jre
             </image>
             <platforms>
               <platform>

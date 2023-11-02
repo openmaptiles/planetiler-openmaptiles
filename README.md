@@ -11,7 +11,7 @@ Using pre-built docker image:
 docker run -v "$(pwd)/data":/data openmaptiles/planetiler-openmaptiles:latest --force --download --area=monaco
 ```
 
-Or to build from source, after [installing Java 17+](https://adoptium.net/installation.html):
+Or to build from source, after [installing Java 21+](https://adoptium.net/installation.html):
 
 ```bash
 # Build the project (use mvnw.cmd on windows):

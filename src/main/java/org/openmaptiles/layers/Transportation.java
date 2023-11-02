@@ -156,8 +156,6 @@ public class Transportation implements
     .put(6, 100)
     .put(5, 500)
     .put(4, 1_000);
-  // "shipway_linestring_gen_z5: ... tolerance: ZRES6", etc. when recalculated from meters to pixels is always:
-  private static final double FERRY_TOLERANCE = 0.5;
   // ORDER BY network_type, network, LENGTH(ref), ref)
   private static final Comparator<RouteRelation> RELATION_ORDERING = Comparator
     .<RouteRelation>comparingInt(
@@ -658,7 +656,8 @@ public class Transportation implements
     }
   }
 
-  private List<VectorTile.Feature> postProcessItems(int zoom, List<VectorTile.Feature> items, double tolerance) {
+  @Override
+  public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
     double minLength = coalesce(MIN_LENGTH.apply(zoom), 0).doubleValue();
 
     // don't merge road segments with oneway tag
@@ -671,42 +670,13 @@ public class Transportation implements
       }
     }
 
-    var merged = FeatureMerge.mergeLineStrings(items, minLength, tolerance, BUFFER_SIZE);
+    // "shipway_linestring_gen_z5: ... tolerance: ZRES6", etc. when recalculated from meters to pixels is always 0.5
+    var merged = FeatureMerge.mergeLineStrings(items, minLength, 0.5, BUFFER_SIZE);
 
     for (var item : merged) {
       item.attrs().remove(LIMIT_MERGE_TAG);
     }
     return merged;
-  }
-
-  private List<VectorTile.Feature> postProcessAllOrNonFerry(int zoom, List<VectorTile.Feature> items) {
-    // TODO: use same tolerance as for ferries (see tolerances in OMT `transportation/mapping.yaml`), hence no need to split ferries from the rest in postProcess()
-    return postProcessItems(zoom, items, config.tolerance(zoom));
-  }
-
-  private List<VectorTile.Feature> postProcessFerry(int zoom, List<VectorTile.Feature> items) {
-    return postProcessItems(zoom, items, FERRY_TOLERANCE);
-  }
-
-  @Override
-  public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
-    if (zoom < 4 || zoom > 10) {
-      return postProcessAllOrNonFerry(zoom, items);
-    } else {
-      // ferries at Z4-Z10 need different treatment
-      List<VectorTile.Feature> ferryItems = new ArrayList<>();
-      List<VectorTile.Feature> otherItems = new ArrayList<>();
-      for (var item : items) {
-        if (FieldValues.CLASS_FERRY.equals(item.attrs().get(Fields.CLASS))) {
-          ferryItems.add(item);
-        } else {
-          otherItems.add(item);
-        }
-      }
-      var result = postProcessFerry(zoom, ferryItems);
-      result.addAll(postProcessAllOrNonFerry(zoom, otherItems));
-      return result;
-    }
   }
 
   enum RouteNetwork {

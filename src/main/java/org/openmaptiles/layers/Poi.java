@@ -222,7 +222,7 @@ public class Poi implements
         }
         try {
           // find first based on subclass
-          var firstSubclass = aggStopSet.stream().sorted(BY_SUBCLASS).toArray(Tables.OsmPoiPoint[]::new)[0].subclass();
+          var firstSubclass = aggStopSet.stream().min(BY_SUBCLASS).get().subclass();
           var topAggStops =
             aggStopSet.stream().filter(s -> firstSubclass.equals(s.subclass())).toArray(Tables.OsmPoiPoint[]::new);
           if (topAggStops.length <= 2) {

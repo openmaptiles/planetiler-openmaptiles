@@ -1363,24 +1363,24 @@ class TransportationTest extends AbstractLayerTest {
     // test subject: https://www.openstreetmap.org/way/222564359
     // note: "name:es" used instead of "name:ar" since we've setup only "de" and "es" for unit tests
     FeatureCollector result = process(lineFeature(Map.of(
-        "name", "איילון דרום",
-        "name:es", "أيالون جنوب",
-        "name:en", "Ayalon South",
-        "highway", "motorway"
+      "name", "איילון דרום",
+      "name:es", "أيالون جنوب",
+      "name:en", "Ayalon South",
+      "highway", "motorway"
     )));
     assertFeatures(4, List.of(Map.of(
-        "_layer", "transportation",
-        "_type", "line",
-        "class", "motorway"
+      "_layer", "transportation",
+      "_type", "line",
+      "class", "motorway"
     ), Map.of(
-        "_layer", "transportation_name",
-        "_type", "line",
-        "class", "motorway",
-        "name", "איילון דרום",
-        "name_int", "Ayalon South",
-        "name:latin", "Ayalon South",
-        "name:es", "أيالون جنوب",
-        "name:en", "Ayalon South"
+      "_layer", "transportation_name",
+      "_type", "line",
+      "class", "motorway",
+      "name", "איילון דרום",
+      "name_int", "Ayalon South",
+      "name:latin", "Ayalon South",
+      "name:es", "أيالون جنوب",
+      "name:en", "Ayalon South"
     )), result);
   }
 }

@@ -114,6 +114,6 @@ public class Utils {
    * @return minzoom for a feature with given length and given threshold clipped to not exceed given minimum and maximum
    */
   public static int getClippedMinZoomForLength(double length, double threshold, int min, int max) {
-    return Math.min(max, Math.max(min, getMinZoomForLength(length, threshold)));
+    return Math.clamp(getMinZoomForLength(length, threshold), min, max);
   }
 }

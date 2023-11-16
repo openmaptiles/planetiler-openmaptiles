@@ -45,6 +45,7 @@ import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -66,7 +67,7 @@ public class Housenumber implements
   ForwardingProfile.FeaturePostProcessor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Housenumber.class);
-  private static final Character OSM_SEPARATOR = ';';
+  private static final String OSM_SEPARATOR = ";";
   private static final String DISPLAY_SEPARATOR = "–";
   private static final Pattern NO_CONVERSION_PATTERN = Pattern.compile("[^0-9;]");
   private final Stats stats;
@@ -75,21 +76,22 @@ public class Housenumber implements
     this.stats = stats;
   }
 
-  private static String displayHousenumberNonumeric(String[] numbers) {
-    return numbers[0]
+  private static String displayHousenumberNonumeric(List<String> numbers) {
+    return numbers.getFirst()
       .concat(DISPLAY_SEPARATOR)
-      .concat(numbers[numbers.length - 1]);
+      .concat(numbers.getLast());
   }
 
   protected static String displayHousenumber(String housenumber) {
-    if (housenumber.indexOf(OSM_SEPARATOR) < 0) {
+    if (!housenumber.contains(OSM_SEPARATOR)) {
       return housenumber;
     }
 
-    String[] numbers = Arrays.stream(housenumber.split(OSM_SEPARATOR.toString()))
-      .filter(n -> !n.trim().isEmpty())
-      .toArray(String[]::new);
-    if (numbers.length <= 0) {
+    List<String> numbers = Arrays.stream(housenumber.split(OSM_SEPARATOR))
+      .map(String::trim)
+      .filter(Predicate.not(String::isEmpty))
+      .toList();
+    if (numbers.size() <= 0) {
       // not much to do with strange/invalid entries like "3;" or ";" etc.
       return housenumber;
     }
@@ -100,8 +102,8 @@ public class Housenumber implements
     }
 
     // numeric display house number
-    var statistics = Arrays.stream(numbers)
-      .collect(Collectors.summarizingInt(Integer::parseUnsignedInt));
+    var statistics = numbers.stream()
+      .collect(Collectors.summarizingLong(Long::parseUnsignedLong));
     return String.valueOf(statistics.getMin())
       .concat(DISPLAY_SEPARATOR)
       .concat(String.valueOf(statistics.getMax()));

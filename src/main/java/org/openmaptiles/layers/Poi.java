@@ -114,14 +114,14 @@ public class Poi implements
     entry(FieldValues.CLASS_BAR, 800)
   );
   private static final Set<String> UNIVERSITY_POI_SUBCLASSES = Set.of("university", "college");
-  private static final Map<String, Integer> AGG_STOP_SUBCLASS_ORDER = Map.ofEntries(
-    entry("subway", 0),
-    entry("tram_stop", 1),
-    entry("bus_station", 2),
-    entry("bus_stop", 3)
+  private static final List<String> AGG_STOP_SUBCLASS_ORDER = List.of(
+    "subway",
+    "tram_stop",
+    "bus_station",
+    "bus_stop"
   );
   private static final Comparator<Tables.OsmPoiPoint> BY_SUBCLASS = Comparator
-    .comparingInt(s -> AGG_STOP_SUBCLASS_ORDER.get(s.subclass()));
+    .comparingInt(s -> AGG_STOP_SUBCLASS_ORDER.indexOf(s.subclass()));
   private static final double LOG2 = Math.log(2);
   private static final double SQRT10 = Math.sqrt(10);
   private final MultiExpression.Index<String> classMapping;
@@ -163,7 +163,7 @@ public class Poi implements
     // And to accommodate for some precision errors (observed for Z9-Z11) we do also `- 0.1e-10`.
     int result = (int) Math.floor(zoom - 0.1e-10) + 1;
 
-    return Math.min(14, Math.max(10, result));
+    return Math.clamp(result, 10, 14);
   }
 
   @Override
@@ -173,7 +173,7 @@ public class Poi implements
 
   @Override
   public void process(Tables.OsmPoiPoint element, FeatureCollector features) {
-    if (element.uicRef() != null && AGG_STOP_SUBCLASS_ORDER.containsKey(element.subclass())) {
+    if (element.uicRef() != null && AGG_STOP_SUBCLASS_ORDER.contains(element.subclass())) {
       // multiple threads may update this concurrently
       synchronized (this) {
         aggStops.computeIfAbsent(element.uicRef(), key -> new ArrayList<>()).add(element);
@@ -333,7 +333,7 @@ public class Poi implements
       try {
         minzoom = uniAreaToMinZoom(element.source().area());
       } catch (GeometryException e) {
-        e.log(stats, "omt_poi_polygon", "Unable to get geometry for water polygon " + element.source().id());
+        e.log(stats, "omt_poi_polygon", "Unable to get geometry for university polygon " + element.source().id());
       }
     } else {
       minzoom = minzoom(element.subclass(), element.mappingKey());

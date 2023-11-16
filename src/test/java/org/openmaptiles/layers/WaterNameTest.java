@@ -270,7 +270,7 @@ class WaterNameTest extends AbstractLayerTest {
     ));
     testEntries.add(new TestEntry(
       feature,
-      Math.min(14, Math.max(3, expectedZoom))
+      Math.clamp(expectedZoom, 3, 14)
     ));
   }
 

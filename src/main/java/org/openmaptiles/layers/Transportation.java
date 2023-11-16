@@ -140,10 +140,10 @@ public class Transportation implements
   private static final Set<String> ACCESS_NO_VALUES = Set.of(
     "private", "no"
   );
-  private static final Set<String> TRUNK_AS_MOTORWAY_BY_NETWORK = Set.of(
-    RouteNetwork.CA_TRANSCANADA.toString(),
-    RouteNetwork.CA_PROVINCIAL_ARTERIAL.toString(),
-    RouteNetwork.US_INTERSTATE.toString()
+  private static final Set<RouteNetwork> TRUNK_AS_MOTORWAY_BY_NETWORK = Set.of(
+    RouteNetwork.CA_TRANSCANADA,
+    RouteNetwork.CA_PROVINCIAL_ARTERIAL,
+    RouteNetwork.US_INTERSTATE
   );
   private static final Set<String> CA_AB_PRIMARY_AS_ARTERIAL_BY_REF = Set.of(
     "2", "3", "4"
@@ -261,22 +261,22 @@ public class Transportation implements
     // multiple threads call this method concurrently, GB (or IE) polygon *should* only be found
     // once, but just to be safe synchronize updates to that field
     if (feature.hasTag("iso_a2", "GB")) {
-      synchronized (this) {
-        try {
-          Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+      try {
+        Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+        synchronized (this) {
           greatBritain = PreparedGeometryFactory.prepare(boundary);
-        } catch (GeometryException e) {
-          LOGGER.error("Failed to get Great Britain Polygon: " + e);
         }
+      } catch (GeometryException e) {
+        LOGGER.error("Failed to get Great Britain Polygon: " + e);
       }
     } else if (feature.hasTag("iso_a2", "IE")) {
-      synchronized (this) {
-        try {
-          Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+      try {
+        Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+        synchronized (this) {
           ireland = PreparedGeometryFactory.prepare(boundary);
-        } catch (GeometryException e) {
-          LOGGER.error("Failed to get Great Britain Polygon: " + e);
         }
+      } catch (GeometryException e) {
+        LOGGER.error("Failed to get Ireland Polygon: " + e);
       }
     }
   }
@@ -355,28 +355,15 @@ public class Transportation implements
           try {
             Geometry wayGeometry = element.source().worldGeometry();
             if (greatBritain.intersects(wayGeometry)) {
-              Transportation.RouteNetwork networkType;
-              String network;
-              switch (element.highway()) {
-                case "motorway" -> {
-                  networkType = Transportation.RouteNetwork.GB_MOTORWAY;
-                  network = "omt-gb-motorway";
-                }
-                case "trunk" -> {
-                  networkType = RouteNetwork.GB_TRUNK;
-                  network = "omt-gb-trunk";
-                }
-                case "primary", "secondary" -> {
-                  networkType = RouteNetwork.GB_PRIMARY;
-                  network = "omt-gb-primary";
-                }
-                default -> {
-                  networkType = null;
-                  network = null;
-                }
-              }
-              result.add(new RouteRelation(refMatcher.group(), network, networkType, (byte) -1,
-                0));
+              Transportation.RouteNetwork networkType = switch (element.highway()) {
+                case "motorway" -> Transportation.RouteNetwork.GB_MOTORWAY;
+                case "trunk" -> RouteNetwork.GB_TRUNK;
+                case "primary", "secondary" -> RouteNetwork.GB_PRIMARY;
+                default -> null;
+              };
+              result.add(new RouteRelation(refMatcher.group(),
+                networkType == null ? null : networkType.network,
+                networkType, (byte) -1, 0));
             }
           } catch (GeometryException e) {
             e.log(stats, "omt_transportation_name_gb_test",
@@ -395,25 +382,13 @@ public class Transportation implements
           try {
             Geometry wayGeometry = element.source().worldGeometry();
             if (ireland.intersects(wayGeometry)) {
-              Transportation.RouteNetwork networkType;
-              String network;
               String highway = coalesce(element.highway(), "");
-              switch (highway) {
-                case "motorway" -> {
-                  networkType = Transportation.RouteNetwork.IE_MOTORWAY;
-                  network = "omt-ie-motorway";
-                }
-                case "trunk", "primary" -> {
-                  networkType = RouteNetwork.IE_NATIONAL;
-                  network = "omt-ie-national";
-                }
-                default -> {
-                  networkType = RouteNetwork.IE_REGIONAL;
-                  network = "omt-ie-regional";
-                }
-              }
-              result.add(new RouteRelation(refMatcher.group(), network, networkType, (byte) -1,
-                0));
+              Transportation.RouteNetwork networkType = switch (highway) {
+                case "motorway" -> Transportation.RouteNetwork.IE_MOTORWAY;
+                case "trunk", "primary" -> RouteNetwork.IE_NATIONAL;
+                default -> RouteNetwork.IE_REGIONAL;
+              };
+              result.add(new RouteRelation(refMatcher.group(), networkType.network, networkType, (byte) -1, 0));
             }
           } catch (GeometryException e) {
             e.log(stats, "omt_transportation_name_ie_test",
@@ -452,6 +427,7 @@ public class Transportation implements
 
       String brunnelValue = brunnel(element.isBridge(), element.isTunnel(), element.isFord());
       int brunnelMinzoom = brunnelValue != null ? getBrunnelMinzoom(element) : minzoom;
+      int layerMinzoom = Math.max(brunnelMinzoom, 9);
 
       if (minzoom > config.maxzoom()) {
         return;
@@ -470,7 +446,7 @@ public class Transportation implements
         // z8+
         .setAttrWithMinzoom(Fields.EXPRESSWAY, element.expressway() && !"motorway".equals(highway) ? 1 : null, 8)
         // z9+
-        .setAttrWithMinzoom(Fields.LAYER, nullIfLong(element.layer(), 0), brunnelValue == null ? 9 : brunnelMinzoom)
+        .setAttrWithMinzoom(Fields.LAYER, nullIfLong(element.layer(), 0), layerMinzoom)
         .setAttrWithMinzoom(Fields.BICYCLE, nullIfEmpty(element.bicycle()), 9)
         .setAttrWithMinzoom(Fields.FOOT, nullIfEmpty(element.foot()), 9)
         .setAttrWithMinzoom(Fields.HORSE, nullIfEmpty(element.horse()), 9)
@@ -522,7 +498,6 @@ public class Transportation implements
           String clazz = routeRelations.stream()
             .map(RouteRelation::networkType)
             .filter(Objects::nonNull)
-            .map(Enum::toString)
             .anyMatch(TRUNK_AS_MOTORWAY_BY_NETWORK::contains) ? FieldValues.CLASS_MOTORWAY : FieldValues.CLASS_TRUNK;
           yield MINZOOMS.getOrDefault(clazz, Integer.MAX_VALUE);
         }
@@ -538,11 +513,11 @@ public class Transportation implements
 
   int getBrunnelMinzoom(Tables.OsmHighwayLinestring element) {
     try {
-      return Utils.getClippedMinZoomForLength(element.source().length(), 6, 9, 12);
+      return Utils.getClippedMinZoomForLength(element.source().length(), 6, 4, 12);
     } catch (GeometryException e) {
       e.log(stats, "omt_brunnel_minzoom",
         "Unable to calculate brunnel minzoom for " + element.source().id());
-      // brunnel is optional (depends on feature size) for Z9-Z11, it is always present for Z12+, hence 12 as fallback
+      // brunnel is optional (depends on feature size) for Z4-Z11, it is always present for Z12+, hence 12 as fallback
       return 12;
     }
   }
@@ -658,6 +633,7 @@ public class Transportation implements
 
   @Override
   public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
+    double tolerance = config.tolerance(zoom);
     double minLength = coalesce(MIN_LENGTH.apply(zoom), 0).doubleValue();
 
     // don't merge road segments with oneway tag
@@ -670,8 +646,7 @@ public class Transportation implements
       }
     }
 
-    // "shipway_linestring_gen_z5: ... tolerance: ZRES6", etc. when recalculated from meters to pixels is always 0.5
-    var merged = FeatureMerge.mergeLineStrings(items, minLength, 0.5, BUFFER_SIZE);
+    var merged = FeatureMerge.mergeLineStrings(items, minLength, tolerance, BUFFER_SIZE);
 
     for (var item : merged) {
       item.attrs().remove(LIMIT_MERGE_TAG);
@@ -681,23 +656,25 @@ public class Transportation implements
 
   enum RouteNetwork {
 
-    US_INTERSTATE("us-interstate"),
-    US_HIGHWAY("us-highway"),
-    US_STATE("us-state"),
-    CA_TRANSCANADA("ca-transcanada"),
-    CA_PROVINCIAL_ARTERIAL("ca-provincial-arterial"),
-    CA_PROVINCIAL("ca-provincial"),
-    GB_MOTORWAY("gb-motorway"),
-    GB_TRUNK("gb-trunk"),
-    GB_PRIMARY("gb-primary"),
-    IE_MOTORWAY("ie-motorway"),
-    IE_NATIONAL("ie-national"),
-    IE_REGIONAL("ie-regional");
+    US_INTERSTATE("us-interstate", null),
+    US_HIGHWAY("us-highway", null),
+    US_STATE("us-state", null),
+    CA_TRANSCANADA("ca-transcanada", null),
+    CA_PROVINCIAL_ARTERIAL("ca-provincial-arterial", null),
+    CA_PROVINCIAL("ca-provincial", null),
+    GB_MOTORWAY("gb-motorway", "omt-gb-motorway"),
+    GB_TRUNK("gb-trunk", "omt-gb-trunk"),
+    GB_PRIMARY("gb-primary", "omt-gb-primary"),
+    IE_MOTORWAY("ie-motorway", "omt-ie-motorway"),
+    IE_NATIONAL("ie-national", "omt-ie-national"),
+    IE_REGIONAL("ie-regional", "omt-ie-regional");
 
     final String name;
+    final String network;
 
-    RouteNetwork(String name) {
+    RouteNetwork(String name, String network) {
       this.name = name;
+      this.network = network;
     }
   }
 

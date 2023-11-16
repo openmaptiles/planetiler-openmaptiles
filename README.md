@@ -26,11 +26,11 @@ available options.
 ## Differences from OpenMapTiles
 
 - Road name abbreviations are not implemented yet in the `transportation_name` layer
-- `agg_stop` tag not implemented yet in the `poi` layer
 - `brunnel` tag is excluded from `transportation_name` layer to avoid breaking apart long `transportation_name`
   lines, to revert this behavior set `--transportation-name-brunnel=true`
 - `rank` field on `mountain_peak` linestrings only has 3 levels (1: has wikipedia page and name, 2: has name, 3: no name
   or wikipedia page or name)
+- some line and polygon tolerances are different, can be tweaked with `--simplify-tolerance` parameter
 
 ## Customizing
 

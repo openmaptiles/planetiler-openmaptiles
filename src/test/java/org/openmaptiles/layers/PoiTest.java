@@ -439,15 +439,14 @@ class PoiTest extends AbstractLayerTest {
     int expectedZoom
   ) {}
 
-  private void createUniAreaForMinZoomTest(List<TestEntry> testEntries, double side, int expectedZoom, String name) {
-    double area = Math.pow(side, 2);
+  private void createUniAreaForMinZoomTest(List<TestEntry> testEntries, double area, int expectedZoom, String name) {
     var feature = polygonFeatureWithArea(area, Map.of(
       "name", name,
       "amenity", "university"
     ));
     testEntries.add(new TestEntry(
       feature,
-      Math.min(14, Math.max(10, expectedZoom))
+      Math.clamp(expectedZoom, 10, 14)
     ));
   }
 
@@ -458,19 +457,18 @@ class PoiTest extends AbstractLayerTest {
     //final double PORTION_OF_TILE_SIDE = (256d / Math.sqrt(10)) / Math.pow(2d, 14d + 8d);
     // ... and then for some lower zoom:
     //double testAreaSide = PORTION_OF_TILE_SIDE * Math.pow(2, 14 - zoom);
-    // all this then simplified to `testAreaSide` calculation bellow
+    // all this then simplified to `testArea` calculation bellow
 
-    final double SQRT10 = Math.sqrt(10);
     final List<TestEntry> testEntries = new ArrayList<>();
     for (int zoom = 14; zoom >= 0; zoom--) {
-      double testAreaSide = Math.pow(2, -zoom) / SQRT10;
+      double testArea = Math.pow(4, -zoom) / 10;
 
       // slightly bellow the threshold
-      createUniAreaForMinZoomTest(testEntries, testAreaSide * 0.999, zoom + 1, "uni-");
+      createUniAreaForMinZoomTest(testEntries, testArea * 0.999, zoom + 1, "uni-");
       // precisely at the threshold
-      createUniAreaForMinZoomTest(testEntries, testAreaSide, zoom, "uni=");
+      createUniAreaForMinZoomTest(testEntries, testArea, zoom, "uni=");
       // slightly over the threshold
-      createUniAreaForMinZoomTest(testEntries, testAreaSide * 1.001, zoom, "uni+");
+      createUniAreaForMinZoomTest(testEntries, testArea * 1.001, zoom, "uni+");
     }
 
     for (var entry : testEntries) {

@@ -235,7 +235,7 @@ public class Place implements
         rank = country.rank;
       }
 
-      rank = Math.max(1, Math.min(6, rank));
+      rank = Math.clamp(rank, 1, 6);
 
       features.point(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
         .putAttrs(names)
@@ -261,7 +261,7 @@ public class Place implements
         if (nullOrEmpty(names.get(Fields.NAME_EN))) {
           names.put(Fields.NAME_EN, state.name);
         }
-        int rank = Math.min(6, Math.max(1, state.rank));
+        int rank = Math.clamp(state.rank, 1, 6);
 
         features.point(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
           .putAttrs(names)

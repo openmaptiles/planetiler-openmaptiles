@@ -355,28 +355,15 @@ public class Transportation implements
           try {
             Geometry wayGeometry = element.source().worldGeometry();
             if (greatBritain.intersects(wayGeometry)) {
-              Transportation.RouteNetwork networkType;
-              String network;
-              switch (element.highway()) {
-                case "motorway" -> {
-                  networkType = Transportation.RouteNetwork.GB_MOTORWAY;
-                  network = "omt-gb-motorway";
-                }
-                case "trunk" -> {
-                  networkType = RouteNetwork.GB_TRUNK;
-                  network = "omt-gb-trunk";
-                }
-                case "primary", "secondary" -> {
-                  networkType = RouteNetwork.GB_PRIMARY;
-                  network = "omt-gb-primary";
-                }
-                default -> {
-                  networkType = null;
-                  network = null;
-                }
-              }
-              result.add(new RouteRelation(refMatcher.group(), network, networkType, (byte) -1,
-                0));
+              Transportation.RouteNetwork networkType = switch (element.highway()) {
+                case "motorway" -> Transportation.RouteNetwork.GB_MOTORWAY;
+                case "trunk" -> RouteNetwork.GB_TRUNK;
+                case "primary", "secondary" -> RouteNetwork.GB_PRIMARY;
+                default -> null;
+              };
+              result.add(new RouteRelation(refMatcher.group(),
+                networkType == null ? null : networkType.network,
+                networkType, (byte) -1, 0));
             }
           } catch (GeometryException e) {
             e.log(stats, "omt_transportation_name_gb_test",
@@ -395,25 +382,13 @@ public class Transportation implements
           try {
             Geometry wayGeometry = element.source().worldGeometry();
             if (ireland.intersects(wayGeometry)) {
-              Transportation.RouteNetwork networkType;
-              String network;
               String highway = coalesce(element.highway(), "");
-              switch (highway) {
-                case "motorway" -> {
-                  networkType = Transportation.RouteNetwork.IE_MOTORWAY;
-                  network = "omt-ie-motorway";
-                }
-                case "trunk", "primary" -> {
-                  networkType = RouteNetwork.IE_NATIONAL;
-                  network = "omt-ie-national";
-                }
-                default -> {
-                  networkType = RouteNetwork.IE_REGIONAL;
-                  network = "omt-ie-regional";
-                }
-              }
-              result.add(new RouteRelation(refMatcher.group(), network, networkType, (byte) -1,
-                0));
+              Transportation.RouteNetwork networkType = switch (highway) {
+                case "motorway" -> Transportation.RouteNetwork.IE_MOTORWAY;
+                case "trunk", "primary" -> RouteNetwork.IE_NATIONAL;
+                default -> RouteNetwork.IE_REGIONAL;
+              };
+              result.add(new RouteRelation(refMatcher.group(), networkType.network, networkType, (byte) -1, 0));
             }
           } catch (GeometryException e) {
             e.log(stats, "omt_transportation_name_ie_test",
@@ -681,23 +656,25 @@ public class Transportation implements
 
   enum RouteNetwork {
 
-    US_INTERSTATE("us-interstate"),
-    US_HIGHWAY("us-highway"),
-    US_STATE("us-state"),
-    CA_TRANSCANADA("ca-transcanada"),
-    CA_PROVINCIAL_ARTERIAL("ca-provincial-arterial"),
-    CA_PROVINCIAL("ca-provincial"),
-    GB_MOTORWAY("gb-motorway"),
-    GB_TRUNK("gb-trunk"),
-    GB_PRIMARY("gb-primary"),
-    IE_MOTORWAY("ie-motorway"),
-    IE_NATIONAL("ie-national"),
-    IE_REGIONAL("ie-regional");
+    US_INTERSTATE("us-interstate", null),
+    US_HIGHWAY("us-highway", null),
+    US_STATE("us-state", null),
+    CA_TRANSCANADA("ca-transcanada", null),
+    CA_PROVINCIAL_ARTERIAL("ca-provincial-arterial", null),
+    CA_PROVINCIAL("ca-provincial", null),
+    GB_MOTORWAY("gb-motorway", "omt-gb-motorway"),
+    GB_TRUNK("gb-trunk", "omt-gb-trunk"),
+    GB_PRIMARY("gb-primary", "omt-gb-primary"),
+    IE_MOTORWAY("ie-motorway", "omt-ie-motorway"),
+    IE_NATIONAL("ie-national", "omt-ie-national"),
+    IE_REGIONAL("ie-regional", "omt-ie-regional");
 
     final String name;
+    final String network;
 
-    RouteNetwork(String name) {
+    RouteNetwork(String name, String network) {
       this.name = name;
+      this.network = network;
     }
   }
 

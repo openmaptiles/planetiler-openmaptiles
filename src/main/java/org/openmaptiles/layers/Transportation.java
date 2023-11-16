@@ -140,10 +140,10 @@ public class Transportation implements
   private static final Set<String> ACCESS_NO_VALUES = Set.of(
     "private", "no"
   );
-  private static final Set<String> TRUNK_AS_MOTORWAY_BY_NETWORK = Set.of(
-    RouteNetwork.CA_TRANSCANADA.toString(),
-    RouteNetwork.CA_PROVINCIAL_ARTERIAL.toString(),
-    RouteNetwork.US_INTERSTATE.toString()
+  private static final Set<RouteNetwork> TRUNK_AS_MOTORWAY_BY_NETWORK = Set.of(
+    RouteNetwork.CA_TRANSCANADA,
+    RouteNetwork.CA_PROVINCIAL_ARTERIAL,
+    RouteNetwork.US_INTERSTATE
   );
   private static final Set<String> CA_AB_PRIMARY_AS_ARTERIAL_BY_REF = Set.of(
     "2", "3", "4"
@@ -497,7 +497,6 @@ public class Transportation implements
           String clazz = routeRelations.stream()
             .map(RouteRelation::networkType)
             .filter(Objects::nonNull)
-            .map(Enum::toString)
             .anyMatch(TRUNK_AS_MOTORWAY_BY_NETWORK::contains) ? FieldValues.CLASS_MOTORWAY : FieldValues.CLASS_TRUNK;
           yield MINZOOMS.getOrDefault(clazz, Integer.MAX_VALUE);
         }

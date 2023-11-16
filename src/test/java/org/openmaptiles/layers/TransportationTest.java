@@ -302,7 +302,7 @@ class TransportationTest extends AbstractLayerTest {
       "bicycle", "<null>",
       "foot", "<null>",
       "horse", "<null>",
-      "brunnel", "<null>",
+      "brunnel", "bridge",
       "_minzoom", 4
     ), Map.of(
       "_layer", "transportation_name",
@@ -2028,7 +2028,7 @@ class TransportationTest extends AbstractLayerTest {
     ));
     testEntries.add(new TestEntry(
       feature,
-      Math.clamp(expectedZoom, 9, 12)
+      Math.clamp(expectedZoom, 4, 12)
     ));
   }
 

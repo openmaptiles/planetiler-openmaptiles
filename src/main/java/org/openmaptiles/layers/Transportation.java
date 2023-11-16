@@ -427,6 +427,7 @@ public class Transportation implements
 
       String brunnelValue = brunnel(element.isBridge(), element.isTunnel(), element.isFord());
       int brunnelMinzoom = brunnelValue != null ? getBrunnelMinzoom(element) : minzoom;
+      int layerMinzoom = Math.max(brunnelMinzoom, 9);
 
       if (minzoom > config.maxzoom()) {
         return;
@@ -445,7 +446,7 @@ public class Transportation implements
         // z8+
         .setAttrWithMinzoom(Fields.EXPRESSWAY, element.expressway() && !"motorway".equals(highway) ? 1 : null, 8)
         // z9+
-        .setAttrWithMinzoom(Fields.LAYER, nullIfLong(element.layer(), 0), brunnelValue == null ? 9 : brunnelMinzoom)
+        .setAttrWithMinzoom(Fields.LAYER, nullIfLong(element.layer(), 0), layerMinzoom)
         .setAttrWithMinzoom(Fields.BICYCLE, nullIfEmpty(element.bicycle()), 9)
         .setAttrWithMinzoom(Fields.FOOT, nullIfEmpty(element.foot()), 9)
         .setAttrWithMinzoom(Fields.HORSE, nullIfEmpty(element.horse()), 9)
@@ -512,11 +513,11 @@ public class Transportation implements
 
   int getBrunnelMinzoom(Tables.OsmHighwayLinestring element) {
     try {
-      return Utils.getClippedMinZoomForLength(element.source().length(), 6, 9, 12);
+      return Utils.getClippedMinZoomForLength(element.source().length(), 6, 4, 12);
     } catch (GeometryException e) {
       e.log(stats, "omt_brunnel_minzoom",
         "Unable to calculate brunnel minzoom for " + element.source().id());
-      // brunnel is optional (depends on feature size) for Z9-Z11, it is always present for Z12+, hence 12 as fallback
+      // brunnel is optional (depends on feature size) for Z4-Z11, it is always present for Z12+, hence 12 as fallback
       return 12;
     }
   }

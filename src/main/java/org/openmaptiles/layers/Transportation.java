@@ -276,7 +276,7 @@ public class Transportation implements
           ireland = PreparedGeometryFactory.prepare(boundary);
         }
       } catch (GeometryException e) {
-        LOGGER.error("Failed to get Great Britain Polygon: " + e);
+        LOGGER.error("Failed to get Ireland Polygon: " + e);
       }
     }
   }

@@ -364,18 +364,16 @@ public class Tables {
   public record OsmRailwayLinestring(@Override String railway, @Override String ref, @Override String network,
     @Override int zOrder, @Override long layer, @Override long level, @Override boolean indoor, @Override String name,
     @Override String nameEn, @Override String nameDe, @Override String shortName, @Override boolean isTunnel,
-    @Override boolean isBridge, @Override boolean isRamp, @Override boolean isFord, @Override int isOneway,
-    @Override boolean isArea, @Override String service, @Override String usage, @Override SourceFeature source)
-    implements Row, WithRailway, WithRef, WithNetwork, WithZOrder, WithLayer, WithLevel, WithIndoor, WithName,
-    WithNameEn, WithNameDe, WithShortName, WithIsTunnel, WithIsBridge, WithIsRamp, WithIsFord, WithIsOneway, WithIsArea,
-    WithService, WithUsage, WithSource {
+    @Override boolean isBridge, @Override boolean isRamp, @Override boolean isFord, @Override boolean isArea,
+    @Override String service, @Override String usage, @Override SourceFeature source) implements Row, WithRailway,
+    WithRef, WithNetwork, WithZOrder, WithLayer, WithLevel, WithIndoor, WithName, WithNameEn, WithNameDe, WithShortName,
+    WithIsTunnel, WithIsBridge, WithIsRamp, WithIsFord, WithIsArea, WithService, WithUsage, WithSource {
     public OsmRailwayLinestring(SourceFeature source, String mappingKey) {
       this(source.getString("railway"), source.getString("ref"), source.getString("network"), source.getWayZorder(),
         source.getLong("layer"), source.getLong("level"), source.getBoolean("indoor"), source.getString("name"),
         source.getString("name:en"), source.getString("name:de"), source.getString("short_name"),
         source.getBoolean("tunnel"), source.getBoolean("bridge"), source.getBoolean("ramp"), source.getBoolean("ford"),
-        source.getDirection("oneway"), source.getBoolean("area"), source.getString("service"),
-        source.getString("usage"), source);
+        source.getBoolean("area"), source.getString("service"), source.getString("usage"), source);
     }
 
     /** Imposm3 "mapping" to filter OSM elements that should appear in this "table". */
@@ -423,16 +421,14 @@ public class Tables {
   public record OsmShipwayLinestring(@Override String shipway, @Override int zOrder, @Override long layer,
     @Override String name, @Override String nameEn, @Override String nameDe, @Override String shortName,
     @Override boolean isTunnel, @Override boolean isBridge, @Override boolean isRamp, @Override boolean isFord,
-    @Override int isOneway, @Override boolean isArea, @Override String service, @Override String usage,
-    @Override SourceFeature source)
+    @Override boolean isArea, @Override String service, @Override String usage, @Override SourceFeature source)
     implements Row, WithShipway, WithZOrder, WithLayer, WithName, WithNameEn, WithNameDe, WithShortName, WithIsTunnel,
-    WithIsBridge, WithIsRamp, WithIsFord, WithIsOneway, WithIsArea, WithService, WithUsage, WithSource {
+    WithIsBridge, WithIsRamp, WithIsFord, WithIsArea, WithService, WithUsage, WithSource {
     public OsmShipwayLinestring(SourceFeature source, String mappingKey) {
       this(source.getString("route"), source.getWayZorder(), source.getLong("layer"), source.getString("name"),
         source.getString("name:en"), source.getString("name:de"), source.getString("short_name"),
         source.getBoolean("tunnel"), source.getBoolean("bridge"), source.getBoolean("ramp"), source.getBoolean("ford"),
-        source.getDirection("oneway"), source.getBoolean("area"), source.getString("service"),
-        source.getString("usage"), source);
+        source.getBoolean("area"), source.getString("service"), source.getString("usage"), source);
     }
 
     /** Imposm3 "mapping" to filter OSM elements that should appear in this "table". */

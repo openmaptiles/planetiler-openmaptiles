@@ -261,22 +261,22 @@ public class Transportation implements
     // multiple threads call this method concurrently, GB (or IE) polygon *should* only be found
     // once, but just to be safe synchronize updates to that field
     if (feature.hasTag("iso_a2", "GB")) {
-      synchronized (this) {
-        try {
-          Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+      try {
+        Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+        synchronized (this) {
           greatBritain = PreparedGeometryFactory.prepare(boundary);
-        } catch (GeometryException e) {
-          LOGGER.error("Failed to get Great Britain Polygon: " + e);
         }
+      } catch (GeometryException e) {
+        LOGGER.error("Failed to get Great Britain Polygon: " + e);
       }
     } else if (feature.hasTag("iso_a2", "IE")) {
-      synchronized (this) {
-        try {
-          Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+      try {
+        Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+        synchronized (this) {
           ireland = PreparedGeometryFactory.prepare(boundary);
-        } catch (GeometryException e) {
-          LOGGER.error("Failed to get Great Britain Polygon: " + e);
         }
+      } catch (GeometryException e) {
+        LOGGER.error("Failed to get Great Britain Polygon: " + e);
       }
     }
   }

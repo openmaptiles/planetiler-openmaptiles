@@ -45,6 +45,7 @@ import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -87,7 +88,8 @@ public class Housenumber implements
     }
 
     List<String> numbers = Arrays.stream(housenumber.split(OSM_SEPARATOR))
-      .filter(n -> !n.trim().isEmpty())
+      .map(String::trim)
+      .filter(Predicate.not(String::isEmpty))
       .toList();
     if (numbers.size() <= 0) {
       // not much to do with strange/invalid entries like "3;" or ";" etc.

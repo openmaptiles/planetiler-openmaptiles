@@ -66,7 +66,7 @@ public class Housenumber implements
   ForwardingProfile.FeaturePostProcessor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Housenumber.class);
-  private static final Character OSM_SEPARATOR = ';';
+  private static final String OSM_SEPARATOR = ";";
   private static final String DISPLAY_SEPARATOR = "–";
   private static final Pattern NO_CONVERSION_PATTERN = Pattern.compile("[^0-9;]");
   private final Stats stats;
@@ -82,11 +82,11 @@ public class Housenumber implements
   }
 
   protected static String displayHousenumber(String housenumber) {
-    if (housenumber.indexOf(OSM_SEPARATOR) < 0) {
+    if (!housenumber.contains(OSM_SEPARATOR)) {
       return housenumber;
     }
 
-    String[] numbers = Arrays.stream(housenumber.split(OSM_SEPARATOR.toString()))
+    String[] numbers = Arrays.stream(housenumber.split(OSM_SEPARATOR))
       .filter(n -> !n.trim().isEmpty())
       .toArray(String[]::new);
     if (numbers.length <= 0) {

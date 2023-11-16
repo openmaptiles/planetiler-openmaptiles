@@ -208,9 +208,9 @@ public class WaterName implements
           feature = features.pointOnSurface(LAYER_NAME);
           double area = element.source().area();
           if (place != null && SEA_OR_OCEAN_PLACE.contains(place)) {
-            minzoom = 0;
+            minzoom = areaToMinZoom(area, 0);
           } else {
-            minzoom = areaToMinZoom(area);
+            minzoom = areaToMinZoom(area, 3);
           }
         }
         feature
@@ -225,9 +225,9 @@ public class WaterName implements
     }
   }
 
-  public static int areaToMinZoom(double areaWorld) {
+  public static int areaToMinZoom(double areaWorld, int minLimit) {
     double oneSideWorld = Math.sqrt(areaWorld);
     // OMT does "feature area is 1/4 of tile area", which is same as "feature side is 1/2 of tile side"
-    return Utils.getClippedMinZoomForLength(oneSideWorld, 1, 3, 14);
+    return Utils.getClippedMinZoomForLength(oneSideWorld, 1, minLimit, 14);
   }
 }

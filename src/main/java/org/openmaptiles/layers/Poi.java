@@ -333,7 +333,7 @@ public class Poi implements
       try {
         minzoom = uniAreaToMinZoom(element.source().area());
       } catch (GeometryException e) {
-        e.log(stats, "omt_poi_polygon", "Unable to get geometry for water polygon " + element.source().id());
+        e.log(stats, "omt_poi_polygon", "Unable to get geometry for university polygon " + element.source().id());
       }
     } else {
       minzoom = minzoom(element.subclass(), element.mappingKey());

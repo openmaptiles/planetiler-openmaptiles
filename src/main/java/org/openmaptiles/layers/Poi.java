@@ -173,7 +173,7 @@ public class Poi implements
 
   @Override
   public void process(Tables.OsmPoiPoint element, FeatureCollector features) {
-    if (element.uicRef() != null && AGG_STOP_SUBCLASS_ORDER.containsKey(element.subclass())) {
+    if (element.uicRef() != null && AGG_STOP_SUBCLASS_ORDER.contains(element.subclass())) {
       // multiple threads may update this concurrently
       synchronized (this) {
         aggStops.computeIfAbsent(element.uicRef(), key -> new ArrayList<>()).add(element);

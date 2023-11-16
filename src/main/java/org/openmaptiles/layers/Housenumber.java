@@ -103,7 +103,7 @@ public class Housenumber implements
 
     // numeric display house number
     var statistics = numbers.stream()
-      .collect(Collectors.summarizingInt(Integer::parseUnsignedInt));
+      .collect(Collectors.summarizingLong(Long::parseUnsignedLong));
     return String.valueOf(statistics.getMin())
       .concat(DISPLAY_SEPARATOR)
       .concat(String.valueOf(statistics.getMax()));

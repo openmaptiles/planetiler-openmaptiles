@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class HousenumberTest extends AbstractLayerTest {
 
@@ -67,5 +69,13 @@ class HousenumberTest extends AbstractLayerTest {
 
     final String HOUSENUMBER_2 = ";;";
     assertEquals(HOUSENUMBER_2, Housenumber.displayHousenumber(HOUSENUMBER_2));
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+      "2712;935803935803, 2712–935803935803",
+  })
+  void testDisplayHousenumberOutliers(String outlier, String expected) {
+    assertEquals(expected, Housenumber.displayHousenumber(outlier));
   }
 }

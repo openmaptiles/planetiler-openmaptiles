@@ -75,10 +75,10 @@ public class Housenumber implements
     this.stats = stats;
   }
 
-  private static String displayHousenumberNonumeric(String[] numbers) {
-    return numbers[0]
+  private static String displayHousenumberNonumeric(List<String> numbers) {
+    return numbers.getFirst()
       .concat(DISPLAY_SEPARATOR)
-      .concat(numbers[numbers.length - 1]);
+      .concat(numbers.getLast());
   }
 
   protected static String displayHousenumber(String housenumber) {
@@ -86,10 +86,10 @@ public class Housenumber implements
       return housenumber;
     }
 
-    String[] numbers = Arrays.stream(housenumber.split(OSM_SEPARATOR))
+    List<String> numbers = Arrays.stream(housenumber.split(OSM_SEPARATOR))
       .filter(n -> !n.trim().isEmpty())
-      .toArray(String[]::new);
-    if (numbers.length <= 0) {
+      .toList();
+    if (numbers.size() <= 0) {
       // not much to do with strange/invalid entries like "3;" or ";" etc.
       return housenumber;
     }
@@ -100,7 +100,7 @@ public class Housenumber implements
     }
 
     // numeric display house number
-    var statistics = Arrays.stream(numbers)
+    var statistics = numbers.stream()
       .collect(Collectors.summarizingInt(Integer::parseUnsignedInt));
     return String.valueOf(statistics.getMin())
       .concat(DISPLAY_SEPARATOR)

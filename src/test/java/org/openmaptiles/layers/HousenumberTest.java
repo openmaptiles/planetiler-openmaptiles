@@ -34,14 +34,14 @@ class HousenumberTest extends AbstractLayerTest {
 
   @ParameterizedTest
   @CsvSource({
-      "1, 1",
-      "1;1a;2;2/b;20;3, 1–3",
-      "1;1a;2;2/b;20;3;, 1–3",
-      "1;2;20;3, 1–20",
-      "1;2;20;3;, 1–20",
-      ";, ;",
-      ";;, ;;",
-      "2712;935803935803, 2712–935803935803",
+    "1, 1",
+    "1;1a;2;2/b;20;3, 1–3",
+    "1;1a;2;2/b;20;3;, 1–3",
+    "1;2;20;3, 1–20",
+    "1;2;20;3;, 1–20",
+    ";, ;",
+    ";;, ;;",
+    "2712;935803935803, 2712–935803935803",
   })
   void testDisplayHousenumber(String outlier, String expected) {
     assertEquals(expected, Housenumber.displayHousenumber(outlier));

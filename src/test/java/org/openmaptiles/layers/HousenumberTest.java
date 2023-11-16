@@ -32,50 +32,18 @@ class HousenumberTest extends AbstractLayerTest {
     ))));
   }
 
-  @Test
-  void testDisplayHousenumberNonRange() {
-    final String HOUSENUMBER = "1";
-    assertEquals(HOUSENUMBER, Housenumber.displayHousenumber(HOUSENUMBER));
-  }
-
-  @Test
-  void testDisplayHousenumberNonnumericRange() {
-    final String HOUSENUMBER = "1;1a;2;2/b;20;3";
-    assertEquals("1–3", Housenumber.displayHousenumber(HOUSENUMBER));
-  }
-
-  @Test
-  void testDisplayHousenumberNonnumericRangeBroken() {
-    final String HOUSENUMBER = "1;1a;2;2/b;20;3;";
-    assertEquals("1–3", Housenumber.displayHousenumber(HOUSENUMBER));
-  }
-
-  @Test
-  void testDisplayHousenumberNumericRange() {
-    final String HOUSENUMBER = "1;2;20;3";
-    assertEquals("1–20", Housenumber.displayHousenumber(HOUSENUMBER));
-  }
-
-  @Test
-  void testDisplayHousenumberNumericRangeBroken() {
-    final String HOUSENUMBER = "1;2;20;3;";
-    assertEquals("1–20", Housenumber.displayHousenumber(HOUSENUMBER));
-  }
-
-  @Test
-  void testDisplayHousenumberExtraBroken() {
-    final String HOUSENUMBER_1 = ";";
-    assertEquals(HOUSENUMBER_1, Housenumber.displayHousenumber(HOUSENUMBER_1));
-
-    final String HOUSENUMBER_2 = ";;";
-    assertEquals(HOUSENUMBER_2, Housenumber.displayHousenumber(HOUSENUMBER_2));
-  }
-
   @ParameterizedTest
   @CsvSource({
+      "1, 1",
+      "1;1a;2;2/b;20;3, 1–3",
+      "1;1a;2;2/b;20;3;, 1–3",
+      "1;2;20;3, 1–20",
+      "1;2;20;3;, 1–20",
+      ";, ;",
+      ";;, ;;",
       "2712;935803935803, 2712–935803935803",
   })
-  void testDisplayHousenumberOutliers(String outlier, String expected) {
+  void testDisplayHousenumber(String outlier, String expected) {
     assertEquals(expected, Housenumber.displayHousenumber(outlier));
   }
 }

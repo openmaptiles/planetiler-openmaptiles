@@ -585,7 +585,6 @@ public class Transportation implements
         .setAttr(Fields.CLASS, clazz)
         .setAttr(Fields.SUBCLASS, railway)
         .setAttr(Fields.SERVICE, service(service))
-        .setAttr(Fields.ONEWAY, nullIfInt(element.isOneway(), 0))
         .setAttr(Fields.RAMP, element.isRamp() ? 1L : null)
         .setAttrWithMinzoom(Fields.BRUNNEL, brunnel(element.isBridge(), element.isTunnel(), element.isFord()), 10)
         .setAttrWithMinzoom(Fields.LAYER, nullIfLong(element.layer(), 0), 9)
@@ -616,7 +615,6 @@ public class Transportation implements
       .setAttr(Fields.CLASS, element.shipway()) // "ferry"
       // no subclass
       .setAttr(Fields.SERVICE, service(element.service()))
-      .setAttr(Fields.ONEWAY, nullIfInt(element.isOneway(), 0))
       .setAttr(Fields.RAMP, element.isRamp() ? 1L : null)
       .setAttr(Fields.BRUNNEL, brunnel(element.isBridge(), element.isTunnel(), element.isFord()))
       .setAttr(Fields.LAYER, nullIfLong(element.layer(), 0))

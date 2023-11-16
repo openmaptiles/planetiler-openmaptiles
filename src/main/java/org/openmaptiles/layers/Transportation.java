@@ -633,6 +633,7 @@ public class Transportation implements
 
   @Override
   public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> items) {
+    double tolerance = config.tolerance(zoom);
     double minLength = coalesce(MIN_LENGTH.apply(zoom), 0).doubleValue();
 
     // don't merge road segments with oneway tag
@@ -645,8 +646,7 @@ public class Transportation implements
       }
     }
 
-    // "shipway_linestring_gen_z5: ... tolerance: ZRES6", etc. when recalculated from meters to pixels is always 0.5
-    var merged = FeatureMerge.mergeLineStrings(items, minLength, 0.5, BUFFER_SIZE);
+    var merged = FeatureMerge.mergeLineStrings(items, minLength, tolerance, BUFFER_SIZE);
 
     for (var item : merged) {
       item.attrs().remove(LIMIT_MERGE_TAG);

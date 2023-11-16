@@ -447,7 +447,7 @@ class PoiTest extends AbstractLayerTest {
     ));
     testEntries.add(new TestEntry(
       feature,
-      Math.min(14, Math.max(10, expectedZoom))
+      Math.clamp(expectedZoom, 10, 14)
     ));
   }
 

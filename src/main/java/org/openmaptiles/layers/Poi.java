@@ -163,7 +163,7 @@ public class Poi implements
     // And to accommodate for some precision errors (observed for Z9-Z11) we do also `- 0.1e-10`.
     int result = (int) Math.floor(zoom - 0.1e-10) + 1;
 
-    return Math.min(14, Math.max(10, result));
+    return Math.clamp(result, 10, 14);
   }
 
   @Override

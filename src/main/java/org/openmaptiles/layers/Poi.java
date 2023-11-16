@@ -114,14 +114,14 @@ public class Poi implements
     entry(FieldValues.CLASS_BAR, 800)
   );
   private static final Set<String> UNIVERSITY_POI_SUBCLASSES = Set.of("university", "college");
-  private static final Map<String, Integer> AGG_STOP_SUBCLASS_ORDER = Map.ofEntries(
-    entry("subway", 0),
-    entry("tram_stop", 1),
-    entry("bus_station", 2),
-    entry("bus_stop", 3)
+  private static final List<String> AGG_STOP_SUBCLASS_ORDER = List.of(
+    "subway",
+    "tram_stop",
+    "bus_station",
+    "bus_stop"
   );
   private static final Comparator<Tables.OsmPoiPoint> BY_SUBCLASS = Comparator
-    .comparingInt(s -> AGG_STOP_SUBCLASS_ORDER.get(s.subclass()));
+    .comparingInt(s -> AGG_STOP_SUBCLASS_ORDER.indexOf(s.subclass()));
   private static final double LOG2 = Math.log(2);
   private static final double SQRT10 = Math.sqrt(10);
   private final MultiExpression.Index<String> classMapping;

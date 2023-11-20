@@ -96,7 +96,7 @@ public class Housenumber implements
       .map(String::trim)
       .filter(Predicate.not(String::isEmpty))
       .toList();
-    if (numbers.size() <= 0) {
+    if (numbers.isEmpty()) {
       // not much to do with strange/invalid entries like "3;" or ";" etc.
       return housenumber;
     }

@@ -137,7 +137,7 @@ class OpenMapTilesTest {
     assertFeatureNear(mbtiles, "housenumber", Map.of(
       "housenumber", "27"
     ), 7.42117, 43.73652, 14, 14);
-    assertNumFeatures("housenumber", Map.of(), 14, 274, Point.class);
+    assertNumFeatures("housenumber", Map.of(), 14, 231, Point.class);
   }
 
   @Test

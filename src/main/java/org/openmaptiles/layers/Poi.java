@@ -176,9 +176,9 @@ public class Poi implements
     if (element.uicRef() != null && AGG_STOP_SUBCLASS_ORDER.contains(element.subclass())) {
       // multiple threads may update this concurrently
       String aggStopKey = element.uicRef()
-          .concat(coalesce(nullIfEmpty(element.name()), ""))
-          .concat(coalesce(nullIfEmpty(element.network()), ""))
-          .concat(coalesce(nullIfEmpty(element.operator()), ""));
+        .concat(coalesce(nullIfEmpty(element.name()), ""))
+        .concat(coalesce(nullIfEmpty(element.network()), ""))
+        .concat(coalesce(nullIfEmpty(element.operator()), ""));
       synchronized (this) {
         aggStops.computeIfAbsent(aggStopKey, key -> new ArrayList<>()).add(element);
       }

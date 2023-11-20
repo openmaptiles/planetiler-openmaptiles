@@ -235,7 +235,7 @@ public class Poi implements
             processAggStop(topAggStops[0], featureCollectors, emit, 1);
             // and emit the rest
             aggStopSet.stream()
-              .filter(s -> !topAggStops[0].equals(s))
+              .filter(s -> s != topAggStops[0])
               .forEach(s -> processAggStop(s, featureCollectors, emit, null));
             continue;
           }
@@ -269,7 +269,7 @@ public class Poi implements
           // emit the rest
           final var alreadyDone = nearest;
           aggStopSet.stream()
-            .filter(s -> !s.equals(alreadyDone))
+            .filter(s -> s != alreadyDone)
             .forEach(s -> processAggStop(s, featureCollectors, emit, null));
         } catch (GeometryException e) {
           e.log(stats, "agg_stop_geometry_1",

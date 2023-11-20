@@ -175,8 +175,12 @@ public class Poi implements
   public void process(Tables.OsmPoiPoint element, FeatureCollector features) {
     if (element.uicRef() != null && AGG_STOP_SUBCLASS_ORDER.contains(element.subclass())) {
       // multiple threads may update this concurrently
+      String aggStopKey = element.uicRef()
+          .concat(coalesce(nullIfEmpty(element.name()), ""))
+          .concat(coalesce(nullIfEmpty(element.network()), ""))
+          .concat(coalesce(nullIfEmpty(element.operator()), ""));
       synchronized (this) {
-        aggStops.computeIfAbsent(element.uicRef(), key -> new ArrayList<>()).add(element);
+        aggStops.computeIfAbsent(aggStopKey, key -> new ArrayList<>()).add(element);
       }
     } else {
       setupPoiFeature(element, features.point(LAYER_NAME), null);

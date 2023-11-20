@@ -99,19 +99,21 @@ class PoiTest extends AbstractLayerTest {
     var result = testAggStops(List.of(
       pointFeature(Map.of(
         "railway", "tram_stop",
-        "name", "station 1",
+        "name", "station",
+        "name:es", "test 1",
         "uic_ref", "1"
       )),
       pointFeature(Map.of(
         "railway", "tram_stop",
-        "name", "station 2",
+        "name", "station",
+        "name:es", "test 2",
         "uic_ref", "1"
       ))
     ));
     assertFeatures(14, List.of(
       Map.of(
         "_layer", "poi",
-        "name", "station 1",
+        "name:es", "test 1",
         "class", "railway",
         "subclass", "tram_stop",
         "agg_stop", 1,
@@ -119,7 +121,7 @@ class PoiTest extends AbstractLayerTest {
       ),
       Map.of(
         "_layer", "poi",
-        "name", "station 2",
+        "name:es", "test 2",
         "class", "railway",
         "subclass", "tram_stop",
         "agg_stop", "<null>",
@@ -133,24 +135,27 @@ class PoiTest extends AbstractLayerTest {
     var result = testAggStops(List.of(
       pointFeature(Map.of(
         "highway", "bus_stop",
-        "name", "station 1",
+        "name", "station",
+        "name:es", "test 1",
         "uic_ref", "1"
       )),
       pointFeature(Map.of(
         "highway", "bus_stop",
-        "name", "station 2",
+        "name", "station",
+        "name:es", "test 2",
         "uic_ref", "1"
       )),
       pointFeature(Map.of(
         "railway", "tram_stop",
-        "name", "station 3",
+        "name", "station",
+        "name:es", "test 3",
         "uic_ref", "1"
       ))
     ));
     assertFeatures(14, List.of(
       Map.of(
         "_layer", "poi",
-        "name", "station 3",
+        "name:es", "test 3",
         "class", "railway",
         "subclass", "tram_stop",
         "agg_stop", 1,
@@ -158,7 +163,7 @@ class PoiTest extends AbstractLayerTest {
       ),
       Map.of(
         "_layer", "poi",
-        "name", "station 1",
+        "name:es", "test 1",
         "class", "bus",
         "subclass", "bus_stop",
         "agg_stop", "<null>",
@@ -166,7 +171,7 @@ class PoiTest extends AbstractLayerTest {
       ),
       Map.of(
         "_layer", "poi",
-        "name", "station 2",
+        "name:es", "test 2",
         "class", "bus",
         "subclass", "bus_stop",
         "agg_stop", "<null>",
@@ -180,24 +185,27 @@ class PoiTest extends AbstractLayerTest {
     var result = testAggStops(List.of(
       SimpleFeature.create(newPoint(0, 0), Map.of(
         "highway", "bus_stop",
-        "name", "station 1",
+        "name", "station",
+        "name:es", "test 1",
         "uic_ref", "1"
       ), OpenMapTilesProfile.OSM_SOURCE, null, 0),
       SimpleFeature.create(newPoint(1, 0), Map.of(
         "highway", "bus_stop",
-        "name", "station 2",
+        "name", "station",
+        "name:es", "test 2",
         "uic_ref", "1"
       ), OpenMapTilesProfile.OSM_SOURCE, null, 1),
       SimpleFeature.create(newPoint(2, 0), Map.of(
         "highway", "bus_stop",
-        "name", "station 3",
+        "name", "station",
+        "name:es", "test 3",
         "uic_ref", "1"
       ), OpenMapTilesProfile.OSM_SOURCE, null, 2)
     ));
     assertFeatures(14, List.of(
       Map.of(
         "_layer", "poi",
-        "name", "station 2",
+        "name:es", "test 2",
         "class", "bus",
         "subclass", "bus_stop",
         "agg_stop", 1,
@@ -205,7 +213,7 @@ class PoiTest extends AbstractLayerTest {
       ),
       Map.of(
         "_layer", "poi",
-        "name", "station 1",
+        "name:es", "test 1",
         "class", "bus",
         "subclass", "bus_stop",
         "agg_stop", "<null>",
@@ -213,7 +221,7 @@ class PoiTest extends AbstractLayerTest {
       ),
       Map.of(
         "_layer", "poi",
-        "name", "station 3",
+        "name:es", "test 3",
         "class", "bus",
         "subclass", "bus_stop",
         "agg_stop", "<null>",

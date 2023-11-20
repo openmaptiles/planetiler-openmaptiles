@@ -176,9 +176,9 @@ public class Poi implements
     if (element.uicRef() != null && AGG_STOP_SUBCLASS_ORDER.contains(element.subclass())) {
       // multiple threads may update this concurrently
       String aggStopKey = element.uicRef()
-          .concat(coalesce(nullIfEmpty(element.name()), ""))
-          .concat(coalesce(nullIfEmpty(element.network()), ""))
-          .concat(coalesce(nullIfEmpty(element.operator()), ""));
+        .concat(coalesce(nullIfEmpty(element.name()), ""))
+        .concat(coalesce(nullIfEmpty(element.network()), ""))
+        .concat(coalesce(nullIfEmpty(element.operator()), ""));
       synchronized (this) {
         aggStops.computeIfAbsent(aggStopKey, key -> new ArrayList<>()).add(element);
       }
@@ -235,7 +235,7 @@ public class Poi implements
             processAggStop(topAggStops[0], featureCollectors, emit, 1);
             // and emit the rest
             aggStopSet.stream()
-              .filter(s -> !topAggStops[0].equals(s))
+              .filter(s -> s != topAggStops[0])
               .forEach(s -> processAggStop(s, featureCollectors, emit, null));
             continue;
           }
@@ -269,7 +269,7 @@ public class Poi implements
           // emit the rest
           final var alreadyDone = nearest;
           aggStopSet.stream()
-            .filter(s -> !s.equals(alreadyDone))
+            .filter(s -> s != alreadyDone)
             .forEach(s -> processAggStop(s, featureCollectors, emit, null));
         } catch (GeometryException e) {
           e.log(stats, "agg_stop_geometry_1",

@@ -39,6 +39,7 @@ class WaterNameTest extends AbstractLayerTest {
       "water", "pond",
       "intermittent", "1"
     ))));
+    /* TODO: remove, since `setMinPixelSize()` is now used and this no longer makes sense, as minzoom is always 3
     // 1/4 th of tile area is the threshold, 1/4 = 0.25 => area->side:0.25->0.5 => slightly bigger -> 0.51
     double z11area = Math.pow(0.51d / Math.pow(2, 11), 2);
     assertFeatures(10, List.of(Map.of(
@@ -46,15 +47,17 @@ class WaterNameTest extends AbstractLayerTest {
     ), Map.of(
       "_layer", "water_name",
       "_type", "point",
-      "_minzoom", 11,
+      "_minzoom", 3,
       "_maxzoom", 14
     )), process(polygonFeatureWithArea(z11area, Map.of(
       "name", "waterway",
       "natural", "water",
       "water", "pond"
     ))));
+     */
   }
 
+  /* TODO: remove, since `setMinPixelSize()` is now used and this no longer makes sense, as minzoom is always 3
   // https://zelonewolf.github.io/openstreetmap-americana/#map=13/41.43989/-71.5716
   @Test
   void testWordenPondNamePoint() {
@@ -63,7 +66,7 @@ class WaterNameTest extends AbstractLayerTest {
     ), Map.of(
       "_layer", "water_name",
       "_type", "point",
-      "_minzoom", 13,
+      "_minzoom", 3,
       "_maxzoom", 14
     )), process(polygonFeatureWithArea(4.930387948170328E-9, Map.of(
       "name", "waterway",
@@ -71,6 +74,7 @@ class WaterNameTest extends AbstractLayerTest {
       "water", "pond"
     ))));
   }
+   */
 
   @Test
   void testWaterNameLakeline() {
@@ -272,38 +276,5 @@ class WaterNameTest extends AbstractLayerTest {
       feature,
       Math.clamp(expectedZoom, 3, 14)
     ));
-  }
-
-  @Test
-  void testAreaToMinZoom() throws GeometryException {
-    // threshold is 1/4 of tile area, hence ...
-    // ... side is 1/2 tile side: from pixels to world coord, for say Z14 ...
-    //final double HALF_OF_TILE_SIDE = 128d / Math.pow(2d, 14d + 8d);
-    // ... and then for some lower zoom:
-    //double testAreaSide = HALF_OF_TILE_SIDE * Math.pow(2, 14 - zoom);
-    // all this then simplified to `testAreaSide` calculation bellow
-
-    final List<TestEntry> testEntries = new ArrayList<>();
-    for (int zoom = 14; zoom >= 0; zoom--) {
-      double testAreaSide = Math.pow(2, -zoom - 1);
-
-      // slightly bellow the threshold
-      createAreaForMinZoomTest(testEntries, testAreaSide * 0.999, zoom + 1, "waterway-");
-      // precisely at the threshold
-      createAreaForMinZoomTest(testEntries, testAreaSide, zoom, "waterway=");
-      // slightly over the threshold
-      createAreaForMinZoomTest(testEntries, testAreaSide * 1.001, zoom, "waterway+");
-    }
-
-    for (var entry : testEntries) {
-      assertFeatures(10, List.of(Map.of(
-        "_layer", "water"
-      ), Map.of(
-        "_layer", "water_name",
-        "_type", "point",
-        "_minzoom", entry.expectedZoom,
-        "_maxzoom", 14
-      )), process(entry.feature));
-    }
   }
 }

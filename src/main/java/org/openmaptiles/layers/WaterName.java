@@ -56,7 +56,6 @@ import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.util.OmtLanguageUtils;
-import org.openmaptiles.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,7 +210,7 @@ public class WaterName implements
         // otherwise just use a label point inside the lake
         feature = features.pointOnSurface(LAYER_NAME)
           .setMinZoom(place != null && SEA_OR_OCEAN_PLACE.contains(place) ? 0 : 3)
-          .setMinPixelSize(128);  // tiles are 256x256, so 128x128 is 1/4 of a tile
+          .setMinPixelSize(128); // tiles are 256x256, so 128x128 is 1/4 of a tile
       }
       feature
         .setAttr(Fields.CLASS, clazz)

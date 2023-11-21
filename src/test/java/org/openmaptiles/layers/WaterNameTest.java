@@ -5,10 +5,7 @@ import static com.onthegomap.planetiler.TestUtils.rectangle;
 
 import com.onthegomap.planetiler.TestUtils;
 import com.onthegomap.planetiler.geo.GeoUtils;
-import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SimpleFeature;
-import com.onthegomap.planetiler.reader.SourceFeature;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -223,6 +223,8 @@ public class Poi implements
           processAggStop(aggStopSet.get(0), featureCollectors, emit, 1);
           continue;
         }
+
+        Tables.OsmPoiPoint nearest = null;
         try {
           // find most important stops based on subclass
           var firstSubclass = aggStopSet.stream().min(BY_SUBCLASS).get().subclass();
@@ -238,7 +240,6 @@ public class Poi implements
 
           // ... find one stop nearest to the centroid
           double minDistance = Double.MAX_VALUE;
-          Tables.OsmPoiPoint nearest = null;
           for (var aggStop : topAggStops) {
             double distance = aggStopCentroid.distance(aggStop.source().worldGeometry());
             if (distance < minDistance) {
@@ -246,17 +247,17 @@ public class Poi implements
               nearest = aggStop;
             }
           }
-
-          final var nearestFinal = nearest; // final needed for lambda
-          aggStopSet
-            .forEach(s -> processAggStop(s, featureCollectors, emit, s == nearestFinal ? 1 : null));
         } catch (GeometryException e) {
           e.log(stats, "agg_stop_geometry_1",
             "Error getting geometry for some of the stops with UIC ref. " + aggStopSet.get(0).uicRef() + " (agg_stop)");
           // we're not able to calculate agg_stop, so simply dump the stops as they are
-          aggStopSet
-            .forEach(s -> processAggStop(s, featureCollectors, emit, null));
+          nearest = null;
         }
+
+        // now emit the stops
+        final Tables.OsmPoiPoint nearestFinal = nearest; // final needed for lambda
+        aggStopSet
+          .forEach(s -> processAggStop(s, featureCollectors, emit, s == nearestFinal ? 1 : null));
       }
 
       timer.stop();

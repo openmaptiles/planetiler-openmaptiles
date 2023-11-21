@@ -279,9 +279,9 @@ public class TransportationName implements
     }
 
     if (brunnel) {
-      String brunnelValue = brunnel(element.isBridge(), element.isTunnel(), element.isFord());
-      int brunnelMinzoom = brunnelValue != null ? transportation.getBrunnelMinzoom(element) : minzoom;
-      feature.setAttrWithMinzoom(Fields.BRUNNEL, brunnelValue, brunnelMinzoom);
+      // from OMT: "Drop brunnel if length of way < 2% of tile width (less than 3 pixels)"
+      feature.setAttrWithMinSize(Fields.BRUNNEL, brunnel(element.isBridge(), element.isTunnel(), element.isFord()),
+        3, 4, 12);
     }
 
     /*

@@ -2107,8 +2107,9 @@ class TransportationTest extends AbstractLayerTest {
       process(entry.feature);
        */
     }
+  }
 
-    @Test
+  @Test
   void testIssue58() {
     // test subject: https://www.openstreetmap.org/way/222564359
     // note: "name:es" used instead of "name:ar" since we've setup only "de" and "es" for unit tests

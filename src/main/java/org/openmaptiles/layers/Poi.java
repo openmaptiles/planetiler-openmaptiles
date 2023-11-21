@@ -155,12 +155,7 @@ public class Poi implements
 
   public static int uniAreaToMinZoom(double areaWorld) {
     double oneSideWorld = Math.sqrt(areaWorld);
-    // adjusted formula from `Utils.getMinZoomForLength()`, given that 1/10 does not match `1 / (2^<something>)`
     double zoom = -(Math.log(oneSideWorld * SQRT10) / LOG2);
-
-    // Say Z13.01 means bellow threshold, Z13.00 is exactly threshold, Z12.99 is over threshold,
-    // hence Z13.01 and Z13.00 will be rounded to Z14 and Z12.99 to Z13 (e.g. `floor() + 1`).
-    // And to accommodate for some precision errors (observed for Z9-Z11) we do also `- 0.1e-10`.
     int result = (int) Math.floor(zoom - 0.1e-10) + 1;
 
     return Math.clamp(result, 10, 14);

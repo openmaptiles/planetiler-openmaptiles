@@ -155,14 +155,6 @@ class PoiTest extends AbstractLayerTest {
     assertFeatures(14, List.of(
       Map.of(
         "_layer", "poi",
-        "name:es", "test 3",
-        "class", "railway",
-        "subclass", "tram_stop",
-        "agg_stop", 1,
-        "_minzoom", 14
-      ),
-      Map.of(
-        "_layer", "poi",
         "name:es", "test 1",
         "class", "bus",
         "subclass", "bus_stop",
@@ -175,6 +167,14 @@ class PoiTest extends AbstractLayerTest {
         "class", "bus",
         "subclass", "bus_stop",
         "agg_stop", "<null>",
+        "_minzoom", 14
+      ),
+      Map.of(
+        "_layer", "poi",
+        "name:es", "test 3",
+        "class", "railway",
+        "subclass", "tram_stop",
+        "agg_stop", 1,
         "_minzoom", 14
       )
     ), result);
@@ -205,18 +205,18 @@ class PoiTest extends AbstractLayerTest {
     assertFeatures(14, List.of(
       Map.of(
         "_layer", "poi",
-        "name:es", "test 2",
-        "class", "bus",
-        "subclass", "bus_stop",
-        "agg_stop", 1,
-        "_minzoom", 14
-      ),
-      Map.of(
-        "_layer", "poi",
         "name:es", "test 1",
         "class", "bus",
         "subclass", "bus_stop",
         "agg_stop", "<null>",
+        "_minzoom", 14
+      ),
+      Map.of(
+        "_layer", "poi",
+        "name:es", "test 2",
+        "class", "bus",
+        "subclass", "bus_stop",
+        "agg_stop", 1,
         "_minzoom", 14
       ),
       Map.of(

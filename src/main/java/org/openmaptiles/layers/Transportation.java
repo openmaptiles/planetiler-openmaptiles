@@ -74,7 +74,6 @@ import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
-import org.openmaptiles.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,6 +165,7 @@ public class Transportation implements
   private static final Set<Integer> ONEWAY_VALUES = Set.of(-1, 1);
   private final Map<String, Integer> MINZOOMS;
   private static final String LIMIT_MERGE_TAG = "__limit_merge";
+  private static final double LOG2 = Math.log(2);
   private final AtomicBoolean loggedNoGb = new AtomicBoolean(false);
   private final AtomicBoolean loggedNoIreland = new AtomicBoolean(false);
   private final boolean z13Paths;
@@ -425,10 +425,6 @@ public class Transportation implements
       }
       int minzoom = getMinzoom(element, highwayClass);
 
-      String brunnelValue = brunnel(element.isBridge(), element.isTunnel(), element.isFord());
-      int brunnelMinzoom = brunnelValue != null ? getBrunnelMinzoom(element) : minzoom;
-      int layerMinzoom = Math.max(brunnelMinzoom, 9);
-
       if (minzoom > config.maxzoom()) {
         return;
       }
@@ -442,11 +438,11 @@ public class Transportation implements
         .setAttr(Fields.CLASS, highwayClass)
         .setAttr(Fields.SUBCLASS, highwaySubclass(highwayClass, element.publicTransport(), highway))
         .setAttr(Fields.NETWORK, networkType != null ? networkType.name : null)
-        .setAttrWithMinzoom(Fields.BRUNNEL, brunnelValue, brunnelMinzoom)
+        .setAttrWithMinSize(Fields.BRUNNEL, brunnel(element.isBridge(), element.isTunnel(), element.isFord()), 4, 4, 12)
         // z8+
         .setAttrWithMinzoom(Fields.EXPRESSWAY, element.expressway() && !"motorway".equals(highway) ? 1 : null, 8)
         // z9+
-        .setAttrWithMinzoom(Fields.LAYER, nullIfLong(element.layer(), 0), layerMinzoom)
+        .setAttrWithMinSize(Fields.LAYER, nullIfLong(element.layer(), 0), 4, 9, 12)
         .setAttrWithMinzoom(Fields.BICYCLE, nullIfEmpty(element.bicycle()), 9)
         .setAttrWithMinzoom(Fields.FOOT, nullIfEmpty(element.foot()), 9)
         .setAttrWithMinzoom(Fields.HORSE, nullIfEmpty(element.horse()), 9)
@@ -509,17 +505,6 @@ public class Transportation implements
       minzoom = Math.max(minzoom, 9);
     }
     return minzoom;
-  }
-
-  int getBrunnelMinzoom(Tables.OsmHighwayLinestring element) {
-    try {
-      return Utils.getClippedMinZoomForLength(element.source().length(), 6, 4, 12);
-    } catch (GeometryException e) {
-      e.log(stats, "omt_brunnel_minzoom",
-        "Unable to calculate brunnel minzoom for " + element.source().id());
-      // brunnel is optional (depends on feature size) for Z4-Z11, it is always present for Z12+, hence 12 as fallback
-      return 12;
-    }
   }
 
   private boolean isPierPolygon(Tables.OsmHighwayLinestring element) {
@@ -598,13 +583,20 @@ public class Transportation implements
       .setMinZoom(getFerryMinzoom(element));
   }
 
+  /*
+   * Ferries are supposed to be included in Z4-Z10 depending on their length, for Z11+ always. This implements
+   * the equivalent of `sql_filter: ST_Length(geometry)>2*ZRES0` in OpenMapTiles to make sure that only longer ferries
+   * make it into lower zoom. That is needed since ferries are not tagged as highways based on importance, hence length
+   * is a substitute for importance.
+   */
   int getFerryMinzoom(Tables.OsmShipwayLinestring element) {
     try {
-      return Utils.getClippedMinZoomForLength(element.source().length(), 3, 4, 11);
+      double zoom = -(Math.log(element.source().length()) / LOG2) - 3;
+      return Math.clamp((int) Math.floor(zoom - 0.1e-10) + 1, 4, 11);
     } catch (GeometryException e) {
       e.log(stats, "omt_ferry_minzoom",
         "Unable to calculate ferry minzoom for " + element.source().id());
-      // ferries are supposed to be included in Z4-Z10 depending on their length (=this min. zoom calculation), for Z11+ always, hence 11 as fallback
+      // for Z11+ always, hence 11 as fallback
       return 11;
     }
   }

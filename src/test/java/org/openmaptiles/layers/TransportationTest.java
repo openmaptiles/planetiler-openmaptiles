@@ -2020,54 +2020,6 @@ class TransportationTest extends AbstractLayerTest {
     int expectedZoom
   ) {}
 
-  private void createBrunnelForMinZoomTest(List<TestEntry> testEntries, double length, int expectedZoom, String name) {
-    var feature = lineFeatureWithLength(length, Map.of(
-      "name", name,
-      "bridge", "yes",
-      "highway", "motorway"
-    ));
-    testEntries.add(new TestEntry(
-      feature,
-      Math.clamp(expectedZoom, 4, 12)
-    ));
-  }
-
-  @Test
-  void testGetBrunnelMinzoom() throws GeometryException {
-    final List<TestEntry> testEntries = new ArrayList<>();
-    for (int zoom = 14; zoom >= 0; zoom--) {
-      double testLength = Math.pow(2, -zoom - 6);
-
-      // slightly bellow the threshold
-      createBrunnelForMinZoomTest(testEntries, testLength * 0.999, zoom + 1, "brunnel-");
-      // precisely at the threshold
-      createBrunnelForMinZoomTest(testEntries, testLength, zoom, "brunnel=");
-      // slightly over the threshold
-      createBrunnelForMinZoomTest(testEntries, testLength * 1.001, zoom, "brunnel+");
-    }
-
-    for (var entry : testEntries) {
-      var result = process(entry.feature);
-
-      assertFeatures(entry.expectedZoom, List.of(Map.of(
-        "_layer", "transportation",
-        "_type", "line",
-        "class", "motorway",
-        "brunnel", "bridge"
-      ), Map.of(
-        "_layer", "transportation_name",
-        "_type", "line"
-      )), result);
-
-      assertFeatures(entry.expectedZoom - 1, List.of(Map.of(
-        "_layer", "transportation",
-        "brunnel", "<null>"
-      ), Map.of(
-        "_layer", "transportation_name"
-      )), result);
-    }
-  }
-
   private void createFerryForMinZoomTest(List<TestEntry> testEntries, double length, int expectedZoom, String name) {
     var feature = lineFeatureWithLength(length, Map.of(
       "name", name,
@@ -2103,9 +2055,6 @@ class TransportationTest extends AbstractLayerTest {
         "_layer", "transportation_name",
         "_type", "line"
       )), process(entry.feature));
-      /*
-      process(entry.feature);
-       */
     }
   }
 

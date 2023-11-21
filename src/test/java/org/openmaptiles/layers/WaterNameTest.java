@@ -39,42 +39,7 @@ class WaterNameTest extends AbstractLayerTest {
       "water", "pond",
       "intermittent", "1"
     ))));
-    /* TODO: remove, since `setMinPixelSize()` is now used and this no longer makes sense, as minzoom is always 3
-    // 1/4 th of tile area is the threshold, 1/4 = 0.25 => area->side:0.25->0.5 => slightly bigger -> 0.51
-    double z11area = Math.pow(0.51d / Math.pow(2, 11), 2);
-    assertFeatures(10, List.of(Map.of(
-      "_layer", "water"
-    ), Map.of(
-      "_layer", "water_name",
-      "_type", "point",
-      "_minzoom", 3,
-      "_maxzoom", 14
-    )), process(polygonFeatureWithArea(z11area, Map.of(
-      "name", "waterway",
-      "natural", "water",
-      "water", "pond"
-    ))));
-     */
   }
-
-  /* TODO: remove, since `setMinPixelSize()` is now used and this no longer makes sense, as minzoom is always 3
-  // https://zelonewolf.github.io/openstreetmap-americana/#map=13/41.43989/-71.5716
-  @Test
-  void testWordenPondNamePoint() {
-    assertFeatures(10, List.of(Map.of(
-      "_layer", "water"
-    ), Map.of(
-      "_layer", "water_name",
-      "_type", "point",
-      "_minzoom", 3,
-      "_maxzoom", 14
-    )), process(polygonFeatureWithArea(4.930387948170328E-9, Map.of(
-      "name", "waterway",
-      "natural", "water",
-      "water", "pond"
-    ))));
-  }
-   */
 
   @Test
   void testWaterNameLakeline() {
@@ -259,22 +224,5 @@ class WaterNameTest extends AbstractLayerTest {
       "name", "Atlantic",
       "place", "sea"
     ))));
-  }
-
-  private record TestEntry(
-    SourceFeature feature,
-    int expectedZoom
-  ) {}
-
-  private void createAreaForMinZoomTest(List<TestEntry> testEntries, double side, int expectedZoom, String name) {
-    double area = Math.pow(side, 2);
-    var feature = polygonFeatureWithArea(area, Map.of(
-      "name", name,
-      "natural", "water"
-    ));
-    testEntries.add(new TestEntry(
-      feature,
-      Math.clamp(expectedZoom, 3, 14)
-    ));
   }
 }

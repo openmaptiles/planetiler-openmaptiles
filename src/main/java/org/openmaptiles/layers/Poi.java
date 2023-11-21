@@ -218,36 +218,25 @@ public class Poi implements
       var timer = stats.startStage("agg_stop");
       LOGGER.info("Processing {} agg_stop sets", aggStops.size());
 
-      // possible TODO: run in parallel?
       for (var aggStopSet : aggStops.values()) {
         if (aggStopSet.size() == 1) {
           processAggStop(aggStopSet.get(0), featureCollectors, emit, 1);
           continue;
         }
         try {
-          // find first based on subclass
+          // find most important stops based on subclass
           var firstSubclass = aggStopSet.stream().min(BY_SUBCLASS).get().subclass();
           var topAggStops =
             aggStopSet.stream().filter(s -> firstSubclass.equals(s.subclass())).toArray(Tables.OsmPoiPoint[]::new);
-          if (topAggStops.length <= 2) {
-            // one found => straightforward: flag it and emit
-            // two found => both will be same distance from centroid: pick first one, flag it and emit
-            processAggStop(topAggStops[0], featureCollectors, emit, 1);
-            // and emit the rest
-            aggStopSet.stream()
-              .filter(s -> s != topAggStops[0])
-              .forEach(s -> processAggStop(s, featureCollectors, emit, null));
-            continue;
-          }
 
-          // easy cases handled, now we need also centroid
+          // calculate the centroid and ...
           List<Point> aggStopPoints = new ArrayList<>(aggStopSet.size());
           for (var aggStop : aggStopSet) {
             aggStopPoints.add(aggStop.source().worldGeometry().getCentroid());
           }
           var aggStopCentroid = GeoUtils.combinePoints(aggStopPoints).getCentroid();
 
-          // find nearest
+          // ... find one stop nearest to the centroid
           double minDistance = Double.MAX_VALUE;
           Tables.OsmPoiPoint nearest = null;
           for (var aggStop : topAggStops) {
@@ -258,23 +247,13 @@ public class Poi implements
             }
           }
 
-          // emit nearest
-          if (nearest != null) {
-            processAggStop(nearest, featureCollectors, emit, 1);
-          } else {
-            stats.dataError("agg_stop_nearest");
-            LOGGER.warn("Failed to find nearest stop for agg_stop UIC ref. {}", aggStopSet.get(0).uicRef());
-          }
-
-          // emit the rest
-          final var alreadyDone = nearest;
-          aggStopSet.stream()
-            .filter(s -> s != alreadyDone)
-            .forEach(s -> processAggStop(s, featureCollectors, emit, null));
+          final var nearestFinal = nearest; // final needed for lambda
+          aggStopSet
+            .forEach(s -> processAggStop(s, featureCollectors, emit, s == nearestFinal ? 1 : null));
         } catch (GeometryException e) {
           e.log(stats, "agg_stop_geometry_1",
             "Error getting geometry for some of the stops with UIC ref. " + aggStopSet.get(0).uicRef() + " (agg_stop)");
-          // we're not able to calculate agg_stop, so simply dump them as-is
+          // we're not able to calculate agg_stop, so simply dump the stops as they are
           aggStopSet
             .forEach(s -> processAggStop(s, featureCollectors, emit, null));
         }

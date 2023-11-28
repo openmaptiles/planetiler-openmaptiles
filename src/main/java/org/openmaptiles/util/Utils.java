@@ -8,8 +8,6 @@ import java.util.Map;
  */
 public class Utils {
 
-  private static final double LOG2 = Math.log(2);
-
   public static <T> T coalesce(T a, T b) {
     return a != null ? a : b;
   }

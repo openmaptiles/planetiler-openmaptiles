@@ -201,6 +201,30 @@
         </executions>
       </plugin>
 
+      <!-- Make latest git commit timestamp available to jib  -->
+      <plugin>
+          <groupId>io.github.git-commit-id</groupId>
+          <artifactId>git-commit-id-maven-plugin</artifactId>
+          <version>7.0.0</version>
+          <executions>
+              <execution>
+                  <id>get-the-git-infos</id>
+                  <goals>
+                      <goal>revision</goal>
+                  </goals>
+                  <phase>initialize</phase>
+              </execution>
+          </executions>
+          <configuration>
+              <dateFormat>yyyy-MM-dd'T'HH:mm:ss'Z'</dateFormat>
+              <dateFormatTimeZone>GMT</dateFormatTimeZone>
+              <generateGitPropertiesFile>false</generateGitPropertiesFile>
+              <includeOnlyProperties>
+                  <includeOnlyProperty>^git.commit.time$</includeOnlyProperty>
+              </includeOnlyProperties>
+          </configuration>
+      </plugin>
+
       <!-- Create a runnable container -->
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
@@ -228,6 +252,8 @@
               </org.opencontainers.image.source>
             </labels>
             <mainClass>${mainClass}</mainClass>
+            <creationTime>${git.commit.time}</creationTime>
+            <filesModificationTime>${git.commit.time}</filesModificationTime>
           </container>
         </configuration>
       </plugin>

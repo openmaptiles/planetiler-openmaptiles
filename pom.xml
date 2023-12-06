@@ -94,6 +94,11 @@
     </dependency>
   </dependencies>
 
+  <scm>
+    <connection>scm:git:https://github.com/openmaptiles/planetiler-openmaptiles.git</connection>
+    <url>https://github.com/openmaptiles/planetiler-openmaptiles</url>
+  </scm>
+
   <build>
     <plugins>
       <plugin>
@@ -201,6 +206,25 @@
         </executions>
       </plugin>
 
+      <!-- Make latest git commit timestamp available to jib  -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <doCheck>false</doCheck>
+          <doUpdate>false</doUpdate>
+        </configuration>
+      </plugin>
+
       <!-- Create a runnable container -->
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
@@ -228,6 +252,8 @@
               </org.opencontainers.image.source>
             </labels>
             <mainClass>${mainClass}</mainClass>
+            <creationTime>${maven.build.timestamp}</creationTime>
+            <filesModificationTime>${maven.build.timestamp}</filesModificationTime>
           </container>
         </configuration>
       </plugin>

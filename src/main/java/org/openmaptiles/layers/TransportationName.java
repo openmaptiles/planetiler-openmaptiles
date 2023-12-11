@@ -106,18 +106,13 @@ public class TransportationName implements
   private static final String LINK_TEMP_KEY = "__islink";
   private static final String RELATION_ID_TEMP_KEY = "__relid";
 
-  /*
-   * note: OpenMapTiles (OMT) is applying length limit *after* line merge, Planetiler *before* merge. Hence,
-   * Planetiler produces fewer features with same limits. To counter that, limits here are 1/2 of those used in OMT.
-   * Result is not 100% same as from OMT but is closer.
-   */
   private static final ZoomFunction.MeterToPixelThresholds MIN_LENGTH = ZoomFunction.meterThresholds()
-    .put(6, 10_000)
-    .put(7, 10_000)
-    .put(8, 7_000)
-    .put(9, 4_000)
-    .put(10, 2_000)
-    .put(11, 1_000);
+    .put(6, 20_000)
+    .put(7, 20_000)
+    .put(8, 14_000)
+    .put(9, 8_000)
+    .put(10, 4_000)
+    .put(11, 2_000);
   private final boolean brunnel;
   private final boolean sizeForShield;
   private final boolean limitMerge;

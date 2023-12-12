@@ -215,7 +215,7 @@ public class Poi implements
 
       for (var aggStopSet : aggStops.values()) {
         if (aggStopSet.size() == 1) {
-          processAggStop(aggStopSet.get(0), featureCollectors, emit, 1);
+          processAggStop(aggStopSet.getFirst(), featureCollectors, emit, 1);
           continue;
         }
 
@@ -244,7 +244,8 @@ public class Poi implements
           }
         } catch (GeometryException e) {
           e.log(stats, "agg_stop_geometry_1",
-            "Error getting geometry for some of the stops with UIC ref. " + aggStopSet.get(0).uicRef() + " (agg_stop)");
+            "Error getting geometry for some of the stops with UIC ref. " + aggStopSet.getFirst().uicRef() +
+              " (agg_stop)");
           // we're not able to calculate agg_stop, so simply dump the stops as they are
           nearest = null;
         }

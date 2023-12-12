@@ -75,6 +75,8 @@ public class Housenumber implements
   private static final Pattern NO_CONVERSION_PATTERN = Pattern.compile("[^0-9;]");
   private static final String TEMP_PARTITION = "_partition";
   private static final String TEMP_HAS_NAME = "_has_name";
+  private static final Comparator<VectorTile.Feature> BY_TEMP_HAS_NAME = Comparator
+    .comparing(i -> (Boolean) i.attrs().get(TEMP_HAS_NAME), Boolean::compare);
   private final Stats stats;
 
   public Housenumber(Translations translations, PlanetilerConfig config, Stats stats) {
@@ -146,7 +148,7 @@ public class Housenumber implements
       .collect(Collectors.groupingBy(f -> f.attrs().get(TEMP_PARTITION)))
       .values().stream()
       .map(
-        g -> g.stream().min(Comparator.comparing(i -> (Boolean) i.attrs().get(TEMP_HAS_NAME), Boolean::compare))
+        g -> g.stream().min(BY_TEMP_HAS_NAME)
       )
       .filter(Optional::isPresent)
       .map(Optional::get)

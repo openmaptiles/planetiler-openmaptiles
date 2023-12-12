@@ -46,7 +46,6 @@ import com.onthegomap.planetiler.util.Translations;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -147,11 +146,9 @@ public class Housenumber implements
     var items = list.stream()
       .collect(Collectors.groupingBy(f -> f.attrs().get(TEMP_PARTITION)))
       .values().stream()
-      .map(
-        g -> g.stream().min(BY_TEMP_HAS_NAME)
+      .flatMap(
+        g -> g.stream().min(BY_TEMP_HAS_NAME).stream()
       )
-      .filter(Optional::isPresent)
-      .map(Optional::get)
       .toList();
 
     // remove temporary attributes

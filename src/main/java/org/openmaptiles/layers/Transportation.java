@@ -262,18 +262,22 @@ public class Transportation implements
     // once, but just to be safe synchronize updates to that field
     if (feature.hasTag("iso_a2", "GB")) {
       try {
-        Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+        var prepared = PreparedGeometryFactory.prepare(
+          feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d)
+        );
         synchronized (this) {
-          greatBritain = PreparedGeometryFactory.prepare(boundary);
+          greatBritain = prepared;
         }
       } catch (GeometryException e) {
         LOGGER.error("Failed to get Great Britain Polygon: " + e);
       }
     } else if (feature.hasTag("iso_a2", "IE")) {
       try {
-        Geometry boundary = feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d);
+        var prepared = PreparedGeometryFactory.prepare(
+          feature.polygon().buffer(GeoUtils.metersToPixelAtEquator(0, 10_000) / 256d)
+        );
         synchronized (this) {
-          ireland = PreparedGeometryFactory.prepare(boundary);
+          ireland = prepared;
         }
       } catch (GeometryException e) {
         LOGGER.error("Failed to get Ireland Polygon: " + e);

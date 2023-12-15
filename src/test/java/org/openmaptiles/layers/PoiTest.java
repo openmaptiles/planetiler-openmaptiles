@@ -352,7 +352,7 @@ class PoiTest extends AbstractLayerTest {
   void testEmbassy() {
     assertFeatures(7, List.of(Map.of(
       "_layer", "poi",
-      "class", "diplomatic",
+      "class", "office",
       "subclass", "diplomatic",
       "name", "The Embassy"
     )), process(pointFeature(Map.of(

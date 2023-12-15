@@ -50,8 +50,9 @@ import java.util.Map;
 
 /**
  * OSM element parsers generated from the <a href="https://github.com/omniscale/imposm3">imposm3</a> table definitions
- * in the <a href="https://github.com/openmaptiles/openmaptiles/blob/master/openmaptiles.yaml">OpenMapTiles vector tile
- * schema</a>.
+ * in the <a href=
+ * "https://github.com/openmaptiles/openmaptiles/blob/3cf77e2a542d8a369bb08bf2538cdde0b3effb2b/openmaptiles.yaml">OpenMapTiles
+ * vector tile schema</a>.
  *
  * These filter and parse the raw OSM key/value attribute pairs on tags into records with fields that match the columns
  * in the tables that imposm3 would generate. Layer implementations can "subscribe" to elements from each "table" but
@@ -725,7 +726,15 @@ public class Tables {
       matchAny("leisure", "dog_park", "escape_game", "garden", "golf_course", "ice_rink", "hackerspace", "marina",
         "miniature_golf", "park", "pitch", "playground", "sports_centre", "stadium", "swimming_area", "swimming_pool",
         "water_park"),
-      matchAny("office", "diplomatic"),
+      matchAny("office", "accountant", "advertising_agency", "architect", "association", "bail_bond_agent", "charity",
+        "company", "construction_company", "consulting", "cooperative", "courier", "coworking", "diplomatic",
+        "educational_institution", "employment_agency", "energy_supplier", "engineer", "estate_agent", "financial",
+        "financial_advisor", "forestry", "foundation", "geodesist", "government", "graphic_design", "guide",
+        "harbour_master", "health_insurance", "insurance", "interior_design", "it", "lawyer", "logistics", "marketing",
+        "moving_company", "newspaper", "ngo", "notary", "physician", "political_party", "private_investigator",
+        "property_management", "publisher", "quango", "religion", "research", "security", "surveyor", "tax_advisor",
+        "taxi", "telecommunication", "therapist", "translator", "travel_agent", "tutoring", "union", "university",
+        "water_utility", "web_design", "wedding_planner"),
       matchAny("railway", "halt", "station", "subway_entrance", "train_station_entrance", "tram_stop"),
       matchAny("shop", "accessories", "alcohol", "antiques", "art", "bag", "bakery", "beauty", "bed", "beverages",
         "bicycle", "books", "boutique", "butcher", "camera", "car", "car_repair", "car_parts", "carpet", "charity",
@@ -795,7 +804,15 @@ public class Tables {
       matchAny("leisure", "dog_park", "escape_game", "garden", "golf_course", "ice_rink", "hackerspace", "marina",
         "miniature_golf", "park", "pitch", "playground", "sports_centre", "stadium", "swimming_area", "swimming_pool",
         "water_park"),
-      matchAny("office", "diplomatic"),
+      matchAny("office", "accountant", "advertising_agency", "architect", "association", "bail_bond_agent", "charity",
+        "company", "construction_company", "consulting", "cooperative", "courier", "coworking", "diplomatic",
+        "educational_institution", "employment_agency", "energy_supplier", "engineer", "estate_agent", "financial",
+        "financial_advisor", "forestry", "foundation", "geodesist", "government", "graphic_design", "guide",
+        "harbour_master", "health_insurance", "insurance", "interior_design", "it", "lawyer", "logistics", "marketing",
+        "moving_company", "newspaper", "ngo", "notary", "physician", "political_party", "private_investigator",
+        "property_management", "publisher", "quango", "religion", "research", "security", "surveyor", "tax_advisor",
+        "taxi", "telecommunication", "therapist", "translator", "travel_agent", "tutoring", "union", "university",
+        "water_utility", "web_design", "wedding_planner"),
       matchAny("railway", "halt", "station", "subway_entrance", "train_station_entrance", "tram_stop"),
       matchAny("shop", "accessories", "alcohol", "antiques", "art", "bag", "bakery", "beauty", "bed", "beverages",
         "bicycle", "books", "boutique", "butcher", "camera", "car", "car_repair", "car_parts", "carpet", "charity",

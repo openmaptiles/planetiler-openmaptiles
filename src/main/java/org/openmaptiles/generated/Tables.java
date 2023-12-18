@@ -50,9 +50,8 @@ import java.util.Map;
 
 /**
  * OSM element parsers generated from the <a href="https://github.com/omniscale/imposm3">imposm3</a> table definitions
- * in the <a href=
- * "https://github.com/openmaptiles/openmaptiles/blob/3cf77e2a542d8a369bb08bf2538cdde0b3effb2b/openmaptiles.yaml">OpenMapTiles
- * vector tile schema</a>.
+ * in the <a href="https://github.com/openmaptiles/openmaptiles/blob/master/openmaptiles.yaml">OpenMapTiles vector tile
+ * schema</a>.
  *
  * These filter and parse the raw OSM key/value attribute pairs on tags into records with fields that match the columns
  * in the tables that imposm3 would generate. Layer implementations can "subscribe" to elements from each "table" but
@@ -712,12 +711,13 @@ public class Tables {
     /** Imposm3 "mapping" to filter OSM elements that should appear in this "table". */
     public static final Expression MAPPING = and(or(matchAny("aerialway", "station"),
       matchAny("amenity", "arts_centre", "atm", "bank", "bar", "bbq", "bicycle_parking", "bicycle_rental", "biergarten",
-        "bus_station", "cafe", "cinema", "clinic", "college", "community_centre", "courthouse", "dentist", "doctors",
-        "drinking_water", "fast_food", "ferry_terminal", "fire_station", "food_court", "fuel", "grave_yard", "hospital",
-        "ice_cream", "kindergarten", "library", "marketplace", "motorcycle_parking", "nightclub", "nursing_home",
-        "parking", "pharmacy", "place_of_worship", "police", "parcel_locker", "post_box", "post_office", "prison",
-        "pub", "public_building", "recycling", "restaurant", "school", "shelter", "swimming_pool", "taxi", "telephone",
-        "theatre", "toilets", "townhall", "university", "veterinary", "waste_basket"),
+        "bus_station", "cafe", "charging_station", "cinema", "clinic", "college", "community_centre", "courthouse",
+        "dentist", "doctors", "drinking_water", "fast_food", "ferry_terminal", "fire_station", "food_court", "fuel",
+        "grave_yard", "hospital", "ice_cream", "kindergarten", "library", "marketplace", "motorcycle_parking",
+        "nightclub", "nursing_home", "parking", "pharmacy", "place_of_worship", "police", "parcel_locker", "post_box",
+        "post_office", "prison", "pub", "public_building", "recycling", "restaurant", "school", "shelter",
+        "swimming_pool", "taxi", "telephone", "theatre", "toilets", "townhall", "university", "veterinary",
+        "waste_basket"),
       matchAny("barrier", "bollard", "border_control", "cycle_barrier", "gate", "lift_gate", "sally_port", "stile",
         "toll_booth"),
       matchAny("building", "dormitory"), matchAny("highway", "bus_stop"),
@@ -790,12 +790,13 @@ public class Tables {
     /** Imposm3 "mapping" to filter OSM elements that should appear in this "table". */
     public static final Expression MAPPING = and(or(matchAny("aerialway", "station"),
       matchAny("amenity", "arts_centre", "atm", "bank", "bar", "bbq", "bicycle_parking", "bicycle_rental", "biergarten",
-        "bus_station", "cafe", "cinema", "clinic", "college", "community_centre", "courthouse", "dentist", "doctors",
-        "drinking_water", "fast_food", "ferry_terminal", "fire_station", "food_court", "fuel", "grave_yard", "hospital",
-        "ice_cream", "kindergarten", "library", "marketplace", "motorcycle_parking", "nightclub", "nursing_home",
-        "parking", "pharmacy", "place_of_worship", "police", "parcel_locker", "post_box", "post_office", "prison",
-        "pub", "public_building", "recycling", "restaurant", "school", "shelter", "swimming_pool", "taxi", "telephone",
-        "theatre", "toilets", "townhall", "university", "veterinary", "waste_basket"),
+        "bus_station", "cafe", "charging_station", "cinema", "clinic", "college", "community_centre", "courthouse",
+        "dentist", "doctors", "drinking_water", "fast_food", "ferry_terminal", "fire_station", "food_court", "fuel",
+        "grave_yard", "hospital", "ice_cream", "kindergarten", "library", "marketplace", "motorcycle_parking",
+        "nightclub", "nursing_home", "parking", "pharmacy", "place_of_worship", "police", "parcel_locker", "post_box",
+        "post_office", "prison", "pub", "public_building", "recycling", "restaurant", "school", "shelter",
+        "swimming_pool", "taxi", "telephone", "theatre", "toilets", "townhall", "university", "veterinary",
+        "waste_basket"),
       matchAny("barrier", "bollard", "border_control", "cycle_barrier", "gate", "lift_gate", "sally_port", "stile",
         "toll_booth"),
       matchAny("building", "dormitory"), matchAny("highway", "bus_stop"),

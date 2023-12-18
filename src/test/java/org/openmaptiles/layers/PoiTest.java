@@ -442,6 +442,29 @@ class PoiTest extends AbstractLayerTest {
     ))));
   }
 
+  @Test
+  void testChargingStation() {
+    List<Map<String, Object>> expected = List.of(Map.of(
+      "_layer", "poi",
+      "class", "fuel",
+      "subclass", "charging_station",
+      "name", "Some Charging Station Operator"
+    ));
+    assertFeatures(14, expected, process(pointFeature(Map.of(
+      "amenity", "charging_station",
+      "brand", "Some Charging Station Operator"
+    ))));
+    assertFeatures(14, expected, process(pointFeature(Map.of(
+      "amenity", "charging_station",
+      "operator", "Some Charging Station Operator"
+    ))));
+    assertFeatures(14, expected, process(pointFeature(Map.of(
+      "amenity", "charging_station",
+      "operator", "Some Charging Station",
+      "ref", "Operator"
+    ))));
+  }
+
   private record TestEntry(
     SourceFeature feature,
     int expectedZoom

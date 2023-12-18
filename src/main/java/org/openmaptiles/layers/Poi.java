@@ -122,6 +122,7 @@ public class Poi implements
   );
   private static final Comparator<Tables.OsmPoiPoint> BY_SUBCLASS = Comparator
     .comparingInt(s -> AGG_STOP_SUBCLASS_ORDER.indexOf(s.subclass()));
+  private static final Set<String> BRAND_OPERATOR_REF_SUBCLASSES = Set.of("charging_station", "parcel_locker");
   private static final double LOG2 = Math.log(2);
   private static final double SQRT10 = Math.sqrt(10);
   private final MultiExpression.Index<String> classMapping;
@@ -286,7 +287,7 @@ public class Poi implements
     }
 
     // Parcel locker without name: use either brand or operator and add ref if present
-    if ("parcel_locker".equals(rawSubclass) && nullOrEmpty(name)) {
+    if (BRAND_OPERATOR_REF_SUBCLASSES.contains(rawSubclass) && nullOrEmpty(name)) {
       name = coalesce(nullIfEmpty(element.brand()), nullIfEmpty(element.operator()));
       String ref = nullIfEmpty(element.ref());
       if (ref != null) {

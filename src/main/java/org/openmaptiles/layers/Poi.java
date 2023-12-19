@@ -123,8 +123,6 @@ public class Poi implements
   private static final Comparator<Tables.OsmPoiPoint> BY_SUBCLASS = Comparator
     .comparingInt(s -> AGG_STOP_SUBCLASS_ORDER.indexOf(s.subclass()));
   private static final Set<String> BRAND_OPERATOR_REF_SUBCLASSES = Set.of("charging_station", "parcel_locker");
-  private static final double LOG2 = Math.log(2);
-  private static final double SQRT10 = Math.sqrt(10);
   private final MultiExpression.Index<String> classMapping;
   private final Translations translations;
   private final Stats stats;
@@ -152,14 +150,6 @@ public class Poi implements
     boolean lowZoom = ("station".equals(subclass) && "railway".equals(mappingKey)) ||
       "halt".equals(subclass) || "ferry_terminal".equals(subclass);
     return lowZoom ? 12 : 14;
-  }
-
-  public static int uniAreaToMinZoom(double areaWorld) {
-    double oneSideWorld = Math.sqrt(areaWorld);
-    double zoom = -(Math.log(oneSideWorld * SQRT10) / LOG2);
-    int result = (int) Math.floor(zoom - 0.1e-10) + 1;
-
-    return Math.clamp(result, 10, 14);
   }
 
   @Override
@@ -308,16 +298,11 @@ public class Poi implements
     int poiClassRank = poiClassRank(poiClass);
     int rankOrder = poiClassRank + ((nullOrEmpty(name)) ? 2000 : 0);
 
-    int minzoom;
+    int minzoom = minzoom(element.subclass(), element.mappingKey());
     if (UNIVERSITY_POI_SUBCLASSES.contains(rawSubclass)) {
-      minzoom = 14;
-      try {
-        minzoom = uniAreaToMinZoom(element.source().area());
-      } catch (GeometryException e) {
-        e.log(stats, "omt_poi_polygon", "Unable to get geometry for university polygon " + element.source().id());
-      }
-    } else {
-      minzoom = minzoom(element.subclass(), element.mappingKey());
+      // universities that are at least 10% of a tile may appear from Z10
+      output.setMinPixelSizeBelowZoom(13, 80); // 80x80px is ~10% of a 256x256px tile
+      minzoom = 10;
     }
 
     output.setBufferPixels(BUFFER_SIZE)

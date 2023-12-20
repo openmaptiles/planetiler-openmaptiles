@@ -2015,49 +2015,6 @@ class TransportationTest extends AbstractLayerTest {
     ))));
   }
 
-  private record TestEntry(
-    SourceFeature feature,
-    int expectedZoom
-  ) {}
-
-  private void createFerryForMinZoomTest(List<TestEntry> testEntries, double length, int expectedZoom, String name) {
-    var feature = lineFeatureWithLength(length, Map.of(
-      "name", name,
-      "route", "ferry"
-    ));
-    testEntries.add(new TestEntry(
-      feature,
-      Math.clamp(expectedZoom, 4, 11)
-    ));
-  }
-
-  @Test
-  void testGetFerryMinzoom() throws GeometryException {
-    final List<TestEntry> testEntries = new ArrayList<>();
-    for (int zoom = 14; zoom >= 0; zoom--) {
-      double testLength = Math.pow(2, -zoom - 3);
-
-      // slightly bellow the threshold
-      createFerryForMinZoomTest(testEntries, testLength * 0.999, zoom + 1, "ferry-");
-      // precisely at the threshold
-      createFerryForMinZoomTest(testEntries, testLength, zoom, "ferry=");
-      // slightly over the threshold
-      createFerryForMinZoomTest(testEntries, testLength * 1.001, zoom, "ferry+");
-    }
-
-    for (var entry : testEntries) {
-      assertFeatures(14, List.of(Map.of(
-        "_layer", "transportation",
-        "class", "ferry",
-        "_minzoom", entry.expectedZoom,
-        "_maxzoom", 14
-      ), Map.of(
-        "_layer", "transportation_name",
-        "_type", "line"
-      )), process(entry.feature));
-    }
-  }
-
   @Test
   void testIssue58() {
     // test subject: https://www.openstreetmap.org/way/222564359

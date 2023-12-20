@@ -165,7 +165,6 @@ public class Transportation implements
   private static final Set<Integer> ONEWAY_VALUES = Set.of(-1, 1);
   private final Map<String, Integer> MINZOOMS;
   private static final String LIMIT_MERGE_TAG = "__limit_merge";
-  private static final double LOG2 = Math.log(2);
   private final AtomicBoolean loggedNoGb = new AtomicBoolean(false);
   private final AtomicBoolean loggedNoIreland = new AtomicBoolean(false);
   private final boolean z13Paths;
@@ -584,25 +583,8 @@ public class Transportation implements
       .setAttr(Fields.LAYER, nullIfLong(element.layer(), 0))
       .setSortKey(element.zOrder())
       .setMinPixelSize(0) // merge during post-processing, then limit by size
-      .setMinZoom(getFerryMinzoom(element));
-  }
-
-  /*
-   * Ferries are supposed to be included in Z4-Z10 depending on their length, for Z11+ always. This implements
-   * the equivalent of `sql_filter: ST_Length(geometry)>2*ZRES0` in OpenMapTiles to make sure that only longer ferries
-   * make it into lower zoom. That is needed since ferries are not tagged as highways based on importance, hence length
-   * is a substitute for importance.
-   */
-  int getFerryMinzoom(Tables.OsmShipwayLinestring element) {
-    try {
-      double zoom = -(Math.log(element.source().length()) / LOG2) - 3;
-      return Math.clamp((int) Math.floor(zoom - 0.1e-10) + 1, 4, 11);
-    } catch (GeometryException e) {
-      e.log(stats, "omt_ferry_minzoom",
-        "Unable to calculate ferry minzoom for " + element.source().id());
-      // for Z11+ always, hence 11 as fallback
-      return 11;
-    }
+      .setMinZoom(4)
+      .setMinPixelSizeBelowZoom(10, 32); // `sql_filter: ST_Length(...)` used in OpenMapTiles translates to 32px
   }
 
   @Override

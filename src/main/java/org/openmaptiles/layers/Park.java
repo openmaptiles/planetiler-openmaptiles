@@ -91,15 +91,20 @@ public class Park implements
 
   @Override
   public void process(Tables.OsmParkPolygon element, FeatureCollector features) {
-    String protectionTitle = element.protectionTitle();
-    if (protectionTitle != null) {
-      protectionTitle = protectionTitle.replace(' ', '_').toLowerCase(Locale.ROOT);
+    String clazz;
+    if ("aboriginal_lands".equals(element.boundary())) {
+      clazz = "aboriginal_lands";
+    } else {
+      String protectionTitle = element.protectionTitle();
+      if (protectionTitle != null) {
+        protectionTitle = protectionTitle.replace(' ', '_').toLowerCase(Locale.ROOT);
+      }
+      clazz = coalesce(
+        nullIfEmpty(protectionTitle),
+        nullIfEmpty(element.boundary()),
+        nullIfEmpty(element.leisure())
+      );
     }
-    String clazz = coalesce(
-      nullIfEmpty(protectionTitle),
-      nullIfEmpty(element.boundary()),
-      nullIfEmpty(element.leisure())
-    );
 
     // park shape
     var outline = features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
@@ -138,7 +143,7 @@ public class Park implements
     // sql filter:    area > 70000*2^(20-zoom_level)
     // simplifies to: zoom_level > 20 - log(area / 70000) / log(2)
     int minzoom = (int) Math.floor(20 - Math.log(area / WORLD_AREA_FOR_70K_SQUARE_METERS) / LOG2);
-    minzoom = Math.min(14, Math.max(5, minzoom));
+    minzoom = Math.clamp(minzoom, 5, 14);
     return minzoom;
   }
 

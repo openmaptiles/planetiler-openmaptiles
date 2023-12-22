@@ -43,9 +43,18 @@ import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
+import org.openmaptiles.util.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines the logic for generating map elements in the {@code housenumber} layer from source features.
@@ -59,19 +68,96 @@ public class Housenumber implements
   Tables.OsmHousenumberPoint.Handler,
   ForwardingProfile.FeaturePostProcessor {
 
-  public Housenumber(Translations translations, PlanetilerConfig config, Stats stats) {}
+  private static final Logger LOGGER = LoggerFactory.getLogger(Housenumber.class);
+  private static final String OSM_SEPARATOR = ";";
+  private static final String DISPLAY_SEPARATOR = "–";
+  private static final Pattern NO_CONVERSION_PATTERN = Pattern.compile("[^0-9;]");
+  private static final String TEMP_PARTITION = "_partition";
+  private static final String TEMP_HAS_NAME = "_has_name";
+  private static final Comparator<VectorTile.Feature> BY_TEMP_HAS_NAME = Comparator
+    .comparing(i -> (Boolean) i.attrs().get(TEMP_HAS_NAME), Boolean::compare);
+  private final Stats stats;
+
+  public Housenumber(Translations translations, PlanetilerConfig config, Stats stats) {
+    this.stats = stats;
+  }
+
+  private static String displayHousenumberNonumeric(List<String> numbers) {
+    return numbers.getFirst()
+      .concat(DISPLAY_SEPARATOR)
+      .concat(numbers.getLast());
+  }
+
+  protected static String displayHousenumber(String housenumber) {
+    if (!housenumber.contains(OSM_SEPARATOR)) {
+      return housenumber;
+    }
+
+    List<String> numbers = Arrays.stream(housenumber.split(OSM_SEPARATOR))
+      .map(String::trim)
+      .filter(Predicate.not(String::isEmpty))
+      .toList();
+    if (numbers.isEmpty()) {
+      // not much to do with strange/invalid entries like "3;" or ";" etc.
+      return housenumber;
+    }
+
+    Matcher matcher = NO_CONVERSION_PATTERN.matcher(housenumber);
+    if (matcher.find()) {
+      return displayHousenumberNonumeric(numbers);
+    }
+
+    // numeric display house number
+    var statistics = numbers.stream()
+      .collect(Collectors.summarizingLong(Long::parseUnsignedLong));
+    return String.valueOf(statistics.getMin())
+      .concat(DISPLAY_SEPARATOR)
+      .concat(String.valueOf(statistics.getMax()));
+  }
 
   @Override
   public void process(Tables.OsmHousenumberPoint element, FeatureCollector features) {
+    String housenumber;
+    try {
+      housenumber = displayHousenumber(element.housenumber());
+    } catch (NumberFormatException e) {
+      // should not be happening (thanks to NO_CONVERSION_PATTERN) but ...
+      stats.dataError("housenumber_range");
+      LOGGER.warn("Failed to convert housenumber range: {}", element.housenumber());
+      housenumber = element.housenumber();
+    }
+
+    String partition = Utils.coalesce(element.street(), "")
+      .concat(Utils.coalesce(element.blockNumber(), ""))
+      .concat(housenumber);
+    Boolean hasName = element.hasName() == null ? Boolean.FALSE : !element.hasName().isEmpty();
+
     features.centroidIfConvex(LAYER_NAME)
       .setBufferPixels(BUFFER_SIZE)
-      .setAttr(Fields.HOUSENUMBER, element.housenumber())
+      .setAttr(Fields.HOUSENUMBER, housenumber)
+      .setAttr(TEMP_PARTITION, partition)
+      .setAttr(TEMP_HAS_NAME, hasName)
       .setMinZoom(14);
   }
 
   @Override
   public List<VectorTile.Feature> postProcess(int zoom, List<VectorTile.Feature> list) throws GeometryException {
+    // remove duplicate house numbers, features without name tag are prioritized
+    var items = list.stream()
+      .collect(Collectors.groupingBy(f -> f.attrs().get(TEMP_PARTITION)))
+      .values().stream()
+      .flatMap(
+        g -> g.stream().min(BY_TEMP_HAS_NAME).stream()
+      )
+      .toList();
+
+    // remove temporary attributes
+    for (var item : items) {
+      item.attrs().remove(TEMP_HAS_NAME);
+      item.attrs().remove(TEMP_PARTITION);
+    }
+
     // reduces the size of some heavy z14 tiles with many repeated housenumber values by 60% or more
-    return FeatureMerge.mergeMultiPoint(list);
+    return FeatureMerge.mergeMultiPoint(items);
   }
 }

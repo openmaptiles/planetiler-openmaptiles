@@ -74,5 +74,4 @@ public class Utils {
   public static String brunnel(boolean isBridge, boolean isTunnel, boolean isFord) {
     return isBridge ? "bridge" : isTunnel ? "tunnel" : isFord ? "ford" : null;
   }
-
 }

@@ -1809,8 +1809,9 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "ferry",
 
-      "_minzoom", 5,
+      "_minzoom", 4,
       "_maxzoom", 14,
+      "_minpixelsize", 32d,
       "_type", "line"
     ), Map.of(
       "_layer", "transportation_name",

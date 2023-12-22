@@ -27,7 +27,7 @@ jobs:
       - run: sha256sum target/*with-deps.jar
       - run: md5sum target/*with-deps.jar
       - name: 'Upload artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: planetiler-build
           path: target/*with-deps.jar

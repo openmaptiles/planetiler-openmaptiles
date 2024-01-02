@@ -54,7 +54,7 @@ jobs:
             ref: "refs/tags/v${{ github.event.inputs.version }}",
             sha: context.sha
           })
-    - run: mv planetiler-dist/target/*with-deps.jar planetiler-openmaptiles.jar
+    - run: mv target/*with-deps.jar planetiler-openmaptiles.jar
     - run: sha256sum planetiler-openmaptiles.jar > planetiler-openmaptiles.jar.sha256
     - run: md5sum planetiler-openmaptiles.jar > planetiler-openmaptiles.jar.md5
     - name: Install GPG Private Key

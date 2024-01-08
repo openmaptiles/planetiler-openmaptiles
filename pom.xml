@@ -94,12 +94,17 @@
     </dependency>
   </dependencies>
 
+  <scm>
+    <connection>scm:git:https://github.com/openmaptiles/planetiler-openmaptiles.git</connection>
+    <url>https://github.com/openmaptiles/planetiler-openmaptiles</url>
+  </scm>
+
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.2.2</version>
+        <version>3.2.3</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -110,7 +115,7 @@
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>2.40.0</version>
+        <version>2.41.1</version>
         <configuration>
           <java>
             <importOrder/>
@@ -201,6 +206,25 @@
         </executions>
       </plugin>
 
+      <!-- Make latest git commit timestamp available to jib  -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <doCheck>false</doCheck>
+          <doUpdate>false</doUpdate>
+        </configuration>
+      </plugin>
+
       <!-- Create a runnable container -->
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
@@ -228,6 +252,8 @@
               </org.opencontainers.image.source>
             </labels>
             <mainClass>${mainClass}</mainClass>
+            <creationTime>${maven.build.timestamp}</creationTime>
+            <filesModificationTime>${maven.build.timestamp}</filesModificationTime>
           </container>
         </configuration>
       </plugin>

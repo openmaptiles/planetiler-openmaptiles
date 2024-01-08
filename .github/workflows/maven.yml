@@ -18,7 +18,7 @@ jobs:
       - name: Checkout this PR planetiler-openmaptiles repo
         uses: actions/checkout@v4
       - name: Set up JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: 'temurin'
@@ -40,7 +40,7 @@ jobs:
       - name: Checkout this PR planetiler-openmaptiles repo
         uses: actions/checkout@v4
       - name: Set up JDK ${{ matrix.jdk }}
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.jdk }}
           distribution: 'temurin'
@@ -62,7 +62,7 @@ jobs:
       - name: Checkout this PR planetiler-openmaptiles repo
         uses: actions/checkout@v4
       - name: Set up JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: 'temurin'
@@ -81,7 +81,7 @@ jobs:
       - name: Cache data/sources
         uses: ./.github/cache-sources-action
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: 'temurin'
@@ -89,7 +89,7 @@ jobs:
       - name: Build this branch
         run: ./mvnw -DskipTests -Dimage.version=CI_ONLY --batch-mode -no-transfer-progress package jib:dockerBuild --file pom.xml
       - name: 'Upload artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: planetiler-build
           path: target/*with-deps.jar
@@ -120,7 +120,7 @@ jobs:
       - name: Cache data/sources
         uses: ./planetiler/planetiler-openmaptiles/.github/cache-sources-action
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: 'temurin'

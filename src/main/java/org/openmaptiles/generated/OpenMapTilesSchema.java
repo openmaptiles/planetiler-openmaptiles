@@ -209,13 +209,20 @@ public class OpenMapTilesSchema {
     /** Attribute names for map elements in the waterway layer. */
     final class Fields {
       /**
-       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the waterway. The
-       * <code>name</code> field may be empty for NaturalEarth data or at lower zoom levels.
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the waterway.
+       * Language-specific values are in <code>name:xx</code>. The <code>name</code> field may be empty for NaturalEarth
+       * data or at lower zoom levels.
        */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
 
       /**
@@ -546,9 +553,15 @@ public class OpenMapTilesSchema {
 
     /** Attribute names for map elements in the mountain_peak layer. */
     final class Fields {
-      /** The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the peak. */
+      /**
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the peak.
+       * Language-specific values are in <code>name:xx</code>.
+       */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
       /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
       public static final String NAME_DE = "name_de";
@@ -640,14 +653,17 @@ public class OpenMapTilesSchema {
       public static final String CLASS = "class";
       /**
        * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the park (point
-       * features only).
+       * features only). Language-specific values are in <code>name:xx</code>.
        */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code> (point features only). */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code> (point features only). This is
+       * deprecated and will be removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
       /**
        * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code> (point
-       * features only).
+       * features only). This is deprecated and will be removed in a future release in favor of <code>name:de</code>.
        */
       public static final String NAME_DE = "name_de";
       /** Rank of the park within one tile, starting at 1 that is the most important park (point features only). */
@@ -1236,11 +1252,18 @@ public class OpenMapTilesSchema {
     final class Fields {
       /**
        * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the water body.
+       * Language-specific values are in <code>name:xx</code>.
        */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
 
       /**
@@ -1309,9 +1332,15 @@ public class OpenMapTilesSchema {
        * of the highway.
        */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
       /**
        * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:ref"><code>ref</code></a> tag of the motorway or its
@@ -1534,11 +1563,20 @@ public class OpenMapTilesSchema {
 
     /** Attribute names for map elements in the place layer. */
     final class Fields {
-      /** The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the POI. */
+      /**
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the place.
+       * Language-specific values are in <code>name:xx</code>.
+       */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
 
       /**
@@ -1677,11 +1715,20 @@ public class OpenMapTilesSchema {
 
     /** Attribute names for map elements in the poi layer. */
     final class Fields {
-      /** The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the POI. */
+      /**
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the POI.
+       * Language-specific values are in <code>name:xx</code>.
+       */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
 
       /**
@@ -1911,11 +1958,20 @@ public class OpenMapTilesSchema {
 
     /** Attribute names for map elements in the aerodrome_label layer. */
     final class Fields {
-      /** The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the aerodrome. */
+      /**
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the aerodrome.
+       * Language-specific values are in <code>name:xx</code>.
+       */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
 
       /**

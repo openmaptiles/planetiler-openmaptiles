@@ -436,6 +436,8 @@ public class Transportation implements
       Integer rampAboveZ12 = (highwayRamp || element.isRamp()) ? 1 : null;
       Integer rampBelowZ12 = highwayRamp ? 1 : null;
 
+      boolean expressway = element.expressway() && !"motorway".equals(highway) && !(element.isRamp() || highwayRamp);
+
       FeatureCollector.Feature feature = features.line(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
         // main attributes at all zoom levels (used for grouping <= z8)
         .setAttr(Fields.CLASS, highwayClass)
@@ -443,7 +445,7 @@ public class Transportation implements
         .setAttr(Fields.NETWORK, networkType != null ? networkType.name : null)
         .setAttrWithMinSize(Fields.BRUNNEL, brunnel(element.isBridge(), element.isTunnel(), element.isFord()), 4, 4, 12)
         // z8+
-        .setAttrWithMinzoom(Fields.EXPRESSWAY, element.expressway() && !"motorway".equals(highway) ? 1 : null, 8)
+        .setAttrWithMinzoom(Fields.EXPRESSWAY, expressway ? 1 : null, 8)
         // z9+
         .setAttrWithMinSize(Fields.LAYER, nullIfLong(element.layer(), 0), 4, 9, 12)
         .setAttrWithMinzoom(Fields.BICYCLE, nullIfEmpty(element.bicycle()), 9)

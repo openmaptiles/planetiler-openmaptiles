@@ -33,9 +33,6 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: 'maven'
-        server-id: ossrh
-        server-username: MAVEN_USERNAME
-        server-password: MAVEN_PASSWORD
 
     - name: Check tag does not exist yet
       run: if git rev-list "v${{ github.event.inputs.version }}"; then echo "Tag already exists. Aborting the release process."; exit 1; fi

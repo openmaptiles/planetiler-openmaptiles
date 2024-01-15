@@ -151,12 +151,12 @@ public class OpenMapTilesProfile extends ForwardingProfile {
   public boolean caresAboutWikidataTranslation(OsmElement elem) {
     var tags = elem.tags();
     if (elem instanceof OsmElement.Node) {
-      return wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POINT, tags, 0), false);
+      return wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POINT, tags), false);
     } else if (elem instanceof OsmElement.Way) {
-      return wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POLYGON, tags, 0), false) ||
-        wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_LINE, tags, 0), false);
+      return wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POLYGON, tags), false) ||
+        wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_LINE, tags), false);
     } else if (elem instanceof OsmElement.Relation) {
-      return wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POLYGON, tags, 0), false);
+      return wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POLYGON, tags), false);
     } else {
       return false;
     }

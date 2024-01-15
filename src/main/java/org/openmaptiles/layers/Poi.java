@@ -176,7 +176,8 @@ public class Poi implements
   private void processAggStop(Tables.OsmPoiPoint element, FeatureCollector.Factory featureCollectors,
     Consumer<FeatureCollector.Feature> emit, Integer aggStop) {
     try {
-      var features = featureCollectors.get(SimpleFeature.fromWorldGeometry(element.source().worldGeometry()));
+      var features =
+        featureCollectors.get(SimpleFeature.fromWorldGeometry(element.source().worldGeometry(), element.source().id()));
       setupPoiFeature(element, features.point(LAYER_NAME), aggStop);
       for (var feature : features) {
         emit.accept(feature);
@@ -209,7 +210,6 @@ public class Poi implements
           processAggStop(aggStopSet.getFirst(), featureCollectors, emit, 1);
           continue;
         }
-
         Tables.OsmPoiPoint nearest = null;
         try {
           // find most important stops based on subclass
@@ -228,7 +228,8 @@ public class Poi implements
           double minDistance = Double.MAX_VALUE;
           for (var aggStop : topAggStops) {
             double distance = aggStopCentroid.distance(aggStop.source().worldGeometry());
-            if (distance < minDistance) {
+            if (distance < minDistance || nearest == null ||
+              (distance == minDistance && aggStop.source().id() < nearest.source().id())) {
               minDistance = distance;
               nearest = aggStop;
             }

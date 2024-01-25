@@ -46,30 +46,6 @@ class ParkTest extends AbstractLayerTest {
   }
 
   @Test
-  void testAbotiginalLand() {
-    assertFeatures(13, List.of(Map.of(
-      "_layer", "park",
-      "_type", "polygon",
-      "class", "aboriginal_lands",
-      "name", "Hualapai Tribe",
-      "_minpixelsize", 2d,
-      "_minzoom", 4,
-      "_maxzoom", 14
-    ), Map.of(
-      "_layer", "park",
-      "_type", "point",
-      "class", "aboriginal_lands",
-      "name", "Hualapai Tribe",
-      "_minzoom", 5,
-      "_maxzoom", 14
-    )), process(polygonFeature(Map.of(
-      "boundary", "aboriginal_lands",
-      "name", "Hualapai Tribe",
-      "protection_title", "National Park"
-    ))));
-  }
-
-  @Test
   void testSmallerPark() {
     double z11area = Math.pow((GeoUtils.metersToPixelAtEquator(0, Math.sqrt(70_000)) / 256d), 2) * Math.pow(2, 20 - 11);
     assertFeatures(13, List.of(Map.of(

@@ -258,7 +258,7 @@ class PlaceTest extends AbstractLayerTest {
       "name", "Nantucket",
       "name_en", "Nantucket",
       "name:latin", "Nantucket",
-      "rank", 3,
+      "rank", 1,
 
       "_type", "point",
       "_minzoom", 8

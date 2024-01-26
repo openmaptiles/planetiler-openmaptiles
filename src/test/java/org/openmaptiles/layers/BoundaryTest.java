@@ -714,4 +714,26 @@ class BoundaryTest extends AbstractLayerTest {
     assertFeatures(14, List.of(Map.of("_minzoom", 1)),
       processOsmOnly(lineFeatureWithRelation(profile.preprocessOsmRelation(relation), Map.of())));
   }
+
+  @Test
+  void testIndigenousLand() {
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "boundary",
+      "class", "aboriginal_lands",
+      "name", "Seminole Nation",
+      "name_en", "Seminole Nation",
+      "name:latin", "Seminole Nation",
+
+      "_type", "polygon",
+      "_minzoom", 4
+    ), Map.of(
+      "_layer", "place"
+    )), process(polygonFeatureWithArea(1,
+      Map.of(
+        "type", "boundary",
+        "boundary", "aboriginal_lands",
+        "name", "Seminole Nation",
+        "name:en", "Seminole Nation"
+      ))));
+  }
 }

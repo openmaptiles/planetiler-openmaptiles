@@ -288,6 +288,49 @@ class PlaceTest extends AbstractLayerTest {
   }
 
   @Test
+  void testIndigenousLand() {
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "place",
+      "class", "aboriginal_lands",
+      "name", "Seminole Nation",
+      "name_en", "Seminole Nation",
+      "name:latin", "Seminole Nation",
+      "rank", 1,
+
+      "_type", "point",
+      "_minzoom", 6
+    ), Map.of(
+      "_layer", "boundary"
+    )), process(polygonFeatureWithArea(1,
+      Map.of(
+        "type", "boundary",
+        "boundary", "aboriginal_lands",
+        "name", "Seminole Nation",
+        "name:en", "Seminole Nation"
+      ))));
+
+    double rank2area = Math.pow(GeoUtils.metersToPixelAtEquator(0, Math.sqrt(640_000_000 - 1)) / 256d, 2);
+
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "place",
+      "class", "aboriginal_lands",
+      "name", "Seminole Nation",
+      "rank", 2,
+
+      "_type", "point",
+      "_minzoom", 7
+    ), Map.of(
+      "_layer", "boundary"
+    )), process(polygonFeatureWithArea(rank2area,
+      Map.of(
+        "type", "boundary",
+        "boundary", "aboriginal_lands",
+        "name", "Seminole Nation",
+        "name:en", "Seminole Nation"
+      ))));
+  }
+
+  @Test
   void testPlaceSortKeyRanking() {
     int[] sortKeys = new int[]{
       // max

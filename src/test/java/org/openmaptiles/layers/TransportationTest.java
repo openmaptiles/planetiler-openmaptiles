@@ -519,8 +519,8 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation_name",
       "class", "trunk",
       "name", "<null>",
-      "ref", "S7",
-      "ref_length", 2,
+      "ref", "E 28",
+      "ref_length", 4,
       "route_1", "e-road=E 28",
       "route_2", "e-road=E 77"
     )), rendered);

@@ -45,7 +45,7 @@ the [layers package](src/main/java/org/openmaptiles/layers), and make a change t
 Example adding an attribute to a built-in layer
 </summary>
 
-For example to copy over the source attribute from OpenStreetMap elements to the building layer,
+For example to copy over the name attribute from OpenStreetMap elements to the building layer,
 modify [Building.java](src/main/java/org/openmaptiles/layers/Building.java):
 
 ```diff
@@ -53,7 +53,7 @@ modify [Building.java](src/main/java/org/openmaptiles/layers/Building.java):
          .setAttrWithMinzoom(Fields.RENDER_MIN_HEIGHT, renderMinHeight, 14)
          .setAttrWithMinzoom(Fields.COLOUR, color, 14)
          .setAttrWithMinzoom(Fields.HIDE_3D, hide3d, 14)
-+        .setAttrWithMinzoom("source", element.source().getTag("source"), 14)
++        .setAttrWithMinzoom("name", element.source().getTag("name"), 14)
          .setSortKey(renderHeight);
        if (mergeZ13Buildings) {
          feature

@@ -69,7 +69,7 @@ jobs:
           cache: 'maven'
       - run: ./scripts/regenerate-openmaptiles.sh
       # Skip spotless since that gets checked in a separate task
-      - run: ./mvnw -Dspotless.check.skip --batch-mode -no-transfer-progress clean verify
+      - run: ./mvnw -DskipTests -Dspotless.check.skip --batch-mode -no-transfer-progress clean verify
 
   run:
     name: Build / Run

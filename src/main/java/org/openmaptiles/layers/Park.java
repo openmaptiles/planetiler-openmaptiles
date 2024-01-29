@@ -91,20 +91,15 @@ public class Park implements
 
   @Override
   public void process(Tables.OsmParkPolygon element, FeatureCollector features) {
-    String clazz;
-    if ("aboriginal_lands".equals(element.boundary())) {
-      clazz = "aboriginal_lands";
-    } else {
-      String protectionTitle = element.protectionTitle();
-      if (protectionTitle != null) {
-        protectionTitle = protectionTitle.replace(' ', '_').toLowerCase(Locale.ROOT);
-      }
-      clazz = coalesce(
-        nullIfEmpty(protectionTitle),
-        nullIfEmpty(element.boundary()),
-        nullIfEmpty(element.leisure())
-      );
+    String protectionTitle = element.protectionTitle();
+    if (protectionTitle != null) {
+      protectionTitle = protectionTitle.replace(' ', '_').toLowerCase(Locale.ROOT);
     }
+    String clazz = coalesce(
+      nullIfEmpty(protectionTitle),
+      nullIfEmpty(element.boundary()),
+      nullIfEmpty(element.leisure())
+    );
 
     // park shape
     var outline = features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)

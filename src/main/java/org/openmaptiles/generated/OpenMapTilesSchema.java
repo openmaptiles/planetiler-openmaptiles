@@ -619,10 +619,6 @@ public class OpenMapTilesSchema {
    * <a href=
    * "https://wiki.openstreetmap.org/wiki/Tag:boundary%3Dprotected_area"><code>boundary=protected_area</code></a>, or
    * <a href="https://wiki.openstreetmap.org/wiki/Tag:leisure%3Dnature_reserve"><code>leisure=nature_reserve</code></a>.
-   * This layer also includes boundaries for indigenous lands tagged with <a href=
-   * "https://wiki.openstreetmap.org/wiki/Tag:boundary%3Daboriginal_lands"><code>boundary=aboriginal_lands</code></a>.
-   * Indigenous boundaries are not parks, but they are included in this layer for technical reasons related to data
-   * processing. These boundaries represent areas with special legal and administrative status for indigenous peoples.
    *
    * Generated from
    * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/park/park.yaml">park.yaml</a>
@@ -640,15 +636,14 @@ public class OpenMapTilesSchema {
     final class Fields {
       /**
        * Use the <strong>class</strong> to differentiate between different kinds of features in the <code>parks</code>
-       * layer, for example between parks and non-parks. The class for <code>boundary=protected_area</code> parks is the
-       * lower-case of the
+       * layer. The class for <code>boundary=protected_area</code> parks is the lower-case of the
        * <a href="http://wiki.openstreetmap.org/wiki/key:protection_title"><code>protection_title</code></a> value with
        * blanks replaced by <code>_</code>. <code>national_park</code> is the class of
        * <code>protection_title=National Park</code> and <code>boundary=national_park</code>.
        * <code>nature_reserve</code> is the class of <code>protection_title=Nature Reserve</code> and
        * <code>leisure=nature_reserve</code>. The class for other
        * <a href="http://wiki.openstreetmap.org/wiki/key:protection_title"><code>protection_title</code></a> values is
-       * similarly assigned. The class for <code>boundary=aboriginal_lands</code> is <code>aboriginal_lands</code>.
+       * similarly assigned.
        */
       public static final String CLASS = "class";
       /**
@@ -679,7 +674,7 @@ public class OpenMapTilesSchema {
     }
   }
   /**
-   * Contains administrative boundaries as linestrings. Until z4
+   * Contains administrative boundaries as linestrings and aboriginal lands as polygons. Until z4
    * <a href="http://www.naturalearthdata.com/downloads/">Natural Earth data</a> is used after which OSM boundaries
    * (<a href=
    * "http://wiki.openstreetmap.org/wiki/Tag:boundary%3Dadministrative"><code>boundary=administrative</code></a>) are
@@ -702,6 +697,15 @@ public class OpenMapTilesSchema {
 
     /** Attribute names for map elements in the boundary layer. */
     final class Fields {
+      /**
+       * Use the <strong>class</strong> to differentiate between different kinds of boundaries. The class for
+       * <code>boundary=aboriginal_lands</code> is <code>aboriginal_lands</code>.
+       */
+      public static final String CLASS = "class";
+      /**
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value (area features only).
+       */
+      public static final String NAME = "name";
       /**
        * OSM <a href="http://wiki.openstreetmap.org/wiki/Tag:boundary%3Dadministrative#admin_level">admin_level</a>
        * indicating the level of importance of this boundary. The <code>admin_level</code> corresponds to the lowest
@@ -1599,7 +1603,8 @@ public class OpenMapTilesSchema {
        * Original value of the <a href="http://wiki.openstreetmap.org/wiki/Key:place"><code>place</code></a> tag.
        * Distinguish between continents, countries, states, islands and places like settlements or smaller entities. Use
        * <strong>class</strong> to separately style the different places and build a text hierarchy according to their
-       * importance.
+       * importance. For places derived from boundaries, the original value of the
+       * <a href="http://wiki.openstreetmap.org/wiki/Key:boundary"><code>boundary</code></a> tag.
        * <p>
        * allowed values:
        * <ul>
@@ -1617,6 +1622,7 @@ public class OpenMapTilesSchema {
        * <li>"neighbourhood"
        * <li>"isolated_dwelling"
        * <li>"island"
+       * <li>"aboriginal_lands"
        * </ul>
        */
       public static final String CLASS = "class";
@@ -1655,8 +1661,10 @@ public class OpenMapTilesSchema {
       public static final String CLASS_NEIGHBOURHOOD = "neighbourhood";
       public static final String CLASS_ISOLATED_DWELLING = "isolated_dwelling";
       public static final String CLASS_ISLAND = "island";
-      public static final Set<String> CLASS_VALUES = Set.of("continent", "country", "state", "province", "city", "town",
-        "village", "hamlet", "borough", "suburb", "quarter", "neighbourhood", "isolated_dwelling", "island");
+      public static final String CLASS_ABORIGINAL_LANDS = "aboriginal_lands";
+      public static final Set<String> CLASS_VALUES =
+        Set.of("continent", "country", "state", "province", "city", "town", "village", "hamlet", "borough", "suburb",
+          "quarter", "neighbourhood", "isolated_dwelling", "island", "aboriginal_lands");
     }
     /** Complex mappings to generate attribute values from OSM element tags in the place layer. */
     final class FieldMappings {

@@ -519,8 +519,8 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation_name",
       "class", "trunk",
       "name", "<null>",
-      "ref", "S7",
-      "ref_length", 2,
+      "ref", "E 28",
+      "ref_length", 4,
       "route_1", "e-road=E 28",
       "route_2", "e-road=E 77"
     )), rendered);
@@ -2040,5 +2040,59 @@ class TransportationTest extends AbstractLayerTest {
       "name:es", "أيالون جنوب",
       "name:en", "Ayalon South"
     )), result);
+  }
+
+  @Test
+  void testARoad() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "AsianHighway");
+    rel.setTag("ref", "AH11");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "network", "a-road",
+      "_minzoom", 4
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "trunk",
+      "ref", "AH11",
+      "network", "a-road"
+    )), features);
+  }
+
+  @Test
+  void testERoad() {
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "e-road");
+    rel.setTag("ref", "E 50");
+
+    FeatureCollector features = process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "motorway"
+      )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "motorway",
+      "network", "e-road",
+      "_minzoom", 4
+    ), Map.of(
+      "_layer", "transportation_name",
+      "class", "motorway",
+      "ref", "E 50",
+      "network", "e-road"
+    )), features);
   }
 }

@@ -142,7 +142,9 @@ public class Transportation implements
   private static final Set<RouteNetwork> TRUNK_AS_MOTORWAY_BY_NETWORK = Set.of(
     RouteNetwork.CA_TRANSCANADA,
     RouteNetwork.CA_PROVINCIAL_ARTERIAL,
-    RouteNetwork.US_INTERSTATE
+    RouteNetwork.US_INTERSTATE,
+    RouteNetwork.E_ROAD,
+    RouteNetwork.A_ROAD
   );
   private static final Set<String> CA_AB_PRIMARY_AS_ARTERIAL_BY_REF = Set.of(
     "2", "3", "4"
@@ -291,7 +293,11 @@ public class Transportation implements
       String network = relation.getString("network");
       String ref = relation.getString("ref");
 
-      if ("US:I".equals(network)) {
+      if ("e-road".equals(network)) {
+        networkType = RouteNetwork.E_ROAD;
+      } else if ("AsianHighway".equals(network)) {
+        networkType = RouteNetwork.A_ROAD;
+      } else if ("US:I".equals(network)) {
         networkType = RouteNetwork.US_INTERSTATE;
       } else if ("US:US".equals(network)) {
         networkType = RouteNetwork.US_HIGHWAY;
@@ -645,7 +651,9 @@ public class Transportation implements
     GB_PRIMARY("gb-primary", "omt-gb-primary"),
     IE_MOTORWAY("ie-motorway", "omt-ie-motorway"),
     IE_NATIONAL("ie-national", "omt-ie-national"),
-    IE_REGIONAL("ie-regional", "omt-ie-regional");
+    IE_REGIONAL("ie-regional", "omt-ie-regional"),
+    E_ROAD("e-road", null),
+    A_ROAD("a-road", null);
 
     final String name;
     final String network;

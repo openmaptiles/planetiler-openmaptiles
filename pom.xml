@@ -10,7 +10,7 @@
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
     <planetiler.version>0.7-SNAPSHOT</planetiler.version>
-    <junit.version>5.10.1</junit.version>
+    <junit.version>5.10.2</junit.version>
 
     <mainClass>org.openmaptiles.OpenMapTilesMain</mainClass>
     <image.version>${project.version}</image.version>
@@ -115,7 +115,7 @@
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>2.42.0</version>
+        <version>2.43.0</version>
         <configuration>
           <java>
             <importOrder/>

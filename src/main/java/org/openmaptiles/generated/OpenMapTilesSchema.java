@@ -1887,15 +1887,14 @@ public class OpenMapTilesSchema {
     }
     /** Complex mappings to generate attribute values from OSM element tags in the poi layer. */
     final class FieldMappings {
-      public static final MultiExpression<String> Class = MultiExpression.of(List.of(
-        MultiExpression.entry("shop",
-          matchAny("subclass", "accessories", "antiques", "beauty", "bed", "boutique", "camera", "carpet", "charity",
-            "chemist", "coffee", "computer", "convenience", "copyshop", "cosmetics", "garden_centre", "doityourself",
-            "erotic", "electronics", "fabric", "florist", "frozen_food", "furniture", "video_games", "video", "general",
-            "gift", "hardware", "hearing_aids", "hifi", "ice_cream", "interior_decoration", "jewelry", "kiosk",
-            "locksmith", "lamps", "mall", "massage", "motorcycle", "mobile_phone", "newsagent", "optician", "outdoor",
-            "paint", "perfumery", "perfume", "pet", "photo", "second_hand", "shoes", "sports", "stationery", "tailor",
-            "tattoo", "ticket", "tobacco", "toys", "travel_agency", "watches", "weapons", "wholesale")),
+      public static final MultiExpression<String> Class = MultiExpression.of(List.of(MultiExpression.entry("shop",
+        matchAny("subclass", "accessories", "antiques", "beauty", "bed", "boutique", "camera", "carpet", "charity",
+          "chemist", "coffee", "computer", "convenience", "confectionery", "copyshop", "cosmetics", "garden_centre",
+          "doityourself", "erotic", "electronics", "fabric", "florist", "frozen_food", "furniture", "video_games",
+          "video", "general", "gift", "hardware", "hearing_aids", "hifi", "ice_cream", "interior_decoration", "jewelry",
+          "kiosk", "locksmith", "lamps", "mall", "massage", "motorcycle", "mobile_phone", "newsagent", "optician",
+          "outdoor", "paint", "perfumery", "perfume", "pet", "photo", "second_hand", "shoes", "sports", "stationery",
+          "tailor", "tattoo", "ticket", "tobacco", "toys", "travel_agency", "watches", "weapons", "wholesale")),
         MultiExpression.entry("office",
           matchAny("subclass", "accountant", "advertising_agency", "architect", "association", "bail_bond_agent",
             "charity", "company", "construction_company", "consulting", "cooperative", "courier", "coworking",
@@ -1927,7 +1926,7 @@ public class OpenMapTilesSchema {
         MultiExpression.entry("lodging",
           matchAny("subclass", "hotel", "motel", "bed_and_breakfast", "guest_house", "hostel", "chalet", "alpine_hut",
             "dormitory")),
-        MultiExpression.entry("ice_cream", matchAny("subclass", "chocolate", "confectionery")),
+        MultiExpression.entry("ice_cream", matchAny("subclass", "chocolate")),
         MultiExpression.entry("post", matchAny("subclass", "post_box", "post_office", "parcel_locker")),
         MultiExpression.entry("cafe", matchAny("subclass", "cafe")),
         MultiExpression.entry("school", matchAny("subclass", "school", "kindergarten")),

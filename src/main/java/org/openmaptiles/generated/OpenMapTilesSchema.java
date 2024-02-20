@@ -48,9 +48,9 @@ import java.util.Set;
 import org.openmaptiles.Layer;
 
 /**
- * All vector tile layer definitions, attributes, and allowed values generated from the
- * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/openmaptiles.yaml">OpenMapTiles vector tile schema
- * master</a>.
+ * All vector tile layer definitions, attributes, and allowed values generated from the <a href=
+ * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/openmaptiles.yaml">OpenMapTiles
+ * vector tile schema fff7110aeb61882abfafe22d1618fbe6181d96cb</a>.
  */
 @SuppressWarnings("unused")
 public class OpenMapTilesSchema {
@@ -95,8 +95,8 @@ public class OpenMapTilesSchema {
    * polygons to improve rendering performance. This however can lead to less rendering options in clients since these
    * boundaries show up. So you might not be able to use border styling for ocean water features.
    *
-   * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/water/water.yaml">water.yaml</a>
+   * Generated from <a href=
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/water/water.yaml">water.yaml</a>
    */
   public interface Water extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -194,8 +194,8 @@ public class OpenMapTilesSchema {
    * there is also <code>canal</code> generated, starting z13 there is no generalization according to <code>class</code>
    * field applied. Waterways do not have a <code>subclass</code> field.
    *
-   * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/waterway/waterway.yaml">waterway.yaml</a>
+   * Generated from <a href=
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/waterway/waterway.yaml">waterway.yaml</a>
    */
   public interface Waterway extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -287,7 +287,7 @@ public class OpenMapTilesSchema {
    * layer is to style wood (<code>class=wood</code>) and grass (<code>class=grass</code>) areas.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/landcover/landcover.yaml">landcover.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/landcover/landcover.yaml">landcover.yaml</a>
    */
   public interface Landcover extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -443,8 +443,8 @@ public class OpenMapTilesSchema {
    * Landuse is used to describe use of land by humans. At lower zoom levels this is from Natural Earth data for
    * residential (urban) areas and at higher zoom levels mostly OSM <code>landuse</code> tags.
    *
-   * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/landuse/landuse.yaml">landuse.yaml</a>
+   * Generated from <a href=
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/landuse/landuse.yaml">landuse.yaml</a>
    */
   public interface Landuse extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -540,7 +540,7 @@ public class OpenMapTilesSchema {
    * <a href="http://wiki.openstreetmap.org/wiki/Tag:natural%3Dpeak">Natural peaks</a>
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/mountain_peak/mountain_peak.yaml">mountain_peak.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/mountain_peak/mountain_peak.yaml">mountain_peak.yaml</a>
    */
   public interface MountainPeak extends Layer {
     double BUFFER_SIZE = 64.0;
@@ -620,8 +620,8 @@ public class OpenMapTilesSchema {
    * "https://wiki.openstreetmap.org/wiki/Tag:boundary%3Dprotected_area"><code>boundary=protected_area</code></a>, or
    * <a href="https://wiki.openstreetmap.org/wiki/Tag:leisure%3Dnature_reserve"><code>leisure=nature_reserve</code></a>.
    *
-   * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/park/park.yaml">park.yaml</a>
+   * Generated from <a href=
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/park/park.yaml">park.yaml</a>
    */
   public interface Park extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -683,8 +683,8 @@ public class OpenMapTilesSchema {
    * <a href="http://wiki.openstreetmap.org/wiki/Tag:boundary%3Dadministrative#admin_level"><code>admin_level</code></a>
    * but for most styles it makes sense to just style <code>admin_level=2</code> and <code>admin_level=4</code>.
    *
-   * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/boundary/boundary.yaml">boundary.yaml</a>
+   * Generated from <a href=
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/boundary/boundary.yaml">boundary.yaml</a>
    */
   public interface Boundary extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -793,8 +793,8 @@ public class OpenMapTilesSchema {
    * buildings are contained in the <strong>building</strong> layer but all other airport related polygons can be found
    * in the <strong>aeroway</strong> layer.
    *
-   * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/aeroway/aeroway.yaml">aeroway.yaml</a>
+   * Generated from <a href=
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/aeroway/aeroway.yaml">aeroway.yaml</a>
    */
   public interface Aeroway extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -854,7 +854,7 @@ public class OpenMapTilesSchema {
    * features like plazas.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/transportation/transportation.yaml">transportation.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/transportation/transportation.yaml">transportation.yaml</a>
    */
   public interface Transportation extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -1198,8 +1198,8 @@ public class OpenMapTilesSchema {
    * (<a href="http://wiki.openstreetmap.org/wiki/Key:building"><code>building= </code></a>). Only buildings with tag
    * location:underground are excluded.
    *
-   * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/building/building.yaml">building.yaml</a>
+   * Generated from <a href=
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/building/building.yaml">building.yaml</a>
    */
   public interface Building extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -1241,7 +1241,7 @@ public class OpenMapTilesSchema {
    * from OSM water bodies. Only the most important lakes contain labels.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/water_name/water_name.yaml">water_name.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/water_name/water_name.yaml">water_name.yaml</a>
    */
   public interface WaterName extends Layer {
     double BUFFER_SIZE = 256.0;
@@ -1318,7 +1318,7 @@ public class OpenMapTilesSchema {
    * while for other roads you should use <code>name</code>.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/transportation_name/transportation_name.yaml">transportation_name.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/transportation_name/transportation_name.yaml">transportation_name.yaml</a>
    */
   public interface TransportationName extends Layer {
     double BUFFER_SIZE = 8.0;
@@ -1465,18 +1465,54 @@ public class OpenMapTilesSchema {
        * </ul>
        */
       public static final String INDOOR = "indoor";
-      /** 1st route concurrency. */
-      public static final String ROUTE_1 = "route_1";
-      /** 2nd route concurrency. */
-      public static final String ROUTE_2 = "route_2";
-      /** 3rd route concurrency. */
-      public static final String ROUTE_3 = "route_3";
-      /** 4th route concurrency. */
-      public static final String ROUTE_4 = "route_4";
-      /** 5th route concurrency. */
-      public static final String ROUTE_5 = "route_5";
-      /** 6th route concurrency. */
-      public static final String ROUTE_6 = "route_6";
+      /** 1st route concurrency network. */
+      public static final String ROUTE_1_NETWORK = "route_1_network";
+      /** 1st route concurrency ref. */
+      public static final String ROUTE_1_REF = "route_1_ref";
+      /** 1st route concurrency name. */
+      public static final String ROUTE_1_NAME = "route_1_name";
+      /** 1st route concurrency colour. */
+      public static final String ROUTE_1_COLOUR = "route_1_colour";
+      /** 2nd route concurrency network. */
+      public static final String ROUTE_2_NETWORK = "route_2_network";
+      /** 2nd route concurrency ref. */
+      public static final String ROUTE_2_REF = "route_2_ref";
+      /** 2nd route concurrency name. */
+      public static final String ROUTE_2_NAME = "route_2_name";
+      /** 2nd route concurrency colour. */
+      public static final String ROUTE_2_COLOUR = "route_2_colour";
+      /** 3rd route concurrency network. */
+      public static final String ROUTE_3_NETWORK = "route_3_network";
+      /** 3rd route concurrency ref. */
+      public static final String ROUTE_3_REF = "route_3_ref";
+      /** 3rd route concurrency name. */
+      public static final String ROUTE_3_NAME = "route_3_name";
+      /** 3rd route concurrency colour. */
+      public static final String ROUTE_3_COLOUR = "route_3_colour";
+      /** 4th route concurrency network. */
+      public static final String ROUTE_4_NETWORK = "route_4_network";
+      /** 4th route concurrency ref. */
+      public static final String ROUTE_4_REF = "route_4_ref";
+      /** 4th route concurrency name. */
+      public static final String ROUTE_4_NAME = "route_4_name";
+      /** 4th route concurrency colour. */
+      public static final String ROUTE_4_COLOUR = "route_4_colour";
+      /** 5th route concurrency network. */
+      public static final String ROUTE_5_NETWORK = "route_5_network";
+      /** 5th route concurrency ref. */
+      public static final String ROUTE_5_REF = "route_5_ref";
+      /** 5th route concurrency name. */
+      public static final String ROUTE_5_NAME = "route_5_name";
+      /** 5th route concurrency colour. */
+      public static final String ROUTE_5_COLOUR = "route_5_colour";
+      /** 6th route concurrency network. */
+      public static final String ROUTE_6_NETWORK = "route_6_network";
+      /** 6th route concurrency ref. */
+      public static final String ROUTE_6_REF = "route_6_ref";
+      /** 6th route concurrency name. */
+      public static final String ROUTE_6_NAME = "route_6_name";
+      /** 6th route concurrency colour. */
+      public static final String ROUTE_6_COLOUR = "route_6_colour";
     }
     /** Attribute values for map elements in the transportation_name layer. */
     final class FieldValues {
@@ -1553,8 +1589,8 @@ public class OpenMapTilesSchema {
    * of the more important layers to create a beautiful map. We suggest you use different font styles and sizes to
    * create a text hierarchy.
    *
-   * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/place/place.yaml">place.yaml</a>
+   * Generated from <a href=
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/place/place.yaml">place.yaml</a>
    */
   public interface Place extends Layer {
     double BUFFER_SIZE = 256.0;
@@ -1678,7 +1714,7 @@ public class OpenMapTilesSchema {
    * tag are prioritized for preservation).
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/housenumber/housenumber.yaml">housenumber.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/housenumber/housenumber.yaml">housenumber.yaml</a>
    */
   public interface Housenumber extends Layer {
     double BUFFER_SIZE = 8.0;
@@ -1710,7 +1746,8 @@ public class OpenMapTilesSchema {
    * <a href="http://wiki.openstreetmap.org/wiki/Points_of_interest">Points of interests</a> containing a of a variety
    * of OpenStreetMap tags. Mostly contains amenities, sport, shop and tourist POIs.
    *
-   * Generated from <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/poi/poi.yaml">poi.yaml</a>
+   * Generated from <a href=
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/poi/poi.yaml">poi.yaml</a>
    */
   public interface Poi extends Layer {
     double BUFFER_SIZE = 64.0;
@@ -1887,14 +1924,15 @@ public class OpenMapTilesSchema {
     }
     /** Complex mappings to generate attribute values from OSM element tags in the poi layer. */
     final class FieldMappings {
-      public static final MultiExpression<String> Class = MultiExpression.of(List.of(MultiExpression.entry("shop",
-        matchAny("subclass", "accessories", "antiques", "beauty", "bed", "boutique", "camera", "carpet", "charity",
-          "chemist", "coffee", "computer", "convenience", "confectionery", "copyshop", "cosmetics", "garden_centre",
-          "doityourself", "erotic", "electronics", "fabric", "florist", "frozen_food", "furniture", "video_games",
-          "video", "general", "gift", "hardware", "hearing_aids", "hifi", "ice_cream", "interior_decoration", "jewelry",
-          "kiosk", "locksmith", "lamps", "mall", "massage", "motorcycle", "mobile_phone", "newsagent", "optician",
-          "outdoor", "paint", "perfumery", "perfume", "pet", "photo", "second_hand", "shoes", "sports", "stationery",
-          "tailor", "tattoo", "ticket", "tobacco", "toys", "travel_agency", "watches", "weapons", "wholesale")),
+      public static final MultiExpression<String> Class = MultiExpression.of(List.of(
+        MultiExpression.entry("shop",
+          matchAny("subclass", "accessories", "antiques", "beauty", "bed", "boutique", "camera", "carpet", "charity",
+            "chemist", "coffee", "computer", "convenience", "copyshop", "cosmetics", "garden_centre", "doityourself",
+            "erotic", "electronics", "fabric", "florist", "frozen_food", "furniture", "video_games", "video", "general",
+            "gift", "hardware", "hearing_aids", "hifi", "ice_cream", "interior_decoration", "jewelry", "kiosk",
+            "locksmith", "lamps", "mall", "massage", "motorcycle", "mobile_phone", "newsagent", "optician", "outdoor",
+            "paint", "perfumery", "perfume", "pet", "photo", "second_hand", "shoes", "sports", "stationery", "tailor",
+            "tattoo", "ticket", "tobacco", "toys", "travel_agency", "watches", "weapons", "wholesale")),
         MultiExpression.entry("office",
           matchAny("subclass", "accountant", "advertising_agency", "architect", "association", "bail_bond_agent",
             "charity", "company", "construction_company", "consulting", "cooperative", "courier", "coworking",
@@ -1926,7 +1964,7 @@ public class OpenMapTilesSchema {
         MultiExpression.entry("lodging",
           matchAny("subclass", "hotel", "motel", "bed_and_breakfast", "guest_house", "hostel", "chalet", "alpine_hut",
             "dormitory")),
-        MultiExpression.entry("ice_cream", matchAny("subclass", "chocolate")),
+        MultiExpression.entry("ice_cream", matchAny("subclass", "chocolate", "confectionery")),
         MultiExpression.entry("post", matchAny("subclass", "post_box", "post_office", "parcel_locker")),
         MultiExpression.entry("cafe", matchAny("subclass", "cafe")),
         MultiExpression.entry("school", matchAny("subclass", "school", "kindergarten")),
@@ -1952,7 +1990,7 @@ public class OpenMapTilesSchema {
    * <a href="http://wiki.openstreetmap.org/wiki/Tag:aeroway%3Daerodrome">Aerodrome labels</a>
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/aerodrome_label/aerodrome_label.yaml">aerodrome_label.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/layers/aerodrome_label/aerodrome_label.yaml">aerodrome_label.yaml</a>
    */
   public interface AerodromeLabel extends Layer {
     double BUFFER_SIZE = 64.0;

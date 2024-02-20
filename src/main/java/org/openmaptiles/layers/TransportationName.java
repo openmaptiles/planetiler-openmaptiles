@@ -274,12 +274,16 @@ public class TransportationName implements
       .setSortKey(element.zOrder())
       .setMinZoom(minzoom);
 
-    // populate route_1, route_2, ... route_n tags and remove duplicates
-    Set<String> routes = new HashSet<>();
+    // populate route_1_<something>, route_2_<something>, ... route_n_<something> tags and remove duplicates
+    Set<Long> routes = new HashSet<>();
     for (var route : relations) {
-      String routeString = route.network() + "=" + coalesce(route.ref(), "");
-      if (routes.add(routeString)) {
-        feature.setAttr("route_" + routes.size(), routeString);
+      if (routes.add(route.id())) {
+        String keyPrefix = "route_" + routes.size() + "_";
+
+        feature.setAttr(keyPrefix + "network", route.network());
+        feature.setAttr(keyPrefix + "ref", route.ref());
+        feature.setAttr(keyPrefix + "name", route.name());
+        feature.setAttr(keyPrefix + "colour", route.colour());
       }
     }
 

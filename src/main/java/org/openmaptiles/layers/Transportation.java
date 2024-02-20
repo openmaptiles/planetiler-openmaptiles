@@ -291,7 +291,10 @@ public class Transportation implements
     if (relation.hasTag("route", "road", "hiking")) {
       RouteNetwork networkType = null;
       String network = relation.getString("network");
-      String ref = relation.getString("ref");
+      String ref = nullIfEmpty(relation.getString("ref"));
+      String name = nullIfEmpty(relation.getString("name"));
+      String colour = coalesce(
+        nullIfEmpty(relation.getString("colour")), nullIfEmpty(relation.getString("ref:colour")));
 
       if ("e-road".equals(network)) {
         networkType = RouteNetwork.E_ROAD;
@@ -334,7 +337,8 @@ public class Transportation implements
       };
 
       if (network != null || rank < 3) {
-        return List.of(new RouteRelation(coalesce(ref, ""), network, networkType, (byte) rank, relation.id()));
+        return List
+          .of(new RouteRelation(coalesce(ref, ""), network, name, colour, networkType, (byte) rank, relation.id()));
       }
     }
     return null;
@@ -372,6 +376,7 @@ public class Transportation implements
               };
               result.add(new RouteRelation(refMatcher.group(),
                 networkType == null ? null : networkType.network,
+                null, null,
                 networkType, (byte) -1, 0));
             }
           } catch (GeometryException e) {
@@ -397,7 +402,9 @@ public class Transportation implements
                 case "trunk", "primary" -> RouteNetwork.IE_NATIONAL;
                 default -> RouteNetwork.IE_REGIONAL;
               };
-              result.add(new RouteRelation(refMatcher.group(), networkType.network, networkType, (byte) -1, 0));
+              result.add(new RouteRelation(refMatcher.group(),
+                networkType.network, null, null,
+                networkType, (byte) -1, 0));
             }
           } catch (GeometryException e) {
             e.log(stats, "omt_transportation_name_ie_test",
@@ -668,6 +675,8 @@ public class Transportation implements
   record RouteRelation(
     String ref,
     String network,
+    String name,
+    String colour,
     RouteNetwork networkType,
     byte rank,
     @Override long id
@@ -679,6 +688,8 @@ public class Transportation implements
         MemoryEstimator.estimateSize(rank) +
         POINTER_BYTES + estimateSize(ref) +
         POINTER_BYTES + estimateSize(network) +
+        POINTER_BYTES + estimateSize(name) +
+        POINTER_BYTES + estimateSize(colour) +
         POINTER_BYTES + // networkType
         MemoryEstimator.estimateSizeLong(id);
     }

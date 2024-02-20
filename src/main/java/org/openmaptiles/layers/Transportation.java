@@ -291,7 +291,7 @@ public class Transportation implements
     if (relation.hasTag("route", "road", "hiking")) {
       RouteNetwork networkType = null;
       String network = relation.getString("network");
-      String ref = nullIfEmpty(relation.getString("ref"));
+      String ref = relation.getString("ref");
       String name = nullIfEmpty(relation.getString("name"));
       String colour = coalesce(
         nullIfEmpty(relation.getString("colour")), nullIfEmpty(relation.getString("ref:colour")));

@@ -281,7 +281,7 @@ public class TransportationName implements
         String keyPrefix = "route_" + routes.size() + "_";
 
         feature.setAttr(keyPrefix + "network", route.network());
-        feature.setAttr(keyPrefix + "ref", route.ref());
+        feature.setAttr(keyPrefix + "ref", nullIfEmpty(route.ref()));
         feature.setAttr(keyPrefix + "name", route.name());
         feature.setAttr(keyPrefix + "colour", route.colour());
       }

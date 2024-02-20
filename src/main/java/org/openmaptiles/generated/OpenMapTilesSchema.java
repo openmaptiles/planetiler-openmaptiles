@@ -1465,18 +1465,54 @@ public class OpenMapTilesSchema {
        * </ul>
        */
       public static final String INDOOR = "indoor";
-      /** 1st route concurrency. */
-      public static final String ROUTE_1 = "route_1";
-      /** 2nd route concurrency. */
-      public static final String ROUTE_2 = "route_2";
-      /** 3rd route concurrency. */
-      public static final String ROUTE_3 = "route_3";
-      /** 4th route concurrency. */
-      public static final String ROUTE_4 = "route_4";
-      /** 5th route concurrency. */
-      public static final String ROUTE_5 = "route_5";
-      /** 6th route concurrency. */
-      public static final String ROUTE_6 = "route_6";
+      /** 1st route concurrency network. */
+      public static final String ROUTE_1_NETWORK = "route_1_network";
+      /** 1st route concurrency ref. */
+      public static final String ROUTE_1_REF = "route_1_ref";
+      /** 1st route concurrency name. */
+      public static final String ROUTE_1_NAME = "route_1_name";
+      /** 1st route concurrency colour. */
+      public static final String ROUTE_1_COLOUR = "route_1_colour";
+      /** 2nd route concurrency network. */
+      public static final String ROUTE_2_NETWORK = "route_2_network";
+      /** 2nd route concurrency ref. */
+      public static final String ROUTE_2_REF = "route_2_ref";
+      /** 2nd route concurrency name. */
+      public static final String ROUTE_2_NAME = "route_2_name";
+      /** 2nd route concurrency colour. */
+      public static final String ROUTE_2_COLOUR = "route_2_colour";
+      /** 3rd route concurrency network. */
+      public static final String ROUTE_3_NETWORK = "route_3_network";
+      /** 3rd route concurrency ref. */
+      public static final String ROUTE_3_REF = "route_3_ref";
+      /** 3rd route concurrency name. */
+      public static final String ROUTE_3_NAME = "route_3_name";
+      /** 3rd route concurrency colour. */
+      public static final String ROUTE_3_COLOUR = "route_3_colour";
+      /** 4th route concurrency network. */
+      public static final String ROUTE_4_NETWORK = "route_4_network";
+      /** 4th route concurrency ref. */
+      public static final String ROUTE_4_REF = "route_4_ref";
+      /** 4th route concurrency name. */
+      public static final String ROUTE_4_NAME = "route_4_name";
+      /** 4th route concurrency colour. */
+      public static final String ROUTE_4_COLOUR = "route_4_colour";
+      /** 5th route concurrency network. */
+      public static final String ROUTE_5_NETWORK = "route_5_network";
+      /** 5th route concurrency ref. */
+      public static final String ROUTE_5_REF = "route_5_ref";
+      /** 5th route concurrency name. */
+      public static final String ROUTE_5_NAME = "route_5_name";
+      /** 5th route concurrency colour. */
+      public static final String ROUTE_5_COLOUR = "route_5_colour";
+      /** 6th route concurrency network. */
+      public static final String ROUTE_6_NETWORK = "route_6_network";
+      /** 6th route concurrency ref. */
+      public static final String ROUTE_6_REF = "route_6_ref";
+      /** 6th route concurrency name. */
+      public static final String ROUTE_6_NAME = "route_6_name";
+      /** 6th route concurrency colour. */
+      public static final String ROUTE_6_COLOUR = "route_6_colour";
     }
     /** Attribute values for map elements in the transportation_name layer. */
     final class FieldValues {
@@ -1887,14 +1923,16 @@ public class OpenMapTilesSchema {
     }
     /** Complex mappings to generate attribute values from OSM element tags in the poi layer. */
     final class FieldMappings {
-      public static final MultiExpression<String> Class = MultiExpression.of(List.of(MultiExpression.entry("shop",
-        matchAny("subclass", "accessories", "antiques", "beauty", "bed", "boutique", "camera", "carpet", "charity",
-          "chemist", "coffee", "computer", "convenience", "confectionery", "copyshop", "cosmetics", "garden_centre",
-          "doityourself", "erotic", "electronics", "fabric", "florist", "frozen_food", "furniture", "video_games",
-          "video", "general", "gift", "hardware", "hearing_aids", "hifi", "ice_cream", "interior_decoration", "jewelry",
-          "kiosk", "locksmith", "lamps", "mall", "massage", "motorcycle", "mobile_phone", "newsagent", "optician",
-          "outdoor", "paint", "perfumery", "perfume", "pet", "photo", "second_hand", "shoes", "sports", "stationery",
-          "tailor", "tattoo", "ticket", "tobacco", "toys", "travel_agency", "watches", "weapons", "wholesale")),
+      public static final MultiExpression<String> Class = MultiExpression.of(List.of(
+        MultiExpression.entry("shop",
+          matchAny("subclass", "accessories", "antiques", "beauty", "bed", "boutique", "camera", "carpet", "charity",
+            "chemist", "chocolate", "coffee", "computer", "convenience", "confectionery", "copyshop", "cosmetics",
+            "garden_centre", "doityourself", "erotic", "electronics", "fabric", "florist", "frozen_food", "furniture",
+            "video_games", "video", "general", "gift", "hardware", "hearing_aids", "hifi", "interior_decoration",
+            "jewelry", "kiosk", "locksmith", "lamps", "mall", "massage", "motorcycle", "mobile_phone", "newsagent",
+            "optician", "outdoor", "paint", "perfumery", "perfume", "pet", "photo", "second_hand", "shoes", "sports",
+            "stationery", "tailor", "tattoo", "ticket", "tobacco", "toys", "travel_agency", "watches", "weapons",
+            "wholesale")),
         MultiExpression.entry("office",
           matchAny("subclass", "accountant", "advertising_agency", "architect", "association", "bail_bond_agent",
             "charity", "company", "construction_company", "consulting", "cooperative", "courier", "coworking",
@@ -1926,7 +1964,7 @@ public class OpenMapTilesSchema {
         MultiExpression.entry("lodging",
           matchAny("subclass", "hotel", "motel", "bed_and_breakfast", "guest_house", "hostel", "chalet", "alpine_hut",
             "dormitory")),
-        MultiExpression.entry("ice_cream", matchAny("subclass", "chocolate")),
+        MultiExpression.entry("ice_cream", matchAny("subclass", "ice_cream")),
         MultiExpression.entry("post", matchAny("subclass", "post_box", "post_office", "parcel_locker")),
         MultiExpression.entry("cafe", matchAny("subclass", "cafe")),
         MultiExpression.entry("school", matchAny("subclass", "school", "kindergarten")),

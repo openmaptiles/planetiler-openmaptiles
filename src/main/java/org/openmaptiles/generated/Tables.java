@@ -50,9 +50,8 @@ import java.util.Map;
 
 /**
  * OSM element parsers generated from the <a href="https://github.com/omniscale/imposm3">imposm3</a> table definitions
- * in the <a href=
- * "https://github.com/openmaptiles/openmaptiles/blob/fff7110aeb61882abfafe22d1618fbe6181d96cb/openmaptiles.yaml">OpenMapTiles
- * vector tile schema</a>.
+ * in the <a href="https://github.com/openmaptiles/openmaptiles/blob/master/openmaptiles.yaml">OpenMapTiles vector tile
+ * schema</a>.
  *
  * These filter and parse the raw OSM key/value attribute pairs on tags into records with fields that match the columns
  * in the tables that imposm3 would generate. Layer implementations can "subscribe" to elements from each "table" but

@@ -419,7 +419,7 @@ public class Transportation implements
 
   RouteRelation getRouteRelation(Tables.OsmHighwayLinestring element) {
     List<RouteRelation> all = getRouteRelations(element);
-    return all.isEmpty() ? null : all.get(0);
+    return all.isEmpty() ? null : all.getFirst();
   }
 
   @Override

@@ -278,9 +278,9 @@ public class TransportationName implements
     Set<String> routes = new HashSet<>();
     for (var route : relations) {
       String routeString = route.network() + "=" +
-          coalesce(route.ref(), "") + "=" +
-          coalesce(route.name(), "") + "=" +
-          coalesce(route.colour(), "");
+        coalesce(route.ref(), "") + "=" +
+        coalesce(route.name(), "") + "=" +
+        coalesce(route.colour(), "");
       if (routes.add(routeString)) {
         String keyPrefix = "route_" + routes.size() + "_";
 

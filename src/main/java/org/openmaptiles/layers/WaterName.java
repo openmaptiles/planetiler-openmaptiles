@@ -89,7 +89,7 @@ public class WaterName implements
   // need to synchronize updates from multiple threads
   private final LongObjectMap<Geometry> lakeCenterlines = Hppc.newLongObjectHashMap();
   // may be updated concurrently by multiple threads
-  private ConcurrentSkipListMap<String, NaturalEarthRegion> importantMarinePoints = new ConcurrentSkipListMap<>();
+  private final ConcurrentSkipListMap<String, NaturalEarthRegion> importantMarinePoints = new ConcurrentSkipListMap<>();
   private final Stats stats;
 
   public WaterName(Translations translations, PlanetilerConfig config, Stats stats) {
@@ -100,7 +100,7 @@ public class WaterName implements
   @Override
   public void release() {
     lakeCenterlines.release();
-    importantMarinePoints = null;
+    importantMarinePoints.clear();
   }
 
   @Override

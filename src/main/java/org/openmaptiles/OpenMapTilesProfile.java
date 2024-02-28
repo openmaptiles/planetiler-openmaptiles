@@ -120,6 +120,9 @@ public class OpenMapTilesProfile extends ForwardingProfile {
             return handler;
           })
           .toList();
+        if (handlers.isEmpty()) {
+          return null;
+        }
         return new RowDispatch(constructor.create(), handlers);
       }).simplify().indexAndWarn();
     wikidataMappings = Tables.MAPPINGS

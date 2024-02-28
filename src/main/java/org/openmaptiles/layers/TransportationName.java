@@ -275,9 +275,13 @@ public class TransportationName implements
       .setMinZoom(minzoom);
 
     // populate route_1_<something>, route_2_<something>, ... route_n_<something> tags and remove duplicates
-    Set<Long> routes = new HashSet<>();
+    Set<String> routes = new HashSet<>();
     for (var route : relations) {
-      if (routes.add(route.id())) {
+      String routeString = route.network() + "=" +
+          coalesce(route.ref(), "") + "=" +
+          coalesce(route.name(), "") + "=" +
+          coalesce(route.colour(), "");
+      if (routes.add(routeString)) {
         String keyPrefix = "route_" + routes.size() + "_";
 
         feature.setAttr(keyPrefix + "network", route.network());

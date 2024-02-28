@@ -378,7 +378,7 @@ public class Place implements
       int rank = AREA_RANKS.ceilingEntry(element.source().area()).getValue();
       int minzoom = rank <= 4 ? rank + 5 : 10;
 
-      features.centroid(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
+      features.pointOnSurface(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
         .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
         .setAttr(OpenMapTilesSchema.Boundary.Fields.CLASS, element.boundary())
         .setAttr(Fields.RANK, rank)

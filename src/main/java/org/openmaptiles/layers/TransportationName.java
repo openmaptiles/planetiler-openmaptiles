@@ -43,6 +43,7 @@ import static org.openmaptiles.util.Utils.*;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongByteMap;
 import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongObjectMap;
 import com.carrotsearch.hppc.LongSet;
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.FeatureMerge;
@@ -62,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
@@ -275,9 +277,13 @@ public class TransportationName implements
       .setMinZoom(minzoom);
 
     // populate route_1_<something>, route_2_<something>, ... route_n_<something> tags and remove duplicates
-    Set<Long> routes = new HashSet<>();
+    Set<String> routes = new HashSet<>();
     for (var route : relations) {
-      if (routes.add(route.id())) {
+      String routeString = route.network() + "=" +
+          coalesce(route.ref(), "") + "=" +
+          coalesce(route.name(), "") + "=" +
+          coalesce(route.colour(), "");
+      if (routes.add(routeString)) {
         String keyPrefix = "route_" + routes.size() + "_";
 
         feature.setAttr(keyPrefix + "network", route.network());

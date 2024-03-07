@@ -83,11 +83,13 @@ public class WaterName implements
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WaterName.class);
   private static final Set<String> SEA_OR_OCEAN_PLACE = Set.of("sea", "ocean");
+  private static final double IMPORTANT_MARINE_REGIONS_JOIN_DISTANCE =
+    GeoUtils.metersToPixelAtEquator(0, 50_000) / 256d;
   private final Translations translations;
   // need to synchronize updates from multiple threads
   private final LongObjectMap<Geometry> lakeCenterlines = Hppc.newLongObjectHashMap();
   // may be updated concurrently by multiple threads
-  private final ConcurrentSkipListMap<String, Integer> importantMarinePoints = new ConcurrentSkipListMap<>();
+  private final ConcurrentSkipListMap<String, NaturalEarthRegion> importantMarinePoints = new ConcurrentSkipListMap<>();
   private final Stats stats;
 
   public WaterName(Translations translations, PlanetilerConfig config, Stats stats) {
@@ -133,9 +135,47 @@ public class WaterName implements
       Integer scalerank = Parse.parseIntOrNull(feature.getTag("scalerank"));
       if (name != null && scalerank != null) {
         name = name.replaceAll("\\s+", " ").trim().toLowerCase();
-        importantMarinePoints.put(name, scalerank);
+        try {
+          importantMarinePoints.put(name, new NaturalEarthRegion(feature.worldGeometry(), scalerank));
+        } catch (GeometryException e) {
+          e.log(stats, "ne_marine_polys",
+            "Error getting geometry for natural earth feature " + table + " " + feature.getTag("ogc_fid"));
+        }
       }
     }
+  }
+
+  private NaturalEarthRegion getImportantMarineRegion(Tables.OsmMarinePoint element) {
+    var source = element.source();
+    String name = element.name().toLowerCase();
+    NaturalEarthRegion result = importantMarinePoints.get(name);
+    if (result == null) {
+      result = importantMarinePoints.get(source.getString("name:en", "").toLowerCase());
+    }
+    if (result == null) {
+      result = importantMarinePoints.get(source.getString("name:es", "").toLowerCase());
+    }
+    if (result == null) {
+      Map.Entry<String, NaturalEarthRegion> next = importantMarinePoints.ceilingEntry(name);
+      if (next != null && next.getKey().startsWith(name)) {
+        result = next.getValue();
+      }
+    }
+
+    if (result == null) {
+      return null;
+    }
+    try {
+      double distance = result.geometry.distance(source.worldGeometry());
+      if (distance <= IMPORTANT_MARINE_REGIONS_JOIN_DISTANCE) {
+        return result;
+      }
+    } catch (GeometryException e) {
+      e.log(stats, "osm_marine_point",
+        "Error getting geometry for OSM marine point " + element.source().id());
+    }
+
+    return null;
   }
 
   @Override
@@ -148,29 +188,14 @@ public class WaterName implements
       var source = element.source();
       // use name from OSM, but get min zoom from natural earth based on fuzzy name match...
       Integer rank = Parse.parseIntOrNull(source.getTag("rank"));
-      String name = element.name().toLowerCase();
-      Integer nerank;
-      if ((nerank = importantMarinePoints.get(name)) != null) {
-        rank = nerank;
-      } else if ((nerank = importantMarinePoints.get(source.getString("name:en", "").toLowerCase())) != null) {
-        rank = nerank;
-      } else if ((nerank = importantMarinePoints.get(source.getString("name:es", "").toLowerCase())) != null) {
-        rank = nerank;
-      } else {
-        Map.Entry<String, Integer> next = importantMarinePoints.ceilingEntry(name);
-        if (next != null && next.getKey().startsWith(name)) {
-          rank = next.getValue();
-        }
+      NaturalEarthRegion neRegion = getImportantMarineRegion(element);
+      if (neRegion != null) {
+        rank = neRegion.scalerank;
       }
       int minZoom;
       if ("ocean".equals(element.place())) {
         minZoom = 0;
       } else if (rank != null) {
-        // FIXME: While this looks like matching properly stuff in https://github.com/openmaptiles/openmaptiles/pull/1457/files#diff-201daa1c61c99073fe3280d440c9feca5ed2236b251ad454caa14cc203f952d1R74 ,
-        // it includes not just https://www.openstreetmap.org/relation/13360255 but also https://www.openstreetmap.org/node/1385157299 (and some others).
-        // Hence check how that OpenMapTiles code works for "James Bay" and:
-        // a) if same as here then, fix there and then here
-        // b) if OK (while here NOK), fix only here
         minZoom = rank;
       } else if ("bay".equals(element.natural())) {
         minZoom = 13;
@@ -220,4 +245,9 @@ public class WaterName implements
         .setMinZoom(minzoom);
     }
   }
+
+  private record NaturalEarthRegion(
+    Geometry geometry,
+    int scalerank
+  ) {}
 }

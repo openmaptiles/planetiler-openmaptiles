@@ -209,13 +209,20 @@ public class OpenMapTilesSchema {
     /** Attribute names for map elements in the waterway layer. */
     final class Fields {
       /**
-       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the waterway. The
-       * <code>name</code> field may be empty for NaturalEarth data or at lower zoom levels.
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the waterway.
+       * Language-specific values are in <code>name:xx</code>. The <code>name</code> field may be empty for NaturalEarth
+       * data or at lower zoom levels.
        */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
 
       /**
@@ -546,9 +553,15 @@ public class OpenMapTilesSchema {
 
     /** Attribute names for map elements in the mountain_peak layer. */
     final class Fields {
-      /** The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the peak. */
+      /**
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the peak.
+       * Language-specific values are in <code>name:xx</code>.
+       */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
       /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
       public static final String NAME_DE = "name_de";
@@ -606,10 +619,6 @@ public class OpenMapTilesSchema {
    * <a href=
    * "https://wiki.openstreetmap.org/wiki/Tag:boundary%3Dprotected_area"><code>boundary=protected_area</code></a>, or
    * <a href="https://wiki.openstreetmap.org/wiki/Tag:leisure%3Dnature_reserve"><code>leisure=nature_reserve</code></a>.
-   * This layer also includes boundaries for indigenous lands tagged with <a href=
-   * "https://wiki.openstreetmap.org/wiki/Tag:boundary%3Daboriginal_lands"><code>boundary=aboriginal_lands</code></a>.
-   * Indigenous boundaries are not parks, but they are included in this layer for technical reasons related to data
-   * processing. These boundaries represent areas with special legal and administrative status for indigenous peoples.
    *
    * Generated from
    * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/park/park.yaml">park.yaml</a>
@@ -627,27 +636,29 @@ public class OpenMapTilesSchema {
     final class Fields {
       /**
        * Use the <strong>class</strong> to differentiate between different kinds of features in the <code>parks</code>
-       * layer, for example between parks and non-parks. The class for <code>boundary=protected_area</code> parks is the
-       * lower-case of the
+       * layer. The class for <code>boundary=protected_area</code> parks is the lower-case of the
        * <a href="http://wiki.openstreetmap.org/wiki/key:protection_title"><code>protection_title</code></a> value with
        * blanks replaced by <code>_</code>. <code>national_park</code> is the class of
        * <code>protection_title=National Park</code> and <code>boundary=national_park</code>.
        * <code>nature_reserve</code> is the class of <code>protection_title=Nature Reserve</code> and
        * <code>leisure=nature_reserve</code>. The class for other
        * <a href="http://wiki.openstreetmap.org/wiki/key:protection_title"><code>protection_title</code></a> values is
-       * similarly assigned. The class for <code>boundary=aboriginal_lands</code> is <code>aboriginal_lands</code>.
+       * similarly assigned.
        */
       public static final String CLASS = "class";
       /**
        * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the park (point
-       * features only).
+       * features only). Language-specific values are in <code>name:xx</code>.
        */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code> (point features only). */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code> (point features only). This is
+       * deprecated and will be removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
       /**
        * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code> (point
-       * features only).
+       * features only). This is deprecated and will be removed in a future release in favor of <code>name:de</code>.
        */
       public static final String NAME_DE = "name_de";
       /** Rank of the park within one tile, starting at 1 that is the most important park (point features only). */
@@ -663,7 +674,7 @@ public class OpenMapTilesSchema {
     }
   }
   /**
-   * Contains administrative boundaries as linestrings. Until z4
+   * Contains administrative boundaries as linestrings and aboriginal lands as polygons. Until z4
    * <a href="http://www.naturalearthdata.com/downloads/">Natural Earth data</a> is used after which OSM boundaries
    * (<a href=
    * "http://wiki.openstreetmap.org/wiki/Tag:boundary%3Dadministrative"><code>boundary=administrative</code></a>) are
@@ -686,6 +697,15 @@ public class OpenMapTilesSchema {
 
     /** Attribute names for map elements in the boundary layer. */
     final class Fields {
+      /**
+       * Use the <strong>class</strong> to differentiate between different kinds of boundaries. The class for
+       * <code>boundary=aboriginal_lands</code> is <code>aboriginal_lands</code>.
+       */
+      public static final String CLASS = "class";
+      /**
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value (area features only).
+       */
+      public static final String NAME = "name";
       /**
        * OSM <a href="http://wiki.openstreetmap.org/wiki/Tag:boundary%3Dadministrative#admin_level">admin_level</a>
        * indicating the level of importance of this boundary. The <code>admin_level</code> corresponds to the lowest
@@ -1236,11 +1256,18 @@ public class OpenMapTilesSchema {
     final class Fields {
       /**
        * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the water body.
+       * Language-specific values are in <code>name:xx</code>.
        */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
 
       /**
@@ -1309,9 +1336,15 @@ public class OpenMapTilesSchema {
        * of the highway.
        */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
       /**
        * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:ref"><code>ref</code></a> tag of the motorway or its
@@ -1432,18 +1465,54 @@ public class OpenMapTilesSchema {
        * </ul>
        */
       public static final String INDOOR = "indoor";
-      /** 1st route concurrency. */
-      public static final String ROUTE_1 = "route_1";
-      /** 2nd route concurrency. */
-      public static final String ROUTE_2 = "route_2";
-      /** 3rd route concurrency. */
-      public static final String ROUTE_3 = "route_3";
-      /** 4th route concurrency. */
-      public static final String ROUTE_4 = "route_4";
-      /** 5th route concurrency. */
-      public static final String ROUTE_5 = "route_5";
-      /** 6th route concurrency. */
-      public static final String ROUTE_6 = "route_6";
+      /** 1st route concurrency network. */
+      public static final String ROUTE_1_NETWORK = "route_1_network";
+      /** 1st route concurrency ref. */
+      public static final String ROUTE_1_REF = "route_1_ref";
+      /** 1st route concurrency name. */
+      public static final String ROUTE_1_NAME = "route_1_name";
+      /** 1st route concurrency colour. */
+      public static final String ROUTE_1_COLOUR = "route_1_colour";
+      /** 2nd route concurrency network. */
+      public static final String ROUTE_2_NETWORK = "route_2_network";
+      /** 2nd route concurrency ref. */
+      public static final String ROUTE_2_REF = "route_2_ref";
+      /** 2nd route concurrency name. */
+      public static final String ROUTE_2_NAME = "route_2_name";
+      /** 2nd route concurrency colour. */
+      public static final String ROUTE_2_COLOUR = "route_2_colour";
+      /** 3rd route concurrency network. */
+      public static final String ROUTE_3_NETWORK = "route_3_network";
+      /** 3rd route concurrency ref. */
+      public static final String ROUTE_3_REF = "route_3_ref";
+      /** 3rd route concurrency name. */
+      public static final String ROUTE_3_NAME = "route_3_name";
+      /** 3rd route concurrency colour. */
+      public static final String ROUTE_3_COLOUR = "route_3_colour";
+      /** 4th route concurrency network. */
+      public static final String ROUTE_4_NETWORK = "route_4_network";
+      /** 4th route concurrency ref. */
+      public static final String ROUTE_4_REF = "route_4_ref";
+      /** 4th route concurrency name. */
+      public static final String ROUTE_4_NAME = "route_4_name";
+      /** 4th route concurrency colour. */
+      public static final String ROUTE_4_COLOUR = "route_4_colour";
+      /** 5th route concurrency network. */
+      public static final String ROUTE_5_NETWORK = "route_5_network";
+      /** 5th route concurrency ref. */
+      public static final String ROUTE_5_REF = "route_5_ref";
+      /** 5th route concurrency name. */
+      public static final String ROUTE_5_NAME = "route_5_name";
+      /** 5th route concurrency colour. */
+      public static final String ROUTE_5_COLOUR = "route_5_colour";
+      /** 6th route concurrency network. */
+      public static final String ROUTE_6_NETWORK = "route_6_network";
+      /** 6th route concurrency ref. */
+      public static final String ROUTE_6_REF = "route_6_ref";
+      /** 6th route concurrency name. */
+      public static final String ROUTE_6_NAME = "route_6_name";
+      /** 6th route concurrency colour. */
+      public static final String ROUTE_6_COLOUR = "route_6_colour";
     }
     /** Attribute values for map elements in the transportation_name layer. */
     final class FieldValues {
@@ -1534,11 +1603,20 @@ public class OpenMapTilesSchema {
 
     /** Attribute names for map elements in the place layer. */
     final class Fields {
-      /** The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the POI. */
+      /**
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the place.
+       * Language-specific values are in <code>name:xx</code>.
+       */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
 
       /**
@@ -1561,7 +1639,8 @@ public class OpenMapTilesSchema {
        * Original value of the <a href="http://wiki.openstreetmap.org/wiki/Key:place"><code>place</code></a> tag.
        * Distinguish between continents, countries, states, islands and places like settlements or smaller entities. Use
        * <strong>class</strong> to separately style the different places and build a text hierarchy according to their
-       * importance.
+       * importance. For places derived from boundaries, the original value of the
+       * <a href="http://wiki.openstreetmap.org/wiki/Key:boundary"><code>boundary</code></a> tag.
        * <p>
        * allowed values:
        * <ul>
@@ -1579,6 +1658,7 @@ public class OpenMapTilesSchema {
        * <li>"neighbourhood"
        * <li>"isolated_dwelling"
        * <li>"island"
+       * <li>"aboriginal_lands"
        * </ul>
        */
       public static final String CLASS = "class";
@@ -1617,8 +1697,10 @@ public class OpenMapTilesSchema {
       public static final String CLASS_NEIGHBOURHOOD = "neighbourhood";
       public static final String CLASS_ISOLATED_DWELLING = "isolated_dwelling";
       public static final String CLASS_ISLAND = "island";
-      public static final Set<String> CLASS_VALUES = Set.of("continent", "country", "state", "province", "city", "town",
-        "village", "hamlet", "borough", "suburb", "quarter", "neighbourhood", "isolated_dwelling", "island");
+      public static final String CLASS_ABORIGINAL_LANDS = "aboriginal_lands";
+      public static final Set<String> CLASS_VALUES =
+        Set.of("continent", "country", "state", "province", "city", "town", "village", "hamlet", "borough", "suburb",
+          "quarter", "neighbourhood", "isolated_dwelling", "island", "aboriginal_lands");
     }
     /** Complex mappings to generate attribute values from OSM element tags in the place layer. */
     final class FieldMappings {
@@ -1677,11 +1759,20 @@ public class OpenMapTilesSchema {
 
     /** Attribute names for map elements in the poi layer. */
     final class Fields {
-      /** The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the POI. */
+      /**
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the POI.
+       * Language-specific values are in <code>name:xx</code>.
+       */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
 
       /**
@@ -1835,12 +1926,13 @@ public class OpenMapTilesSchema {
       public static final MultiExpression<String> Class = MultiExpression.of(List.of(
         MultiExpression.entry("shop",
           matchAny("subclass", "accessories", "antiques", "beauty", "bed", "boutique", "camera", "carpet", "charity",
-            "chemist", "coffee", "computer", "convenience", "copyshop", "cosmetics", "garden_centre", "doityourself",
-            "erotic", "electronics", "fabric", "florist", "frozen_food", "furniture", "video_games", "video", "general",
-            "gift", "hardware", "hearing_aids", "hifi", "ice_cream", "interior_decoration", "jewelry", "kiosk",
-            "locksmith", "lamps", "mall", "massage", "motorcycle", "mobile_phone", "newsagent", "optician", "outdoor",
-            "paint", "perfumery", "perfume", "pet", "photo", "second_hand", "shoes", "sports", "stationery", "tailor",
-            "tattoo", "ticket", "tobacco", "toys", "travel_agency", "watches", "weapons", "wholesale")),
+            "chemist", "chocolate", "coffee", "computer", "convenience", "confectionery", "copyshop", "cosmetics",
+            "garden_centre", "doityourself", "erotic", "electronics", "fabric", "florist", "frozen_food", "furniture",
+            "video_games", "video", "general", "gift", "hardware", "hearing_aids", "hifi", "interior_decoration",
+            "jewelry", "kiosk", "locksmith", "lamps", "mall", "massage", "motorcycle", "mobile_phone", "newsagent",
+            "optician", "outdoor", "paint", "perfumery", "perfume", "pet", "photo", "second_hand", "shoes", "sports",
+            "stationery", "tailor", "tattoo", "ticket", "tobacco", "toys", "travel_agency", "watches", "weapons",
+            "wholesale")),
         MultiExpression.entry("office",
           matchAny("subclass", "accountant", "advertising_agency", "architect", "association", "bail_bond_agent",
             "charity", "company", "construction_company", "consulting", "cooperative", "courier", "coworking",
@@ -1872,7 +1964,7 @@ public class OpenMapTilesSchema {
         MultiExpression.entry("lodging",
           matchAny("subclass", "hotel", "motel", "bed_and_breakfast", "guest_house", "hostel", "chalet", "alpine_hut",
             "dormitory")),
-        MultiExpression.entry("ice_cream", matchAny("subclass", "chocolate", "confectionery")),
+        MultiExpression.entry("ice_cream", matchAny("subclass", "ice_cream")),
         MultiExpression.entry("post", matchAny("subclass", "post_box", "post_office", "parcel_locker")),
         MultiExpression.entry("cafe", matchAny("subclass", "cafe")),
         MultiExpression.entry("school", matchAny("subclass", "school", "kindergarten")),
@@ -1911,11 +2003,20 @@ public class OpenMapTilesSchema {
 
     /** Attribute names for map elements in the aerodrome_label layer. */
     final class Fields {
-      /** The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the aerodrome. */
+      /**
+       * The OSM <a href="http://wiki.openstreetmap.org/wiki/Key:name"><code>name</code></a> value of the aerodrome.
+       * Language-specific values are in <code>name:xx</code>.
+       */
       public static final String NAME = "name";
-      /** English name <code>name:en</code> if available, otherwise <code>name</code>. */
+      /**
+       * English name <code>name:en</code> if available, otherwise <code>name</code>. This is deprecated and will be
+       * removed in a future release in favor of <code>name:en</code>.
+       */
       public static final String NAME_EN = "name_en";
-      /** German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. */
+      /**
+       * German name <code>name:de</code> if available, otherwise <code>name</code> or <code>name:en</code>. This is
+       * deprecated and will be removed in a future release in favor of <code>name:de</code>.
+       */
       public static final String NAME_DE = "name_de";
 
       /**

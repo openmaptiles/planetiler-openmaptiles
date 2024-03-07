@@ -139,6 +139,11 @@ public class Poi implements
   }
 
   private String poiClass(String subclass, String mappingKey) {
+    // Special case subclass collision between office=university and amenity=university
+    if ("amenity".equals(mappingKey) && "university".equals(subclass)) {
+      return FieldValues.CLASS_COLLEGE;
+    }
+
     subclass = coalesce(subclass, "");
     return classMapping.getOrElse(Map.of(
       "subclass", subclass,

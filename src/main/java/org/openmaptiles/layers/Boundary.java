@@ -79,6 +79,8 @@ import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
+import org.openmaptiles.generated.Tables;
+import org.openmaptiles.util.OmtLanguageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,6 +97,7 @@ public class Boundary implements
   OpenMapTilesProfile.NaturalEarthProcessor,
   OpenMapTilesProfile.OsmRelationPreprocessor,
   OpenMapTilesProfile.OsmAllProcessor,
+  Tables.OsmBoundaryPolygon.Handler,
   OpenMapTilesProfile.FeaturePostProcessor,
   OpenMapTilesProfile.FinishHandler {
 
@@ -127,6 +130,7 @@ public class Boundary implements
   private final Map<Long, List<Geometry>> regionGeometries = new HashMap<>();
   private final Map<CountryBoundaryComponent, List<Geometry>> boundariesToMerge = new HashMap<>();
   private final PlanetilerConfig config;
+  private final Translations translations;
 
   public Boundary(Translations translations, PlanetilerConfig config, Stats stats) {
     this.config = config;
@@ -141,6 +145,7 @@ public class Boundary implements
       false
     );
     this.stats = stats;
+    this.translations = translations;
   }
 
   private static boolean isDisputed(Map<String, Object> tags) {
@@ -304,6 +309,15 @@ public class Boundary implements
         }
       }
     }
+  }
+
+  @Override
+  public void process(Tables.OsmBoundaryPolygon element, FeatureCollector features) {
+    features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
+      .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
+      .setAttr(OpenMapTilesSchema.Boundary.Fields.CLASS, element.boundary())
+      .setMinPixelSizeBelowZoom(13, 4) // for Z4: `sql_filter: area>power(ZRES3,2)`, etc.
+      .setMinZoom(4);
   }
 
   @Override

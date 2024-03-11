@@ -162,13 +162,13 @@ class WaterNameTest extends AbstractLayerTest {
   @Test
   void testWaterNameBayBig() {
     assertFeatures(11, List.of(), process(SimpleFeature.create(
-        newLineString(0, 0, 1, 1),
-        new HashMap<>(Map.<String, Object>of(
-            "OSM_ID", -10
-        )),
-        OpenMapTilesProfile.LAKE_CENTERLINE_SOURCE,
-        null,
-        0
+      newLineString(0, 0, 1, 1),
+      new HashMap<>(Map.<String, Object>of(
+        "OSM_ID", -10
+      )),
+      OpenMapTilesProfile.LAKE_CENTERLINE_SOURCE,
+      null,
+      0
     )));
     assertFeatures(10, List.of(Map.of(
       "name", "bay",

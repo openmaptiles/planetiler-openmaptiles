@@ -82,6 +82,7 @@ public class WaterName implements
    */
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WaterName.class);
+  private static final double LOG2 = Math.log(2);
   private static final Set<String> SEA_OR_OCEAN_PLACE = Set.of("sea", "ocean");
   private static final double IMPORTANT_MARINE_REGIONS_JOIN_DISTANCE =
     GeoUtils.metersToPixelAtEquator(0, 50_000) / 256d;
@@ -214,35 +215,49 @@ public class WaterName implements
   @Override
   public void process(Tables.OsmWaterPolygon element, FeatureCollector features) {
     if (nullIfEmpty(element.name()) != null) {
-      Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
-      FeatureCollector.Feature feature;
-      int minzoom = 9;
-      String place = element.place();
-      String clazz;
-      if ("bay".equals(element.natural())) {
-        clazz = FieldValues.CLASS_BAY;
-      } else if ("sea".equals(place)) {
-        clazz = FieldValues.CLASS_SEA;
-      } else {
-        clazz = FieldValues.CLASS_LAKE;
-        minzoom = 3;
+      try {
+        Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
+        FeatureCollector.Feature feature;
+        int minzoom = 9;
+        String place = element.place();
+        String clazz;
+        if ("bay".equals(element.natural())) {
+          clazz = FieldValues.CLASS_BAY;
+        } else if ("sea".equals(place)) {
+          clazz = FieldValues.CLASS_SEA;
+        } else {
+          clazz = FieldValues.CLASS_LAKE;
+          minzoom = 3;
+        }
+        if (centerlineGeometry != null) {
+          // prefer lake centerline if it exists
+          // TODO: ... but by doing this we're diverging from OpenMapTiles since say "Notre Dame Bay" is shown:
+          // 1) OpenMapTiles: as point from Z7
+          // 2) planetiler-openmaptiles: as line from Z9
+          feature = features.geometry(LAYER_NAME, centerlineGeometry)
+            .setMinPixelSizeBelowZoom(13, 6d * element.name().length());
+        } else {
+          // otherwise just use a label point inside the lake
+          feature = features.pointOnSurface(LAYER_NAME);
+          // Show a label if a water feature covers at least 1/4 of a tile or z14+
+          Geometry geometry = element.source().worldGeometry();
+          double area = geometry.getArea();
+          minzoom = (int) Math.floor(-1d - Math.log(Math.sqrt(area)) / LOG2);
+          if (place != null && SEA_OR_OCEAN_PLACE.contains(place)) {
+            minzoom = Math.clamp(minzoom, 0, 14);
+          } else {
+            minzoom = Math.clamp(minzoom, 3, 14);
+          }
+        }
+        feature
+          .setAttr(Fields.CLASS, clazz)
+          .setBufferPixels(BUFFER_SIZE)
+          .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
+          .setAttr(Fields.INTERMITTENT, element.isIntermittent() ? 1 : 0)
+          .setMinZoom(minzoom);
+      } catch (GeometryException e) {
+        e.log(stats, "omt_water_polygon", "Unable to get geometry for water polygon " + element.source().id());
       }
-      if (centerlineGeometry != null) {
-        // prefer lake centerline if it exists
-        feature = features.geometry(LAYER_NAME, centerlineGeometry)
-          .setMinPixelSizeBelowZoom(13, 6d * element.name().length());
-      } else {
-        // otherwise just use a label point inside the lake
-        feature = features.pointOnSurface(LAYER_NAME)
-          .setMinZoom(place != null && SEA_OR_OCEAN_PLACE.contains(place) ? 0 : 3)
-          .setMinPixelSize(128); // tiles are 256x256, so 128x128 is 1/4 of a tile
-      }
-      feature
-        .setAttr(Fields.CLASS, clazz)
-        .setBufferPixels(BUFFER_SIZE)
-        .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
-        .setAttr(Fields.INTERMITTENT, element.isIntermittent() ? 1 : 0)
-        .setMinZoom(minzoom);
     }
   }
 

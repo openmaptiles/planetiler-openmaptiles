@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
@@ -73,6 +74,14 @@ public class Landuse implements
     13, 4,
     7, 2,
     6, 1
+  ));
+  private static final TreeMap<Integer, Double> MINDIST_AND_BUFFER_SIZES = new TreeMap<>(Map.of(
+    5, 0.1,
+    // there is quite huge jump between Z5:NE and Z6:OSM => bigger generalization needed to make the transition more smooth
+    6, 0.5,
+    7, 0.25,
+    8, 0.125,
+    Integer.MAX_VALUE, 0.1
   ));
   private static final Set<String> Z6_CLASSES = Set.of(
     FieldValues.CLASS_RESIDENTIAL,
@@ -134,10 +143,14 @@ public class Landuse implements
         result.add(item);
       }
     }
-    var merged = zoom <= 12 ?
-      FeatureMerge.mergeNearbyPolygons(toMerge, 1, 1, 0.1, 0.1) :
+    List<VectorTile.Feature> merged;
+    if (zoom <= 12) {
+      double minDistAndBuffer = MINDIST_AND_BUFFER_SIZES.ceilingEntry(zoom).getValue();
+      merged = FeatureMerge.mergeNearbyPolygons(toMerge, 1, 1, minDistAndBuffer, minDistAndBuffer);
+    } else {
       // reduces size of some heavy z13-14 tiles with lots of small polygons
-      FeatureMerge.mergeMultiPolygon(toMerge);
+      merged = FeatureMerge.mergeMultiPolygon(toMerge);
+    }
     result.addAll(merged);
     return result;
   }

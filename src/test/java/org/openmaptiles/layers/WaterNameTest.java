@@ -62,7 +62,7 @@ class WaterNameTest extends AbstractLayerTest {
       "_maxzoom", 14,
       "_minpixelsize", "waterway".length() * 6d
     )), process(SimpleFeature.create(
-      GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1))),
+      GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1E-7))),
       new HashMap<>(Map.<String, Object>of(
         "name", "waterway",
         "name:es", "waterway es",
@@ -112,7 +112,7 @@ class WaterNameTest extends AbstractLayerTest {
       "_maxzoom", 14,
       "_minpixelsize", "waterway".length() * 6d
     )), process(SimpleFeature.create(
-      GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1))),
+      GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1E-7))),
       new HashMap<>(Map.<String, Object>of(
         "name", "waterway",
         "name:es", "waterway es",

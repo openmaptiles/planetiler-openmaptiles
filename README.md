@@ -30,7 +30,8 @@ available options.
   lines, to revert this behavior set `--transportation-name-brunnel=true`
 - `rank` field on `mountain_peak` linestrings only has 3 levels (1: has wikipedia page and name, 2: has name, 3: no name
   or wikipedia page or name)
-- some line and polygon tolerances are different, can be tweaked with `--simplify-tolerance` parameter
+- Some line and polygon tolerances are different, can be tweaked with `--simplify-tolerance` parameter
+- For bigger bays whose label points show above Z9, centerline is used for Z9+
 
 ## Customizing
 

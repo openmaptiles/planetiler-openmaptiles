@@ -234,12 +234,11 @@ public class WaterName implements
           // TODO: ... but by doing this we're diverging from OpenMapTiles since say "Notre Dame Bay" is shown:
           // 1) OpenMapTiles: as point from Z7
           // 2) planetiler-openmaptiles: as line from Z9
-          feature = features.geometry(LAYER_NAME, centerlineGeometry)
+          setupOsmWaterPolygonFeature(element, features.geometry(LAYER_NAME, centerlineGeometry), clazz, minzoom)
             .setMinPixelSizeBelowZoom(13, 6d * element.name().length());
         } else {
-          // otherwise just use a label point inside the lake
-          feature = features.pointOnSurface(LAYER_NAME);
-          // Show a label if a water feature covers at least 1/4 of a tile or z14+
+          // otherwise just use a label point inside the lake,
+          // show a label if a water feature covers at least 1/4 of a tile or z14+
           Geometry geometry = element.source().worldGeometry();
           double area = geometry.getArea();
           minzoom = (int) Math.floor(-1d - Math.log(Math.sqrt(area)) / LOG2);
@@ -248,17 +247,22 @@ public class WaterName implements
           } else {
             minzoom = Math.clamp(minzoom, 3, 14);
           }
+          setupOsmWaterPolygonFeature(element, features.pointOnSurface(LAYER_NAME), clazz, minzoom);
         }
-        feature
-          .setAttr(Fields.CLASS, clazz)
-          .setBufferPixels(BUFFER_SIZE)
-          .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
-          .setAttr(Fields.INTERMITTENT, element.isIntermittent() ? 1 : 0)
-          .setMinZoom(minzoom);
       } catch (GeometryException e) {
         e.log(stats, "omt_water_polygon", "Unable to get geometry for water polygon " + element.source().id());
       }
     }
+  }
+
+  private FeatureCollector.Feature setupOsmWaterPolygonFeature(Tables.OsmWaterPolygon element, FeatureCollector.Feature output, String clazz, int minzoom) {
+    output
+      .setAttr(Fields.CLASS, clazz)
+      .setBufferPixels(BUFFER_SIZE)
+      .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
+      .setAttr(Fields.INTERMITTENT, element.isIntermittent() ? 1 : 0)
+      .setMinZoom(minzoom);
+    return output;
   }
 
   private record NaturalEarthRegion(

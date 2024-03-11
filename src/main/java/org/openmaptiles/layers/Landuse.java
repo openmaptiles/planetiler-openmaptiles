@@ -87,11 +87,10 @@ public class Landuse implements
   public void processNaturalEarth(String table, SourceFeature feature, FeatureCollector features) {
     if ("ne_50m_urban_areas".equals(table)) {
       Double scalerank = Parse.parseDoubleOrNull(feature.getTag("scalerank"));
-      if (scalerank != null && scalerank <= 2) {
-        features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
-          .setAttr(Fields.CLASS, FieldValues.CLASS_RESIDENTIAL)
-          .setZoomRange(4, 5);
-      }
+      int minzoom = (scalerank != null && scalerank <= 2) ? 4 : 5;
+      features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
+        .setAttr(Fields.CLASS, FieldValues.CLASS_RESIDENTIAL)
+        .setZoomRange(minzoom, 5);
     }
   }
 

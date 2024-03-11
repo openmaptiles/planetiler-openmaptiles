@@ -383,6 +383,29 @@ class BoundaryTest extends AbstractLayerTest {
   }
 
   @Test
+  void testOsmAl2BoundaryDisputedMinZoom() {
+    var relation = new OsmElement.Relation(1);
+    relation.setTag("type", "boundary");
+    relation.setTag("admin_level", "2");
+    relation.setTag("boundary", "administrative");
+
+    assertFeatures(3, List.of(Map.of(
+      "_layer", "boundary",
+      "_type", "line",
+      "_minzoom", 3,
+
+      "disputed", 1,
+      "maritime", 0,
+      "admin_level", 2
+    )), process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(relation),
+      Map.of(
+        "disputed", "yes"
+      ))
+    ));
+  }
+
+  @Test
   void testCountryBoundaryEmittedIfNoName() {
     var relation = new OsmElement.Relation(1);
     relation.setTag("type", "boundary");

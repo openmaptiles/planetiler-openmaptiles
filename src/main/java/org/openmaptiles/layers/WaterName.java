@@ -86,6 +86,9 @@ public class WaterName implements
   private static final Set<String> SEA_OR_OCEAN_PLACE = Set.of("sea", "ocean");
   private static final double IMPORTANT_MARINE_REGIONS_JOIN_DISTANCE =
     GeoUtils.metersToPixelAtEquator(0, 50_000) / 256d;
+  private static final int MINZOOM_BAY = 9;
+  private static final int MINZOOM_LAKE = 3;
+  private static final int MINZOOM_SEA_AND_OCEAN = 0;
   private final Translations translations;
   // need to synchronize updates from multiple threads
   private final LongObjectMap<Geometry> lakeCenterlines = Hppc.newLongObjectHashMap();
@@ -217,8 +220,7 @@ public class WaterName implements
     if (nullIfEmpty(element.name()) != null) {
       try {
         Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
-        FeatureCollector.Feature feature;
-        int minzoom = 9;
+        int minzoom = MINZOOM_BAY;
         String place = element.place();
         String clazz;
         if ("bay".equals(element.natural())) {
@@ -227,27 +229,34 @@ public class WaterName implements
           clazz = FieldValues.CLASS_SEA;
         } else {
           clazz = FieldValues.CLASS_LAKE;
-          minzoom = 3;
+          minzoom = MINZOOM_LAKE;
         }
         if (centerlineGeometry != null) {
-          // prefer lake centerline if it exists
-          // TODO: ... but by doing this we're diverging from OpenMapTiles since say "Notre Dame Bay" is shown:
-          // 1) OpenMapTiles: as point from Z7
-          // 2) planetiler-openmaptiles: as line from Z9
-          setupOsmWaterPolygonFeature(element, features.geometry(LAYER_NAME, centerlineGeometry), clazz, minzoom)
-            .setMinPixelSizeBelowZoom(13, 6d * element.name().length());
+          // prefer lake centerline if it exists, but point will be also used if minzoom bellow 9 is calculated from area
+          // note: Here we're diverging from OpenMapTiles: For bays with minzoom (based on area) point is used between
+          // minzoom and Z8 and for Z9+ centerline is used, while OpenMaptiles sticks with points.
+          setupOsmWaterPolygonFeature(
+            element, features.geometry(LAYER_NAME, centerlineGeometry), clazz, Math.min(minzoom, MINZOOM_BAY))
+              .setMinPixelSizeBelowZoom(13, 6d * element.name().length());
+        }
+
+        // Show a label if a water feature covers at least 1/4 of a tile or z14+
+        Geometry geometry = element.source().worldGeometry();
+        double area = geometry.getArea();
+        minzoom = (int) Math.floor(-1d - Math.log(Math.sqrt(area)) / LOG2);
+        if (place != null && SEA_OR_OCEAN_PLACE.contains(place)) {
+          minzoom = Math.clamp(minzoom, MINZOOM_SEA_AND_OCEAN, 14);
         } else {
-          // otherwise just use a label point inside the lake,
-          // show a label if a water feature covers at least 1/4 of a tile or z14+
-          Geometry geometry = element.source().worldGeometry();
-          double area = geometry.getArea();
-          minzoom = (int) Math.floor(-1d - Math.log(Math.sqrt(area)) / LOG2);
-          if (place != null && SEA_OR_OCEAN_PLACE.contains(place)) {
-            minzoom = Math.clamp(minzoom, 0, 14);
-          } else {
-            minzoom = Math.clamp(minzoom, 3, 14);
+          minzoom = Math.clamp(minzoom, MINZOOM_LAKE, 14);
+        }
+
+        if (centerlineGeometry == null || minzoom < MINZOOM_BAY) {
+          // otherwise just use a label point inside the lake
+          var feature = setupOsmWaterPolygonFeature(element, features.pointOnSurface(LAYER_NAME), clazz, minzoom);
+          if (centerlineGeometry != null) {
+            // centerline already created, so make sure we're not having both at same zoom level
+            feature.setMaxZoom(MINZOOM_BAY - 1);
           }
-          setupOsmWaterPolygonFeature(element, features.pointOnSurface(LAYER_NAME), clazz, minzoom);
         }
       } catch (GeometryException e) {
         e.log(stats, "omt_water_polygon", "Unable to get geometry for water polygon " + element.source().id());
@@ -255,7 +264,8 @@ public class WaterName implements
     }
   }
 
-  private FeatureCollector.Feature setupOsmWaterPolygonFeature(Tables.OsmWaterPolygon element, FeatureCollector.Feature output, String clazz, int minzoom) {
+  private FeatureCollector.Feature setupOsmWaterPolygonFeature(Tables.OsmWaterPolygon element,
+    FeatureCollector.Feature output, String clazz, int minzoom) {
     output
       .setAttr(Fields.CLASS, clazz)
       .setBufferPixels(BUFFER_SIZE)

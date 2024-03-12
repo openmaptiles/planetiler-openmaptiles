@@ -118,7 +118,7 @@ class BoundaryTest extends AbstractLayerTest {
     assertFeatures(0, List.of(), process(SimpleFeature.create(
       newLineString(0, 0, 1, 1),
       Map.of(
-        "featurecla", "Lease Limit"
+        "featurecla", "Lease limit"
       ),
       OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
       "ne_10m_admin_0_boundary_lines_land",

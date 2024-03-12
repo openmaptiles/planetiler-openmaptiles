@@ -179,7 +179,7 @@ public class Boundary implements
     BoundaryInfo info = switch (table) {
       case "ne_110m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 0, 0);
       case "ne_50m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 1, 3);
-      case "ne_10m_admin_0_boundary_lines_land" -> feature.hasTag("featurecla", "Lease Limit") ? null :
+      case "ne_10m_admin_0_boundary_lines_land" -> feature.hasTag("featurecla", "Lease limit") ? null :
         new BoundaryInfo(2, 4, 4);
       case "ne_10m_admin_1_states_provinces_lines" -> {
         Double minZoom = Parse.parseDoubleOrNull(feature.getTag("min_zoom"));

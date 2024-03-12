@@ -166,8 +166,8 @@ If you want to regenerate from a different repository than the default openmapti
 All code in this repository is under the [BSD license](./LICENSE.md) and the cartography decisions encoded in the schema
 and SQL are licensed under [CC-BY](./LICENSE.md).
 
-Products or services using maps derived from OpenMapTiles schema need to visibly credit "OpenMapTiles.org" or
-reference "OpenMapTiles" with a link to https://openmaptiles.org/. Exceptions to attribution requirement can be granted
+Products or services using maps derived from OpenMapTiles schema need to **visibly credit "OpenMapTiles.org"** or
+**reference "OpenMapTiles"** with a link to https://openmaptiles.org/. Exceptions to attribution requirement can be granted
 on request.
 
 For a browsable electronic map based on OpenMapTiles and OpenStreetMap data, the

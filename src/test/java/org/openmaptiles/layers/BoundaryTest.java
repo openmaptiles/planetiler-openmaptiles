@@ -392,7 +392,7 @@ class BoundaryTest extends AbstractLayerTest {
     assertFeatures(3, List.of(Map.of(
       "_layer", "boundary",
       "_type", "line",
-      "_minzoom", 3,
+      "_minzoom", 5,
 
       "disputed", 1,
       "maritime", 0,

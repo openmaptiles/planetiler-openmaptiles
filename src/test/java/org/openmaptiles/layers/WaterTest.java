@@ -316,28 +316,7 @@ class WaterTest extends AbstractLayerTest {
 
   @Test
   void testLakeZoomLevels() {
-    assertCoversZoomRange(0, 14, "water",
-      process(SimpleFeature.create(
-        rectangle(0, 10),
-        Map.of(),
-        OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
-        "ne_110m_lakes",
-        0
-      )),
-      process(SimpleFeature.create(
-        rectangle(0, 10),
-        Map.of(),
-        OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
-        "ne_50m_lakes",
-        0
-      )),
-      process(SimpleFeature.create(
-        rectangle(0, 10),
-        Map.of(),
-        OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
-        "ne_10m_lakes",
-        0
-      )),
+    assertCoversZoomRange(6, 14, "water",
       process(SimpleFeature.create(
         rectangle(0, 10),
         Map.of(

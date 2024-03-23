@@ -263,8 +263,7 @@ public class Boundary implements
           feature.hasTag("natural", "coastline") ||
           feature.hasTag("boundary_type", "maritime");
         int minzoom =
-          (disputed && minAdminLevel == 2) ? 3 :
-            ((maritime || disputed) && minAdminLevel == 2) ? 4 :
+          (maritime && minAdminLevel == 2) ? 4 :
             minAdminLevel <= 4 ? 5 :
             minAdminLevel <= 6 ? 9 :
             minAdminLevel <= 8 ? 11 : 12;

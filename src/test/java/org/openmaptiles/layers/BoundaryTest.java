@@ -104,11 +104,29 @@ class BoundaryTest extends AbstractLayerTest {
     assertFeatures(0, List.of(Map.of(
       "_layer", "boundary",
       "_type", "line",
+      "_minzoom", 4,
       "admin_level", 2
     )), process(SimpleFeature.create(
       newLineString(0, 0, 1, 1),
       Map.of(
         "featurecla", "International boundary (verify)"
+      ),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_admin_0_boundary_lines_land",
+      0
+    )));
+
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "boundary",
+      "_type", "line",
+      "_minzoom", 1,
+      "admin_level", 2
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "featurecla", "Disputed (please verify)",
+        "adm0_left", "South Sudan",
+        "adm0_right", "Kenya"
       ),
       OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
       "ne_10m_admin_0_boundary_lines_land",
@@ -392,7 +410,7 @@ class BoundaryTest extends AbstractLayerTest {
     assertFeatures(3, List.of(Map.of(
       "_layer", "boundary",
       "_type", "line",
-      "_minzoom", 3,
+      "_minzoom", 5,
 
       "disputed", 1,
       "maritime", 0,

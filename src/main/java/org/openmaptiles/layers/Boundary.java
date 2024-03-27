@@ -179,8 +179,17 @@ public class Boundary implements
     BoundaryInfo info = switch (table) {
       case "ne_110m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 0, 0);
       case "ne_50m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 1, 3);
-      case "ne_10m_admin_0_boundary_lines_land" -> feature.hasTag("featurecla", "Lease limit") ? null :
-        new BoundaryInfo(2, 4, 4);
+      case "ne_10m_admin_0_boundary_lines_land" -> {
+        boolean isDisputedSouthSudanAndKenya = false;
+        if (disputed) {
+          String left = feature.getString("adm0_left");
+          String right = feature.getString("adm0_right");
+          isDisputedSouthSudanAndKenya = "South Sudan".equals(left) && "Kenya".equals(right);
+        }
+        yield isDisputedSouthSudanAndKenya ? new BoundaryInfo(2, 1, 4) :
+          feature.hasTag("featurecla", "Lease limit") ? null :
+          new BoundaryInfo(2, 4, 4);
+      }
       case "ne_10m_admin_1_states_provinces_lines" -> {
         Double minZoom = Parse.parseDoubleOrNull(feature.getTag("min_zoom"));
         yield minZoom != null && minZoom <= 7 ? new BoundaryInfo(4, 1, 4) :

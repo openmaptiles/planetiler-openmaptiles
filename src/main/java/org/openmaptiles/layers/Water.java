@@ -84,7 +84,7 @@ public class Water implements
 
   // smallest NE lake is around 4.42E-13, smallest matching OSM lake is 9.34E-13, this is slightly bellow that
   // and approx. 33% of OSM features are smaller than this, hence to save some CPU cycles:
-  private static final double SMALLEST_OSM_LAKE_AREA = Math.pow(4, -20);
+  private static final double OSM_ID_MATCH_AREA_LIMIT = Math.pow(4, -20);
 
   private final MultiExpression.Index<String> classMapping;
   private final PlanetilerConfig config;
@@ -201,7 +201,7 @@ public class Water implements
 
       // if OSM lake is too small for Z6 (e.g. area bellow ~4px) we assume there is no matching NE lake
       Geometry geom = element.source().worldGeometry();
-      if (geom.getArea() < SMALLEST_OSM_LAKE_AREA) {
+      if (geom.getArea() < OSM_ID_MATCH_AREA_LIMIT) {
         return;
       }
 

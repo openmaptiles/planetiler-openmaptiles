@@ -82,8 +82,8 @@ public class Water implements
    * which infers ocean polygons by preprocessing all coastline elements.
    */
 
-  // smallest NE lake is around 4.42E-13, this is roughly 1/2 of that and approx 17% of OSM features are smaller than this:
-  private static final double SMALLEST_OSM_LAKE_AREA = Math.pow(4, -21);
+  // smallest NE lake is around 4.42E-13, this is roughly that and approx. 23% of OSM features are smaller than this:
+  private static final double SMALLEST_OSM_LAKE_AREA = Math.pow(4, -20.5);
 
   private final MultiExpression.Index<String> classMapping;
   private final PlanetilerConfig config;
@@ -210,7 +210,7 @@ public class Water implements
       for (var index : neLakeIndexes.values()) {
         var items = index.query(envelope);
         if (items.size() == 1) {
-          if (items.getFirst()instanceof LakeInfo lakeInfo) {
+          if (items.getFirst() instanceof LakeInfo lakeInfo) {
             fillOsmIdIntoNeLake(element, geom, lakeInfo);
           }
         } else if (!items.isEmpty()) {

@@ -19,7 +19,8 @@ class LanduseTest extends AbstractLayerTest {
     assertFeatures(0, List.of(Map.of(
       "_layer", "landuse",
       "class", "residential",
-      "_buffer", 4d
+      "_buffer", 4d,
+      "_minzoom", 4
     )), process(SimpleFeature.create(
       GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1))),
       Map.of("scalerank", 1.9),
@@ -27,7 +28,12 @@ class LanduseTest extends AbstractLayerTest {
       "ne_50m_urban_areas",
       0
     )));
-    assertFeatures(0, List.of(), process(SimpleFeature.create(
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "landuse",
+      "class", "residential",
+      "_buffer", 4d,
+      "_minzoom", 5
+    )), process(SimpleFeature.create(
       GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1))),
       Map.of("scalerank", 2.1),
       OpenMapTilesProfile.NATURAL_EARTH_SOURCE,

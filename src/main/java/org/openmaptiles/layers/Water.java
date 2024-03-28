@@ -211,7 +211,7 @@ public class Water implements
       for (var index : neLakeIndexes.values()) {
         var items = index.query(envelope);
         if (items.size() == 1) {
-          if (items.getFirst() instanceof LakeInfo lakeInfo) {
+          if (items.getFirst()instanceof LakeInfo lakeInfo) {
             fillOsmIdIntoNeLake(element, geom, lakeInfo);
           }
         } else if (!items.isEmpty()) {

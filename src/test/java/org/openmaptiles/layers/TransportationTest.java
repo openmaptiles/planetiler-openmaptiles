@@ -671,6 +671,26 @@ class TransportationTest extends AbstractLayerTest {
   }
 
   @Test
+  void testMotorwayRoadConstruction() {
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "motorway_construction",
+      "oneway", 1,
+      "_minzoom", 4
+    ), Map.of(
+      "_layer", "transportation_name",
+      "name", "D4 II/118 – Milín",
+      "class", "motorway_construction",
+      "_minzoom", 6
+    )), process(lineFeature(Map.of(
+      "highway", "construction",
+      "construction", "motorway",
+      "name", "D4 II/118 – Milín",
+      "oneway", "yes"
+    ))));
+  }
+
+  @Test
   void testPrimaryRoadConstruction() {
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",

@@ -220,7 +220,7 @@ public class WaterName implements
     if (nullIfEmpty(element.name()) != null) {
       try {
         Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
-        int minzoom = MINZOOM_BAY;
+        int minzoomCL = MINZOOM_BAY;
         String place = element.place();
         String clazz;
         if ("bay".equals(element.natural())) {
@@ -229,33 +229,33 @@ public class WaterName implements
           clazz = FieldValues.CLASS_SEA;
         } else {
           clazz = FieldValues.CLASS_LAKE;
-          minzoom = MINZOOM_LAKE;
+          minzoomCL = MINZOOM_LAKE;
         }
         if (centerlineGeometry != null) {
           // prefer lake centerline if it exists, but point will be also used if minzoom bellow 9 is calculated from area
           // note: Here we're diverging from OpenMapTiles: For bays with minzoom (based on area) point is used between
           // minzoom and Z8 and for Z9+ centerline is used, while OpenMaptiles sticks with points.
           setupOsmWaterPolygonFeature(
-            element, features.geometry(LAYER_NAME, centerlineGeometry), clazz, Math.min(minzoom, MINZOOM_BAY))
+            element, features.geometry(LAYER_NAME, centerlineGeometry), clazz, Math.min(minzoomCL, MINZOOM_BAY))  // TODO: drop the min(), not needed here
               .setMinPixelSizeBelowZoom(13, 6d * element.name().length());
         }
 
         // Show a label if a water feature covers at least 1/4 of a tile or z14+
         Geometry geometry = element.source().worldGeometry();
         double area = geometry.getArea();
-        minzoom = (int) Math.floor(-1d - Math.log(Math.sqrt(area)) / LOG2);
+        int minzoom = (int) Math.floor(-1d - Math.log(Math.sqrt(area)) / LOG2);
         if (place != null && SEA_OR_OCEAN_PLACE.contains(place)) {
           minzoom = Math.clamp(minzoom, MINZOOM_SEA_AND_OCEAN, 14);
         } else {
           minzoom = Math.clamp(minzoom, MINZOOM_LAKE, 14);
         }
 
-        if (centerlineGeometry == null || minzoom < MINZOOM_BAY) {
+        if (centerlineGeometry == null || minzoom < minzoomCL) {
           // otherwise just use a label point inside the lake
           var feature = setupOsmWaterPolygonFeature(element, features.pointOnSurface(LAYER_NAME), clazz, minzoom);
           if (centerlineGeometry != null) {
             // centerline already created, so make sure we're not having both at same zoom level
-            feature.setMaxZoom(MINZOOM_BAY - 1);
+            feature.setMaxZoom(minzoomCL - 1);
           }
         }
       } catch (GeometryException e) {

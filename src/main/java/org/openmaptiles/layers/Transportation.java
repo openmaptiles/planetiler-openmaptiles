@@ -296,11 +296,7 @@ public class Transportation implements
       String colour = coalesce(
         nullIfEmpty(relation.getString("colour")), nullIfEmpty(relation.getString("ref:colour")));
 
-      if ("e-road".equals(network)) {
-        networkType = RouteNetwork.E_ROAD;
-      } else if ("AsianHighway".equals(network)) {
-        networkType = RouteNetwork.A_ROAD;
-      } else if ("US:I".equals(network)) {
+      if ("US:I".equals(network)) {
         networkType = RouteNetwork.US_INTERSTATE;
       } else if ("US:US".equals(network)) {
         networkType = RouteNetwork.US_HIGHWAY;

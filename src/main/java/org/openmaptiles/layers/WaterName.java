@@ -236,7 +236,7 @@ public class WaterName implements
           // note: Here we're diverging from OpenMapTiles: For bays with minzoom (based on area) point is used between
           // minzoom and Z8 and for Z9+ centerline is used, while OpenMaptiles sticks with points.
           setupOsmWaterPolygonFeature(
-            element, features.geometry(LAYER_NAME, centerlineGeometry), clazz, Math.min(minzoomCL, MINZOOM_BAY))  // TODO: drop the min(), not needed here
+            element, features.geometry(LAYER_NAME, centerlineGeometry), clazz, minzoomCL)
               .setMinPixelSizeBelowZoom(13, 6d * element.name().length());
         }
 

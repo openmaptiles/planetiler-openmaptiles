@@ -207,12 +207,19 @@ class WaterTest extends AbstractLayerTest {
   @Test
   void testLakeNaturalEarthByName() {
     final var polygon = rectangle(0, 0.1);
-    // NE lake:
+    // NE lakes:
     process(SimpleFeature.create(
       polygon,
       Map.of("name", "Test Lake"),
       OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
       "ne_50m_lakes",
+      0
+    ));
+    process(SimpleFeature.create(
+      polygon,
+      Map.of("name", "Test Lake"),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_lakes",
       0
     ));
     // OSM lake to take the ID from:
@@ -236,6 +243,12 @@ class WaterTest extends AbstractLayerTest {
       "_layer", "water",
       "_minzoom", 2,
       "_maxzoom", 3
+    ), Map.of(
+      "class", "lake",
+      "id", 123L,
+      "_layer", "water",
+      "_minzoom", 4,
+      "_maxzoom", 5
     )), features);
   }
 

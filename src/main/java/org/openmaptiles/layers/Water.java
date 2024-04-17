@@ -126,11 +126,11 @@ public class Water implements
 
         var neLakeNameMap = neLakeNameMaps.computeIfAbsent(table, t -> new ConcurrentHashMap<>());
 
-        // need to externally synchronize inserts into the STRTree and ArrayList
+        // need to externally synchronize inserts into ArrayList
         synchronized (this) {
-          neLakeIndex.put(geom, lakeInfo);  // TODO: this no longer needs `synchronized`
           neAllLakeInfos.add(lakeInfo);
         }
+        neLakeIndex.put(geom, lakeInfo);
         if (lakeInfo.name != null) {
           if (!neLakeNameMap.containsKey(lakeInfo.name) ||
             lakeInfo.geom.getArea() > neLakeNameMap.get(lakeInfo.name).geom.getArea()) {

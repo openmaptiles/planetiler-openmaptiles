@@ -97,6 +97,114 @@ class WaterTest extends AbstractLayerTest {
   }
 
   @Test
+  void testLakeNaturalEarthIntersectionMiss() {
+    final var polygon1 = rectangle(0, 0.1);
+    final var polygon2 = rectangle(0.2, 0.3);
+    // NE lakes:
+    process(SimpleFeature.create(
+      polygon1,
+      Map.of(),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_110m_lakes",
+      0
+    ));
+    process(SimpleFeature.create(
+      polygon1,
+      Map.of(),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_lakes",
+      0
+    ));
+    // OSM lake to take the ID from:
+    process(SimpleFeature.create(
+      polygon2,
+      new HashMap<>(Map.<String, Object>of(
+        "natural", "water",
+        "water", "reservoir"
+      )),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      123
+    ));
+
+    List<FeatureCollector.Feature> features = new ArrayList<>();
+    profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
+    assertFeatures(0, List.of(Map.of(
+      "class", "lake",
+      "id", "<null>",
+      "_layer", "water",
+      "_type", "polygon"
+    ), Map.of(
+      "class", "lake",
+      "id", "<null>",
+      "_layer", "water",
+      "_type", "polygon"
+    )), features);
+  }
+
+  @Test
+  void testLakeNaturalEarthByBiggerIntersection() {
+    final var polygon1 = rectangle(0, 0.1);
+    final var polygon2 = rectangle(0, 0.2);
+    // NE lakes:
+    process(SimpleFeature.create(
+      polygon2,
+      Map.of(),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_110m_lakes",
+      0
+    ));
+    process(SimpleFeature.create(
+      polygon2,
+      Map.of(),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_lakes",
+      0
+    ));
+    // OSM lakes to take the ID from:
+    process(SimpleFeature.create(
+      polygon1,
+      new HashMap<>(Map.<String, Object>of(
+        "natural", "water",
+        "water", "reservoir"
+      )),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      123
+    ));
+    process(SimpleFeature.create(
+      polygon2,
+      new HashMap<>(Map.<String, Object>of(
+        "natural", "water",
+        "water", "reservoir"
+      )),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      234
+    ));
+
+    List<FeatureCollector.Feature> features = new ArrayList<>();
+    profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
+    assertFeatures(0, List.of(Map.of(
+      "class", "lake",
+      "intermittent", "<null>",
+      "id", 234L,
+      "_layer", "water",
+      "_type", "polygon",
+      "_minzoom", 0,
+      "_maxzoom", 1
+    ), Map.of(
+      "class", "lake",
+      "intermittent", "<null>",
+      "id", 234L,
+      "_layer", "water",
+      "_type", "polygon",
+      "_minzoom", 4,
+      "_maxzoom", 5
+    )), features);
+  }
+
+  @Test
   void testLakeNaturalEarthByName() {
     final var polygon = rectangle(0, 0.1);
     // NE lake:
@@ -128,6 +236,85 @@ class WaterTest extends AbstractLayerTest {
       "_layer", "water",
       "_minzoom", 2,
       "_maxzoom", 3
+    )), features);
+  }
+
+  @Test
+  void testLakeNaturalEarthByNameIntersectionMiss() {
+    final var polygon1 = rectangle(0, 0.1);
+    final var polygon2 = rectangle(0.2, 0.3);
+    // NE lake:
+    process(SimpleFeature.create(
+      polygon1,
+      Map.of("name", "Test Lake"),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_50m_lakes",
+      0
+    ));
+    // OSM lake to take the ID from:
+    process(SimpleFeature.create(
+      polygon2,
+      new HashMap<>(Map.<String, Object>of(
+        "name", "Test Lake",
+        "natural", "water",
+        "water", "reservoir"
+      )),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      123
+    ));
+
+    List<FeatureCollector.Feature> features = new ArrayList<>();
+    profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
+    assertFeatures(0, List.of(Map.of(
+      "class", "lake",
+      "id", "<null>",
+      "_layer", "water"
+    )), features);
+  }
+
+  @Test
+  void testLakeNaturalEarthByNameAndBiggerIntersection() {
+    final var polygon1 = rectangle(0, 0.1);
+    final var polygon2 = rectangle(0, 0.2);
+    // NE lake:
+    process(SimpleFeature.create(
+      polygon2,
+      Map.of("name", "Test Lake"),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_50m_lakes",
+      0
+    ));
+    // OSM lakes to take the ID from:
+    process(SimpleFeature.create(
+      polygon1,
+      new HashMap<>(Map.<String, Object>of(
+        "name", "Test Lake",
+        "natural", "water",
+        "water", "reservoir"
+      )),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      123
+    ));
+    process(SimpleFeature.create(
+      polygon2,
+      new HashMap<>(Map.<String, Object>of(
+        "name", "Test Lake",
+        "natural", "water",
+        "water", "reservoir"
+      )),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      234
+    ));
+
+    List<FeatureCollector.Feature> features = new ArrayList<>();
+    profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
+    assertFeatures(0, List.of(Map.of(
+      "class", "lake",
+      "id", 234L,
+      "_layer", "water"
     )), features);
   }
 

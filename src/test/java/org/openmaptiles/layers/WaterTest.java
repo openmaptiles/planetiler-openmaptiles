@@ -332,6 +332,51 @@ class WaterTest extends AbstractLayerTest {
   }
 
   @Test
+  void testLakeNaturalEarthByNameWithColision() {
+    final var polygonSmaller = rectangle(0, 0.1);
+    final var polygonBigger = rectangle(0, 0.2);
+    // NE lakes:
+    process(SimpleFeature.create(
+      polygonSmaller,
+      Map.of("name", "Test Lake"),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_lakes",
+      0
+    ));
+    process(SimpleFeature.create(
+      polygonBigger,
+      Map.of("name", "Test Lake"),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_lakes",
+      0
+    ));
+    // OSM lake to take the ID from:
+    process(SimpleFeature.create(
+      polygonBigger,
+      new HashMap<>(Map.<String, Object>of(
+        "name", "Test Lake",
+        "natural", "water",
+        "water", "reservoir"
+      )),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      123
+    ));
+
+    List<FeatureCollector.Feature> features = new ArrayList<>();
+    profile.finish(OpenMapTilesProfile.OSM_SOURCE, new FeatureCollector.Factory(params, stats), features::add);
+    assertFeatures(0, List.of(Map.of(
+      "class", "lake",
+      "id", "<null>",
+      "_layer", "water"
+    ), Map.of(
+      "class", "lake",
+      "id", 123L,
+      "_layer", "water"
+    )), features);
+  }
+
+  @Test
   void testWaterOsmWaterPolygon() {
     assertFeatures(0, List.of(Map.of(
       "class", "ocean",

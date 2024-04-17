@@ -89,7 +89,7 @@ public class Water implements
   private final PlanetilerConfig config;
   private final Stats stats;
   private PolygonIndex<LakeInfo> neLakeIndex = PolygonIndex.create();
-  private final Map<String, Map<String, LakeInfo>> neLakeNameMaps = new ConcurrentHashMap<>(); // TODO: simplify in the same way as neLakeIndexes
+  private final Map<String, Map<String, LakeInfo>> neLakeNameMaps = new ConcurrentHashMap<>();
   private final List<LakeInfo> neAllLakeInfos = new ArrayList<>(); // TODO: once neLakeNameMaps is simplified, we may remove this and use only neLakeNameMap.values()
 
   public Water(Translations translations, PlanetilerConfig config, Stats stats) {

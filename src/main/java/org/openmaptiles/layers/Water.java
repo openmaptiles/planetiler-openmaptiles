@@ -88,9 +88,9 @@ public class Water implements
   private final MultiExpression.Index<String> classMapping;
   private final PlanetilerConfig config;
   private final Stats stats;
-  private final Map<String, PolygonIndex<LakeInfo>> neLakeIndexes = new ConcurrentHashMap<>();
-  private final Map<String, Map<String, LakeInfo>> neLakeNameMaps = new ConcurrentHashMap<>();
-  private final List<LakeInfo> neAllLakeInfos = new ArrayList<>();
+  private PolygonIndex<LakeInfo> neLakeIndex = PolygonIndex.create();
+  private final Map<String, Map<String, LakeInfo>> neLakeNameMaps = new ConcurrentHashMap<>(); // TODO: simplify in the same way as neLakeIndexes
+  private final List<LakeInfo> neAllLakeInfos = new ArrayList<>(); // TODO: once neLakeNameMaps is simplified, we may remove this and use only neLakeNameMap.values()
 
   public Water(Translations translations, PlanetilerConfig config, Stats stats) {
     this.classMapping = FieldMappings.Class.index();
@@ -124,12 +124,11 @@ public class Water implements
         lakeInfo.geom = geom;
         lakeInfo.name = feature.getString("name");
 
-        var index = neLakeIndexes.computeIfAbsent(table, t -> PolygonIndex.create());
         var neLakeNameMap = neLakeNameMaps.computeIfAbsent(table, t -> new ConcurrentHashMap<>());
 
         // need to externally synchronize inserts into the STRTree and ArrayList
         synchronized (this) {
-          index.put(geom, lakeInfo);
+          neLakeIndex.put(geom, lakeInfo);  // TODO: this no longer needs `synchronized`
           neAllLakeInfos.add(lakeInfo);
         }
         if (lakeInfo.name != null) {
@@ -205,11 +204,9 @@ public class Water implements
       }
 
       // match by intersection:
-      for (var index : neLakeIndexes.values()) {
-        var items = index.getIntersecting(geom);
-        for (var lakeInfo : items) {
-          fillOsmIdIntoNeLake(element, geom, lakeInfo, false);
-        }
+      var items = neLakeIndex.getIntersecting(geom);
+      for (var lakeInfo : items) {
+        fillOsmIdIntoNeLake(element, geom, lakeInfo, false);
       }
     } catch (GeometryException e) {
       e.log(stats, "omt_water",
@@ -267,7 +264,7 @@ public class Water implements
         }
       }
       neLakeNameMaps.clear();
-      neLakeIndexes.clear();
+      neLakeIndex = null;
       neAllLakeInfos.clear();
       timer.stop();
     }

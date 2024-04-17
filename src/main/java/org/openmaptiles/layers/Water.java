@@ -182,6 +182,12 @@ public class Water implements
 
   void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element) {
     try {
+      // if OSM lake is too small for Z6 (e.g. area bellow ~4px) we assume there is no matching NE lake
+      Geometry geom = element.source().worldGeometry();
+      if (geom.getArea() < OSM_ID_MATCH_AREA_LIMIT) {
+        return;
+      }
+
       // match by name:
       boolean match = false;
       if (element.name() != null) {
@@ -194,12 +200,6 @@ public class Water implements
         }
       }
       if (match) {
-        return;
-      }
-
-      // if OSM lake is too small for Z6 (e.g. area bellow ~4px) we assume there is no matching NE lake
-      Geometry geom = element.source().worldGeometry();
-      if (geom.getArea() < OSM_ID_MATCH_AREA_LIMIT) {
         return;
       }
 

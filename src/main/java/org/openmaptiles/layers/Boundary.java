@@ -121,6 +121,8 @@ public class Boundary implements
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Boundary.class);
   private static final double COUNTRY_TEST_OFFSET = GeoUtils.metersToPixelAtEquator(0, 10) / 256d;
+  private static final String COUNTRY_KE = "Kenya";
+  private static final String COUNTRY_SS = "South Sudan";
   private final Stats stats;
   private final boolean addCountryNames;
   private final boolean onlyOsmBoundaries;
@@ -184,7 +186,11 @@ public class Boundary implements
         if (disputed) {
           String left = feature.getString("adm0_left");
           String right = feature.getString("adm0_right");
-          isDisputedSouthSudanAndKenya = "South Sudan".equals(left) && "Kenya".equals(right);
+          if (COUNTRY_SS.equals(left)) {
+            isDisputedSouthSudanAndKenya = COUNTRY_KE.equals(right);
+          } else if (COUNTRY_KE.equals(left)) {
+            isDisputedSouthSudanAndKenya = COUNTRY_SS.equals(right);
+          }
         }
         yield isDisputedSouthSudanAndKenya ? new BoundaryInfo(2, 1, 4) :
           feature.hasTag("featurecla", "Lease limit") ? null :

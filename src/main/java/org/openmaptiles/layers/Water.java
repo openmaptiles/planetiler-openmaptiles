@@ -240,11 +240,13 @@ public class Water implements
       }
     }
 
-    // should match following in OpenMapTiles: Distinct on keeps just the first occurence -> order by 'area_ratio DESC'
-    double areaRatio = intersection.getArea() / neGeom.getArea();
-    if (areaRatio > lakeInfo.areaRatio) {
+    // Should match following in OpenMapTiles: Distinct on keeps just the first occurence -> order by 'area_ratio DESC'
+    // With a twist: NE geometry is always the same, hence we can make it a little bit faster by dropping "ratio"
+    // and compare only the intersection area: bigger area -> bigger ratio.
+    double area = intersection.getArea();
+    if (area > lakeInfo.area) {
       lakeInfo.osmId = element.source().id();
-      lakeInfo.areaRatio = areaRatio;
+      lakeInfo.area = area;
     }
   }
 
@@ -285,7 +287,7 @@ public class Water implements
     String clazz;
     Geometry geom;
     Long osmId;
-    double areaRatio;
+    double area;
 
     public LakeInfo(int minZoom, int maxZoom, String clazz) {
       this.name = null;
@@ -293,7 +295,7 @@ public class Water implements
       this.maxZoom = maxZoom;
       this.clazz = clazz;
       this.osmId = null;
-      this.areaRatio = 0;
+      this.area = 0;
     }
   }
 }

@@ -241,8 +241,7 @@ public class WaterName implements
         }
 
         // Show a label if a water feature covers at least 1/4 of a tile or z14+
-        Geometry geometry = element.source().worldGeometry();
-        double area = geometry.getArea();
+        final double area = element.source().worldGeometry().getArea();
         int minzoom = (int) Math.floor(-1d - Math.log(Math.sqrt(area)) / LOG2);
         if (place != null && SEA_OR_OCEAN_PLACE.contains(place)) {
           minzoom = Math.clamp(minzoom, MINZOOM_SEA_AND_OCEAN, 14);

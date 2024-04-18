@@ -42,6 +42,7 @@ import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.expression.MultiExpression;
 import com.onthegomap.planetiler.geo.GeometryException;
+import com.onthegomap.planetiler.geo.PolygonIndex;
 import com.onthegomap.planetiler.reader.SimpleFeature;
 import com.onthegomap.planetiler.reader.SourceFeature;
 import com.onthegomap.planetiler.stats.Stats;
@@ -51,11 +52,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.TopologyException;
 import org.locationtech.jts.geom.util.GeometryFixer;
-import org.locationtech.jts.index.strtree.STRtree;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
@@ -89,7 +88,7 @@ public class Water implements
   private final MultiExpression.Index<String> classMapping;
   private final PlanetilerConfig config;
   private final Stats stats;
-  private final Map<String, STRtree> neLakeIndexes = new ConcurrentHashMap<>();
+  private PolygonIndex<LakeInfo> neLakeIndex = PolygonIndex.create();
   private final Map<String, Map<String, LakeInfo>> neLakeNameMaps = new ConcurrentHashMap<>();
   private final List<LakeInfo> neAllLakeInfos = new ArrayList<>();
 
@@ -125,14 +124,13 @@ public class Water implements
         lakeInfo.geom = geom;
         lakeInfo.name = feature.getString("name");
 
-        var index = neLakeIndexes.computeIfAbsent(table, t -> new STRtree());
         var neLakeNameMap = neLakeNameMaps.computeIfAbsent(table, t -> new ConcurrentHashMap<>());
 
-        // need to externally synchronize inserts into the STRTree and ArrayList
+        // need to externally synchronize inserts into ArrayList
         synchronized (this) {
-          index.insert(geom.getEnvelopeInternal(), lakeInfo);
           neAllLakeInfos.add(lakeInfo);
         }
+        neLakeIndex.put(geom, lakeInfo);
         if (lakeInfo.name != null) {
           if (!neLakeNameMap.containsKey(lakeInfo.name) ||
             lakeInfo.geom.getArea() > neLakeNameMap.get(lakeInfo.name).geom.getArea()) {
@@ -184,6 +182,12 @@ public class Water implements
 
   void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element) {
     try {
+      // if OSM lake is too small for Z6 (e.g. area bellow ~4px) we assume there is no matching NE lake
+      Geometry geom = element.source().worldGeometry();
+      if (geom.getArea() < OSM_ID_MATCH_AREA_LIMIT) {
+        return;
+      }
+
       // match by name:
       boolean match = false;
       if (element.name() != null) {
@@ -191,7 +195,7 @@ public class Water implements
           var lakeInfo = map.get(element.name());
           if (lakeInfo != null) {
             match = true;
-            fillOsmIdIntoNeLake(element, element.source().worldGeometry(), lakeInfo);
+            fillOsmIdIntoNeLake(element, element.source().worldGeometry(), lakeInfo, true);
           }
         }
       }
@@ -199,28 +203,10 @@ public class Water implements
         return;
       }
 
-      // if OSM lake is too small for Z6 (e.g. area bellow ~4px) we assume there is no matching NE lake
-      Geometry geom = element.source().worldGeometry();
-      if (geom.getArea() < OSM_ID_MATCH_AREA_LIMIT) {
-        return;
-      }
-
       // match by intersection:
-      Envelope envelope = geom.getEnvelopeInternal();
-
-      for (var index : neLakeIndexes.values()) {
-        var items = index.query(envelope);
-        if (items.size() == 1) {
-          if (items.getFirst()instanceof LakeInfo lakeInfo) {
-            fillOsmIdIntoNeLake(element, geom, lakeInfo);
-          }
-        } else if (!items.isEmpty()) {
-          for (var item : items) {
-            if (item instanceof LakeInfo lakeInfo) {
-              fillOsmIdIntoNeLake(element, geom, lakeInfo);
-            }
-          }
-        }
+      var items = neLakeIndex.getIntersecting(geom);
+      for (var lakeInfo : items) {
+        fillOsmIdIntoNeLake(element, geom, lakeInfo, false);
       }
     } catch (GeometryException e) {
       e.log(stats, "omt_water",
@@ -228,18 +214,23 @@ public class Water implements
     }
   }
 
-  void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element, Geometry geom, LakeInfo lakeInfo) throws GeometryException {
+  /*
+   * When we match lakes with `neLakeIndexes` then `intersetsCheckNeeded` should be `false`,
+   * otherwise `true`, to make sure we DO check the intersection but to avoid checking it twice.
+   */
+  void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element, Geometry geom, LakeInfo lakeInfo,
+    boolean intersetsCheckNeeded) throws GeometryException {
     Geometry neGeom = lakeInfo.geom;
     Geometry intersection;
     try {
-      if (!neGeom.intersects(geom)) {
+      if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
         return;
       }
       intersection = neGeom.intersection(geom);
     } catch (TopologyException e) {
       try {
         Geometry fixedGeom = GeometryFixer.fix(geom);
-        if (!neGeom.intersects(fixedGeom)) {
+        if (intersetsCheckNeeded && !neGeom.intersects(fixedGeom)) {
           return;
         }
         intersection = neGeom.intersection(fixedGeom);
@@ -249,11 +240,13 @@ public class Water implements
       }
     }
 
-    // should match following in OpenMapTiles: Distinct on keeps just the first occurence -> order by 'area_ratio DESC'
-    double areaRatio = intersection.getArea() / neGeom.getArea();
-    if (areaRatio > lakeInfo.areaRatio) {
+    // Should match following in OpenMapTiles: Distinct on keeps just the first occurence -> order by 'area_ratio DESC'
+    // With a twist: NE geometry is always the same, hence we can make it a little bit faster by dropping "ratio"
+    // and compare only the intersection area: bigger area -> bigger ratio.
+    double area = intersection.getArea();
+    if (area > lakeInfo.area) {
       lakeInfo.osmId = element.source().id();
-      lakeInfo.areaRatio = areaRatio;
+      lakeInfo.area = area;
     }
   }
 
@@ -262,9 +255,6 @@ public class Water implements
     Consumer<FeatureCollector.Feature> emit) {
     if (OpenMapTilesProfile.NATURAL_EARTH_SOURCE.equals(sourceName)) {
       var timer = stats.startStage("ne_lake_index");
-      for (var index : neLakeIndexes.values()) {
-        index.build();
-      }
       timer.stop();
     } else if (OpenMapTilesProfile.OSM_SOURCE.equals(sourceName)) {
       var timer = stats.startStage("ne_lakes");
@@ -276,7 +266,7 @@ public class Water implements
         }
       }
       neLakeNameMaps.clear();
-      neLakeIndexes.clear();
+      neLakeIndex = null;
       neAllLakeInfos.clear();
       timer.stop();
     }
@@ -297,7 +287,7 @@ public class Water implements
     String clazz;
     Geometry geom;
     Long osmId;
-    double areaRatio;
+    double area;
 
     public LakeInfo(int minZoom, int maxZoom, String clazz) {
       this.name = null;
@@ -305,7 +295,7 @@ public class Water implements
       this.maxZoom = maxZoom;
       this.clazz = clazz;
       this.osmId = null;
-      this.areaRatio = 0;
+      this.area = 0;
     }
   }
 }

@@ -145,6 +145,44 @@ class BoundaryTest extends AbstractLayerTest {
   }
 
   @Test
+  void testNaturalEarthCountryKeSsBoundaryReversed() {
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "boundary",
+      "_minzoom", 1,
+      "admin_level", 2
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "featurecla", "Disputed (please verify)",
+        "adm0_right", "South Sudan",
+        "adm0_left", "Kenya"
+      ),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_admin_0_boundary_lines_land",
+      0
+    )));
+  }
+
+  @Test
+  void testNaturalEarthCountryNotKeSsBoundary() {
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "boundary",
+      "_minzoom", 4,
+      "admin_level", 2
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "featurecla", "Disputed (please verify)",
+        "adm0_left", "South Sudan",
+        "adm0_right", "Uganda"
+      ),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_admin_0_boundary_lines_land",
+      0
+    )));
+  }
+
+  @Test
   void testNaturalEarthStateBoundaries() {
     assertFeatures(0, List.of(Map.of(
       "_layer", "boundary",

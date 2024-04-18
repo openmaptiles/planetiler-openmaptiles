@@ -232,7 +232,7 @@ public class WaterName implements
           minzoomCL = MINZOOM_LAKE;
         }
         if (centerlineGeometry != null) {
-          // prefer lake centerline if it exists, but point will be also used if minzoom bellow 9 is calculated from area
+          // prefer lake centerline if it exists, but point will be also used if minzoom below 9 is calculated from area
           // note: Here we're diverging from OpenMapTiles: For bays with minzoom (based on area) point is used between
           // minzoom and Z8 and for Z9+ centerline is used, while OpenMaptiles sticks with points.
           setupOsmWaterPolygonFeature(
@@ -241,8 +241,7 @@ public class WaterName implements
         }
 
         // Show a label if a water feature covers at least 1/4 of a tile or z14+
-        Geometry geometry = element.source().worldGeometry();
-        double area = geometry.getArea();
+        final double area = element.source().worldGeometry().getArea();
         int minzoom = (int) Math.floor(-1d - Math.log(Math.sqrt(area)) / LOG2);
         if (place != null && SEA_OR_OCEAN_PLACE.contains(place)) {
           minzoom = Math.clamp(minzoom, MINZOOM_SEA_AND_OCEAN, 14);

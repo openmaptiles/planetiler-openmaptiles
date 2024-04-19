@@ -186,12 +186,12 @@ public class Water implements
             attemptNeLakeIdMapping(element, fixedGeom);
           } catch (TopologyException e2) {
             throw new GeometryException("fix_omt_water_topology_error",
-                "error fixing polygon: " + e2 + "; original error: " + e);
+              "error fixing polygon: " + e2 + "; original error: " + e);
           }
         }
       } catch (GeometryException e) {
         e.log(stats, "omt_water",
-            "Error getting geometry for OSM feature " + element.source().id());
+          "Unable to process intersections for OSM feature " + element.source().id());
       }
     }
   }

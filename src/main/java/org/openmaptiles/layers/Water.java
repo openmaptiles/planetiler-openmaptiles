@@ -176,41 +176,51 @@ public class Water implements
         .setAttrWithMinzoom(Fields.BRUNNEL, Utils.brunnel(element.isBridge(), element.isTunnel()), 12)
         .setAttr(Fields.CLASS, clazz);
 
-      fillOsmIdIntoNeLake(element);
+      try {
+        var geom = element.source().worldGeometry();
+        try {
+          attemptNeLakeIdMapping(element, geom);
+        } catch (TopologyException e) {
+          try {
+            var fixedGeom = GeometryFixer.fix(geom);
+            attemptNeLakeIdMapping(element, fixedGeom);
+          } catch (TopologyException e2) {
+            throw new GeometryException("fix_omt_water_topology_error",
+                "error fixing polygon: " + e2 + "; original error: " + e);
+          }
+        }
+      } catch (GeometryException e) {
+        e.log(stats, "omt_water",
+            "Error getting geometry for OSM feature " + element.source().id());
+      }
     }
   }
 
-  void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element) {
-    try {
-      // if OSM lake is too small for Z6 (e.g. area bellow ~4px) we assume there is no matching NE lake
-      Geometry geom = element.source().worldGeometry();
-      if (geom.getArea() < OSM_ID_MATCH_AREA_LIMIT) {
-        return;
-      }
+  void attemptNeLakeIdMapping(Tables.OsmWaterPolygon element, Geometry geom) throws GeometryException {
+    // if OSM lake is too small for Z6 (e.g. area bellow ~4px) we assume there is no matching NE lake
+    if (geom.getArea() < OSM_ID_MATCH_AREA_LIMIT) {
+      return;
+    }
 
-      // match by name:
-      boolean match = false;
-      if (element.name() != null) {
-        for (var map : neLakeNameMaps.values()) {
-          var lakeInfo = map.get(element.name());
-          if (lakeInfo != null) {
-            match = true;
-            fillOsmIdIntoNeLake(element, element.source().worldGeometry(), lakeInfo, true);
-          }
+    // match by name:
+    boolean match = false;
+    if (element.name() != null) {
+      for (var map : neLakeNameMaps.values()) {
+        var lakeInfo = map.get(element.name());
+        if (lakeInfo != null) {
+          match = true;
+          fillOsmIdIntoNeLake(element, geom, lakeInfo, true);
         }
       }
-      if (match) {
-        return;
-      }
+    }
+    if (match) {
+      return;
+    }
 
-      // match by intersection:
-      var items = neLakeIndex.getIntersecting(geom);
-      for (var lakeInfo : items) {
-        fillOsmIdIntoNeLake(element, geom, lakeInfo, false);
-      }
-    } catch (GeometryException e) {
-      e.log(stats, "omt_water",
-        "Error getting geometry for OSM feature " + element.source().id());
+    // match by intersection:
+    var items = neLakeIndex.getIntersecting(geom);
+    for (var lakeInfo : items) {
+      fillOsmIdIntoNeLake(element, geom, lakeInfo, false);
     }
   }
 
@@ -219,26 +229,12 @@ public class Water implements
    * otherwise `true`, to make sure we DO check the intersection but to avoid checking it twice.
    */
   void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element, Geometry geom, LakeInfo lakeInfo,
-    boolean intersetsCheckNeeded) throws GeometryException {
-    Geometry neGeom = lakeInfo.geom;
-    Geometry intersection;
-    try {
-      if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
-        return;
-      }
-      intersection = neGeom.intersection(geom);
-    } catch (TopologyException e) {
-      try {
-        Geometry fixedGeom = GeometryFixer.fix(geom);
-        if (intersetsCheckNeeded && !neGeom.intersects(fixedGeom)) {
-          return;
-        }
-        intersection = neGeom.intersection(fixedGeom);
-      } catch (TopologyException e2) {
-        throw new GeometryException("fix_omt_water_topology_error",
-          "error fixing polygon: " + e2 + "; original error: " + e);
-      }
+    boolean intersetsCheckNeeded) {
+    final Geometry neGeom = lakeInfo.geom;
+    if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
+      return;
     }
+    var intersection = neGeom.intersection(geom);
 
     // Should match following in OpenMapTiles: Distinct on keeps just the first occurence -> order by 'area_ratio DESC'
     // With a twist: NE geometry is always the same, hence we can make it a little bit faster by dropping "ratio"

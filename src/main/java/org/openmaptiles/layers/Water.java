@@ -191,7 +191,7 @@ public class Water implements
         }
       } catch (GeometryException e) {
         e.log(stats, "omt_water",
-          "Error getting geometry for OSM feature " + element.source().id());
+          "Unable to process intersections for OSM feature " + element.source().id());
       }
     }
   }

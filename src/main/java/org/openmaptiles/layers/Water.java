@@ -195,7 +195,7 @@ public class Water implements
           var lakeInfo = map.get(element.name());
           if (lakeInfo != null) {
             match = true;
-            fillOsmIdIntoNeLake(element, element.source().worldGeometry(), lakeInfo, true);
+            fillOsmIdIntoNeLake(element, geom, lakeInfo, true);
           }
         }
       }

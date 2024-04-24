@@ -153,8 +153,8 @@ public class Transportation implements
     RouteNetwork.A_ROAD
   );
   private static final Set<RouteNetwork> Z5_MOTORWAYS_BY_NETWORK = Set.of(
-      RouteNetwork.GB_TRUNK,
-      RouteNetwork.US_HIGHWAY
+    RouteNetwork.GB_TRUNK,
+    RouteNetwork.US_HIGHWAY
   );
   private static final Set<String> CA_AB_PRIMARY_AS_ARTERIAL_BY_REF = Set.of(
     "2", "3", "4"
@@ -269,10 +269,24 @@ public class Transportation implements
   private static boolean isMotorwayWithNetworkForZ4(List<RouteRelation> routeRelations) {
     // All roads in network included in osm_national_network except gb-trunk and us-highway
     return routeRelations.stream()
-        .map(RouteRelation::networkType)
-        .filter(Objects::nonNull)
-        .filter(nt -> !Z5_MOTORWAYS_BY_NETWORK.contains(nt))
-        .anyMatch(Z5_TRUNK_BY_NETWORK::contains);
+      .map(RouteRelation::networkType)
+      .filter(Objects::nonNull)
+      .filter(nt -> !Z5_MOTORWAYS_BY_NETWORK.contains(nt))
+      .anyMatch(Z5_TRUNK_BY_NETWORK::contains);
+  }
+
+  private static boolean isMotorwayWoNetworkForZ4(List<RouteRelation> routeRelations) {
+    // All motorways without network (e.g. EU, Asia, South America)
+    return routeRelations.stream()
+      .map(RouteRelation::networkType)
+      .noneMatch(Objects::nonNull);
+  }
+
+  private static boolean isMotorwayForZ4(List<RouteRelation> routeRelations) {
+    if (isMotorwayWoNetworkForZ4(routeRelations)) {
+      return true;
+    }
+    return isMotorwayWithNetworkForZ4(routeRelations);
   }
 
   private static boolean isDrivewayOrParkingAisle(String service) {
@@ -543,6 +557,8 @@ public class Transportation implements
           }
           yield (z5trunk) ? 5 : MINZOOMS.getOrDefault(clazz, Integer.MAX_VALUE);
         }
+        case FieldValues.CLASS_MOTORWAY -> isMotorwayForZ4(routeRelations) ?
+          MINZOOMS.getOrDefault(FieldValues.CLASS_MOTORWAY, Integer.MAX_VALUE) : 5;
         default -> MINZOOMS.getOrDefault(baseClass, Integer.MAX_VALUE);
       };
     }

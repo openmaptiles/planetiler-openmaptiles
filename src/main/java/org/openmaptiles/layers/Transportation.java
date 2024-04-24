@@ -261,9 +261,9 @@ public class Transportation implements
       return false;
     }
     return routeRelations.stream()
-        .map(RouteRelation::networkType)
-        .filter(Objects::nonNull)
-        .anyMatch(Z5_TRUNK_BY_NETWORK::contains);
+      .map(RouteRelation::networkType)
+      .filter(Objects::nonNull)
+      .anyMatch(Z5_TRUNK_BY_NETWORK::contains);
   }
 
   private static boolean isMotorwayWithNetworkForZ4(List<RouteRelation> routeRelations) {
@@ -535,6 +535,7 @@ public class Transportation implements
       }
     }
     String highway = element.highway();
+    String construction = element.construction();
 
     int minzoom;
     if ("pier".equals(element.manMade())) {
@@ -563,7 +564,7 @@ public class Transportation implements
       };
     }
 
-    if (isLink(highway)) {
+    if (isLink(highway) || isLink(construction)) {
       minzoom = Math.max(minzoom, 9);
     }
     return minzoom;

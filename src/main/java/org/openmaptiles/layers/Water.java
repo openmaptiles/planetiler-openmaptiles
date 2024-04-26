@@ -243,10 +243,7 @@ public class Water implements
   @Override
   public void finish(String sourceName, FeatureCollector.Factory featureCollectors,
     Consumer<FeatureCollector.Feature> emit) {
-    if (OpenMapTilesProfile.NATURAL_EARTH_SOURCE.equals(sourceName)) {
-      var timer = stats.startStage("ne_lake_index");
-      timer.stop();
-    } else if (OpenMapTilesProfile.OSM_SOURCE.equals(sourceName)) {
+    if (OpenMapTilesProfile.OSM_SOURCE.equals(sourceName)) {
       var timer = stats.startStage("ne_lakes");
       for (var item : neAllLakeInfos) {
         var features = featureCollectors.get(SimpleFeature.fromWorldGeometry(item.geom));

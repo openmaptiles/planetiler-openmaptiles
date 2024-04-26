@@ -132,11 +132,8 @@ public class Water implements
         }
         neLakeIndex.put(geom, lakeInfo);
         if (lakeInfo.name != null) {
-          if (!neLakeNameMap.containsKey(lakeInfo.name) ||
-            lakeInfo.geom.getArea() > neLakeNameMap.get(lakeInfo.name).geom.getArea()) {
-            // on name collision, bigger lake gets on the name list
-            neLakeNameMap.put(lakeInfo.name, lakeInfo);
-          }
+          // on name collision, bigger lake gets on the name list
+          neLakeNameMap.merge(lakeInfo.name, lakeInfo, (prev, next) -> next.geom.getArea() > prev.geom.getArea() ? next : prev);
         }
       } catch (GeometryException e) {
         e.log(stats, "omt_water_ne",

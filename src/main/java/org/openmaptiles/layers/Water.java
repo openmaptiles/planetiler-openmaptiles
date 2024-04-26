@@ -133,7 +133,8 @@ public class Water implements
         neLakeIndex.put(geom, lakeInfo);
         if (lakeInfo.name != null) {
           // on name collision, bigger lake gets on the name list
-          neLakeNameMap.merge(lakeInfo.name, lakeInfo, (prev, next) -> next.geom.getArea() > prev.geom.getArea() ? next : prev);
+          neLakeNameMap.merge(lakeInfo.name, lakeInfo,
+            (prev, next) -> next.geom.getArea() > prev.geom.getArea() ? next : prev);
         }
       } catch (GeometryException e) {
         e.log(stats, "omt_water_ne",

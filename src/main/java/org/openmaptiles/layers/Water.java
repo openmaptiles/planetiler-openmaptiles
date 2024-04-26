@@ -237,10 +237,7 @@ public class Water implements
     // With a twist: NE geometry is always the same, hence we can make it a little bit faster by dropping "ratio"
     // and compare only the intersection area: bigger area -> bigger ratio.
     double area = intersection.getArea();
-    if (area > lakeInfo.area) {
-      lakeInfo.osmId = element.source().id();
-      lakeInfo.area = area;
-    }
+    lakeInfo.mergeId(element.source().id(), area);
   }
 
   @Override
@@ -289,6 +286,13 @@ public class Water implements
       this.clazz = clazz;
       this.osmId = null;
       this.area = 0;
+    }
+
+    public synchronized void mergeId(Long newId, double newArea) {
+      if (newArea > area) {
+        osmId = newId;
+        area = newArea;
+      }
     }
   }
 }

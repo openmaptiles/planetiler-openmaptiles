@@ -218,47 +218,36 @@ public class WaterName implements
   @Override
   public void process(Tables.OsmWaterPolygon element, FeatureCollector features) {
     if (nullIfEmpty(element.name()) != null) {
-      try {
-        Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
-        int minzoomCL = MINZOOM_BAY;
-        String place = element.place();
-        String clazz;
-        if ("bay".equals(element.natural())) {
-          clazz = FieldValues.CLASS_BAY;
-        } else if ("sea".equals(place)) {
-          clazz = FieldValues.CLASS_SEA;
-        } else {
-          clazz = FieldValues.CLASS_LAKE;
-          minzoomCL = MINZOOM_LAKE;
-        }
-        if (centerlineGeometry != null) {
-          // prefer lake centerline if it exists, but point will be also used if minzoom below 9 is calculated from area
-          // note: Here we're diverging from OpenMapTiles: For bays with minzoom (based on area) point is used between
-          // minzoom and Z8 and for Z9+ centerline is used, while OpenMaptiles sticks with points.
-          setupOsmWaterPolygonFeature(
-            element, features.geometry(LAYER_NAME, centerlineGeometry), clazz, minzoomCL)
-              .setMinPixelSizeBelowZoom(13, 6d * element.name().length());
-        }
+      Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
+      int minzoomCL = MINZOOM_BAY;
+      String place = element.place();
+      String clazz;
+      if ("bay".equals(element.natural())) {
+        clazz = FieldValues.CLASS_BAY;
+      } else if ("sea".equals(place)) {
+        clazz = FieldValues.CLASS_SEA;
+      } else {
+        clazz = FieldValues.CLASS_LAKE;
+        minzoomCL = MINZOOM_LAKE;
+      }
+      if (centerlineGeometry != null) {
+        // prefer lake centerline if it exists, but point will be also used if minzoom below 9 is calculated from area
+        // note: Here we're diverging from OpenMapTiles: For bays with minzoom (based on area) point is used between
+        // minzoom and Z8 and for Z9+ centerline is used, while OpenMaptiles sticks with points.
+        setupOsmWaterPolygonFeature(
+          element, features.geometry(LAYER_NAME, centerlineGeometry), clazz, minzoomCL)
+            .setMinPixelSizeBelowZoom(13, 6d * element.name().length());
+      }
 
-        // Show a label if a water feature covers at least 1/4 of a tile or z14+
-        final double area = element.source().worldGeometry().getArea();
-        int minzoom = (int) Math.floor(-1d - Math.log(Math.sqrt(area)) / LOG2);
-        if (place != null && SEA_OR_OCEAN_PLACE.contains(place)) {
-          minzoom = Math.clamp(minzoom, MINZOOM_SEA_AND_OCEAN, 14);
-        } else {
-          minzoom = Math.clamp(minzoom, MINZOOM_LAKE, 14);
-        }
-
-        if (centerlineGeometry == null || minzoom < minzoomCL) {
-          // otherwise just use a label point inside the lake
-          var feature = setupOsmWaterPolygonFeature(element, features.pointOnSurface(LAYER_NAME), clazz, minzoom);
-          if (centerlineGeometry != null) {
-            // centerline already created, so make sure we're not having both at same zoom level
-            feature.setMaxZoom(minzoomCL - 1);
-          }
-        }
-      } catch (GeometryException e) {
-        e.log(stats, "omt_water_polygon", "Unable to get geometry for water polygon " + element.source().id());
+      int minzoom = place != null && SEA_OR_OCEAN_PLACE.contains(place) ? MINZOOM_SEA_AND_OCEAN : MINZOOM_LAKE;
+      if (centerlineGeometry == null || minzoom < minzoomCL) {
+        // use a label point inside the lake but ...
+        // ... if centerline already created, adjust maxzoom here to make sure we're not having both at same zoom level
+        int maxzoom = centerlineGeometry != null ? minzoomCL - 1 : 14;
+        setupOsmWaterPolygonFeature(element, features.pointOnSurface(LAYER_NAME), clazz, minzoom)
+          .setMaxZoom(maxzoom)
+          // Show a label if a water feature covers at least 1/4 of a tile or z14+
+          .setMinPixelSizeBelowZoom(13, 128);
       }
     }
   }

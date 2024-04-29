@@ -146,6 +146,15 @@ class WaterNameTest extends AbstractLayerTest {
       "_minzoom", 9,
       "_maxzoom", 14,
       "_minpixelsize", "bay".length() * 6d
+    ), Map.of(
+      "name", "bay",
+      "name:es", "bay es",
+
+      "_layer", "water_name",
+      "_type", "point",
+      "_minzoom", 3,
+      "_maxzoom", 8,
+      "_minpixelsize", 128d
     )), process(SimpleFeature.create(
       GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1E-7))),
       new HashMap<>(Map.<String, Object>of(

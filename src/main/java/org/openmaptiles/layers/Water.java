@@ -132,11 +132,9 @@ public class Water implements
         }
         neLakeIndex.put(geom, lakeInfo);
         if (lakeInfo.name != null) {
-          if (!neLakeNameMap.containsKey(lakeInfo.name) ||
-            lakeInfo.geom.getArea() > neLakeNameMap.get(lakeInfo.name).geom.getArea()) {
-            // on name collision, bigger lake gets on the name list
-            neLakeNameMap.put(lakeInfo.name, lakeInfo);
-          }
+          // on name collision, bigger lake gets on the name list
+          neLakeNameMap.merge(lakeInfo.name, lakeInfo,
+            (prev, next) -> next.geom.getArea() > prev.geom.getArea() ? next : prev);
         }
       } catch (GeometryException e) {
         e.log(stats, "omt_water_ne",
@@ -240,19 +238,13 @@ public class Water implements
     // With a twist: NE geometry is always the same, hence we can make it a little bit faster by dropping "ratio"
     // and compare only the intersection area: bigger area -> bigger ratio.
     double area = intersection.getArea();
-    if (area > lakeInfo.area) {
-      lakeInfo.osmId = element.source().id();
-      lakeInfo.area = area;
-    }
+    lakeInfo.mergeId(element.source().id(), area);
   }
 
   @Override
   public void finish(String sourceName, FeatureCollector.Factory featureCollectors,
     Consumer<FeatureCollector.Feature> emit) {
-    if (OpenMapTilesProfile.NATURAL_EARTH_SOURCE.equals(sourceName)) {
-      var timer = stats.startStage("ne_lake_index");
-      timer.stop();
-    } else if (OpenMapTilesProfile.OSM_SOURCE.equals(sourceName)) {
+    if (OpenMapTilesProfile.OSM_SOURCE.equals(sourceName)) {
       var timer = stats.startStage("ne_lakes");
       for (var item : neAllLakeInfos) {
         var features = featureCollectors.get(SimpleFeature.fromWorldGeometry(item.geom));
@@ -292,6 +284,13 @@ public class Water implements
       this.clazz = clazz;
       this.osmId = null;
       this.area = 0;
+    }
+
+    public synchronized void mergeId(Long newId, double newArea) {
+      if (newArea > area) {
+        osmId = newId;
+        area = newArea;
+      }
     }
   }
 }

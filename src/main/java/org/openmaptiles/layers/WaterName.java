@@ -82,7 +82,6 @@ public class WaterName implements
    */
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WaterName.class);
-  private static final double LOG2 = Math.log(2);
   private static final Set<String> SEA_OR_OCEAN_PLACE = Set.of("sea", "ocean");
   private static final double IMPORTANT_MARINE_REGIONS_JOIN_DISTANCE =
     GeoUtils.metersToPixelAtEquator(0, 50_000) / 256d;

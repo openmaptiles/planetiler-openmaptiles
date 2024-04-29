@@ -53,12 +53,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.TopologyException;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.util.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines the logic for generating map elements for oceans and lakes in the {@code water} layer from source features.
@@ -81,6 +82,7 @@ public class Water implements
    * which infers ocean polygons by preprocessing all coastline elements.
    */
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(Water.class);
   // smallest NE lake is around 4.42E-13, smallest matching OSM lake is 9.34E-13, this is slightly bellow that
   // and approx. 33% of OSM features are smaller than this, hence to save some CPU cycles:
   private static final double OSM_ID_MATCH_AREA_LIMIT = Math.pow(4, -20);
@@ -121,7 +123,12 @@ public class Water implements
     if (lakeInfo != null) {
       try {
         var geom = feature.worldGeometry();
-        lakeInfo.geom = geom;
+        if (geom.isValid()) {
+          lakeInfo.geom = geom;
+        } else {
+          LOGGER.warn("fixing geometry of NE lake {}", feature.getLong("ne_id"));
+          lakeInfo.geom = GeometryFixer.fix(geom);
+        }
         lakeInfo.name = feature.getString("name");
 
         var neLakeNameMap = neLakeNameMaps.computeIfAbsent(table, t -> new ConcurrentHashMap<>());
@@ -175,27 +182,17 @@ public class Water implements
         .setAttr(Fields.CLASS, clazz);
 
       try {
-        var geom = element.source().worldGeometry();
-        try {
-          attemptNeLakeIdMapping(element, geom);
-        } catch (TopologyException e) {
-          try {
-            var fixedGeom = GeometryFixer.fix(geom);
-            attemptNeLakeIdMapping(element, fixedGeom);
-          } catch (TopologyException e2) {
-            throw new GeometryException("fix_omt_water_topology_error",
-              "error fixing polygon: " + e2 + "; original error: " + e);
-          }
-        }
+        attemptNeLakeIdMapping(element);
       } catch (GeometryException e) {
         e.log(stats, "omt_water",
-          "Unable to process intersections for OSM feature " + element.source().id());
+          "Unable to process intersections", config.logJtsExceptions());
       }
     }
   }
 
-  void attemptNeLakeIdMapping(Tables.OsmWaterPolygon element, Geometry geom) throws GeometryException {
+  void attemptNeLakeIdMapping(Tables.OsmWaterPolygon element) throws GeometryException {
     // if OSM lake is too small for Z6 (e.g. area bellow ~4px) we assume there is no matching NE lake
+    var geom = element.source().worldGeometry();
     if (geom.getArea() < OSM_ID_MATCH_AREA_LIMIT) {
       return;
     }

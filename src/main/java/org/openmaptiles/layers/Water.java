@@ -233,11 +233,11 @@ public class Water implements
   void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element, Geometry geom, LakeInfo lakeInfo,
     boolean intersetsCheckNeeded) throws GeometryException {
     final Geometry neGeom = lakeInfo.geom;
-    if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
-      return;
-    }
     Geometry intersection;
     try {
+      if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
+        return;
+      }
       intersection = neGeom.intersection(geom);
     } catch (TopologyException e) {
       stats.dataError("omt_water_intersection");
@@ -245,6 +245,9 @@ public class Water implements
         lakeInfo.neId, element.source().id(), e);
       final var geomFixed = GeometryFixer.fix(geom);
       try {
+        if (intersetsCheckNeeded && !neGeom.intersects(geomFixed)) {
+          return;
+        }
         intersection = neGeom.intersection(geomFixed);
       } catch (TopologyException e2) {
         throw new GeometryException("omt_water_intersection_fix", "Error getting intersection", e);

@@ -53,7 +53,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.TopologyException;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
@@ -131,7 +130,6 @@ public class Water implements
           lakeInfo.geom = GeometryFixer.fix(geom);
         }
         lakeInfo.name = feature.getString("name");
-        lakeInfo.neId = feature.getLong("ne_id");
 
         var neLakeNameMap = neLakeNameMaps.computeIfAbsent(table, t -> new ConcurrentHashMap<>());
 
@@ -216,11 +214,7 @@ public class Water implements
 
     // match by intersection:
     List<LakeInfo> items;
-    try {
-      items = neLakeIndex.getIntersecting(geom);
-    } catch (TopologyException e) {
-      throw new GeometryException("intersecting", "Error getting intersecting NE lakes from the index", e);
-    }
+    items = neLakeIndex.getIntersecting(geom);
     for (var lakeInfo : items) {
       fillOsmIdIntoNeLake(element, geom, lakeInfo, false);
     }
@@ -231,25 +225,12 @@ public class Water implements
    * otherwise `true`, to make sure we DO check the intersection but to avoid checking it twice.
    */
   void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element, Geometry geom, LakeInfo lakeInfo,
-    boolean intersetsCheckNeeded) throws GeometryException {
+    boolean intersetsCheckNeeded) {
     final Geometry neGeom = lakeInfo.geom;
     if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
       return;
     }
-    Geometry intersection;
-    try {
-      intersection = neGeom.intersection(geom);
-    } catch (TopologyException e) {
-      stats.dataError("omt_water_intersection");
-      LOGGER.warn("omt_water_intersection, NE ID: {}, OSM ID: {}",
-        lakeInfo.neId, element.source().id(), e);
-      final var geomFixed = GeometryFixer.fix(geom);
-      try {
-        intersection = neGeom.intersection(geomFixed);
-      } catch (TopologyException e2) {
-        throw new GeometryException("omt_water_intersection_fix", "Error getting intersection", e);
-      }
-    }
+    Geometry intersection = neGeom.intersection(geom);
 
     // Should match following in OpenMapTiles: Distinct on keeps just the first occurence -> order by 'area_ratio DESC'
     // With a twist: NE geometry is always the same, hence we can make it a little bit faster by dropping "ratio"
@@ -292,7 +273,6 @@ public class Water implements
     String clazz;
     Geometry geom;
     Long osmId;
-    long neId;
     double area;
 
     public LakeInfo(int minZoom, int maxZoom, String clazz) {
@@ -301,7 +281,6 @@ public class Water implements
       this.maxZoom = maxZoom;
       this.clazz = clazz;
       this.osmId = null;
-      this.neId = -1;
       this.area = 0;
     }
 

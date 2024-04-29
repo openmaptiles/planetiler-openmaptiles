@@ -124,7 +124,12 @@ public class Water implements
     if (lakeInfo != null) {
       try {
         var geom = feature.worldGeometry();
-        lakeInfo.geom = geom;
+        if (geom.isValid()) {
+          lakeInfo.geom = geom;
+        } else {
+          LOGGER.warn("fixing geometry of NE lake {}", feature.getLong("ne_id"));
+          lakeInfo.geom = GeometryFixer.fix(geom);
+        }
         lakeInfo.name = feature.getString("name");
         lakeInfo.neId = feature.getLong("ne_id");
 
@@ -182,7 +187,7 @@ public class Water implements
         attemptNeLakeIdMapping(element);
       } catch (GeometryException e) {
         e.log(stats, "omt_water",
-          "Unable to process intersections for OSM feature " + element.source().id(), config.logJtsExceptions());
+          "Unable to process intersections", config.logJtsExceptions());
       }
     }
   }
@@ -214,7 +219,7 @@ public class Water implements
     try {
       items = neLakeIndex.getIntersecting(geom);
     } catch (TopologyException e) {
-      throw new GeometryException("omt_water_intersecting", "Error getting intersecting NE lakes from the index", e);
+      throw new GeometryException("intersecting", "Error getting intersecting NE lakes from the index", e);
     }
     for (var lakeInfo : items) {
       fillOsmIdIntoNeLake(element, geom, lakeInfo, false);
@@ -239,9 +244,8 @@ public class Water implements
       LOGGER.warn("omt_water_intersection, NE ID: {}, OSM ID: {}",
         lakeInfo.neId, element.source().id(), e);
       final var geomFixed = GeometryFixer.fix(geom);
-      final var neGeomfixed = GeometryFixer.fix(neGeom);
       try {
-        intersection = neGeomfixed.intersection(geomFixed);
+        intersection = neGeom.intersection(geomFixed);
       } catch (TopologyException e2) {
         throw new GeometryException("omt_water_intersection_fix", "Error getting intersection", e);
       }

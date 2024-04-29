@@ -213,7 +213,8 @@ public class Water implements
     }
 
     // match by intersection:
-    var items = neLakeIndex.getIntersecting(geom);
+    List<LakeInfo> items;
+    items = neLakeIndex.getIntersecting(geom);
     for (var lakeInfo : items) {
       fillOsmIdIntoNeLake(element, geom, lakeInfo, false);
     }
@@ -229,7 +230,7 @@ public class Water implements
     if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
       return;
     }
-    var intersection = neGeom.intersection(geom);
+    Geometry intersection = neGeom.intersection(geom);
 
     // Should match following in OpenMapTiles: Distinct on keeps just the first occurence -> order by 'area_ratio DESC'
     // With a twist: NE geometry is always the same, hence we can make it a little bit faster by dropping "ratio"

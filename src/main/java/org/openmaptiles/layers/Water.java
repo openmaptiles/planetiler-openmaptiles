@@ -59,6 +59,8 @@ import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.util.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines the logic for generating map elements for oceans and lakes in the {@code water} layer from source features.
@@ -81,6 +83,7 @@ public class Water implements
    * which infers ocean polygons by preprocessing all coastline elements.
    */
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(Water.class);
   // smallest NE lake is around 4.42E-13, smallest matching OSM lake is 9.34E-13, this is slightly bellow that
   // and approx. 33% of OSM features are smaller than this, hence to save some CPU cycles:
   private static final double OSM_ID_MATCH_AREA_LIMIT = Math.pow(4, -20);
@@ -123,6 +126,7 @@ public class Water implements
         var geom = feature.worldGeometry();
         lakeInfo.geom = geom;
         lakeInfo.name = feature.getString("name");
+        lakeInfo.neId = feature.getLong("ne_id");
 
         var neLakeNameMap = neLakeNameMaps.computeIfAbsent(table, t -> new ConcurrentHashMap<>());
 
@@ -175,27 +179,17 @@ public class Water implements
         .setAttr(Fields.CLASS, clazz);
 
       try {
-        var geom = element.source().worldGeometry();
-        try {
-          attemptNeLakeIdMapping(element, geom);
-        } catch (TopologyException e) {
-          try {
-            var fixedGeom = GeometryFixer.fix(geom);
-            attemptNeLakeIdMapping(element, fixedGeom);
-          } catch (TopologyException e2) {
-            throw new GeometryException("fix_omt_water_topology_error",
-              "error fixing polygon: " + e2 + "; original error: " + e);
-          }
-        }
+        attemptNeLakeIdMapping(element);
       } catch (GeometryException e) {
         e.log(stats, "omt_water",
-          "Unable to process intersections for OSM feature " + element.source().id());
+          "Unable to process intersections for OSM feature " + element.source().id(), config.logJtsExceptions());
       }
     }
   }
 
-  void attemptNeLakeIdMapping(Tables.OsmWaterPolygon element, Geometry geom) throws GeometryException {
+  void attemptNeLakeIdMapping(Tables.OsmWaterPolygon element) throws GeometryException {
     // if OSM lake is too small for Z6 (e.g. area bellow ~4px) we assume there is no matching NE lake
+    var geom = element.source().worldGeometry();
     if (geom.getArea() < OSM_ID_MATCH_AREA_LIMIT) {
       return;
     }
@@ -216,7 +210,12 @@ public class Water implements
     }
 
     // match by intersection:
-    var items = neLakeIndex.getIntersecting(geom);
+    List<LakeInfo> items;
+    try {
+      items = neLakeIndex.getIntersecting(geom);
+    } catch (TopologyException e) {
+      throw new GeometryException("omt_water_intersecting", "Error getting intersecting NE lakes from the index", e);
+    }
     for (var lakeInfo : items) {
       fillOsmIdIntoNeLake(element, geom, lakeInfo, false);
     }
@@ -227,12 +226,26 @@ public class Water implements
    * otherwise `true`, to make sure we DO check the intersection but to avoid checking it twice.
    */
   void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element, Geometry geom, LakeInfo lakeInfo,
-    boolean intersetsCheckNeeded) {
+    boolean intersetsCheckNeeded) throws GeometryException {
     final Geometry neGeom = lakeInfo.geom;
     if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
       return;
     }
-    var intersection = neGeom.intersection(geom);
+    Geometry intersection;
+    try {
+      intersection = neGeom.intersection(geom);
+    } catch (TopologyException e) {
+      stats.dataError("omt_water_intersection");
+      LOGGER.warn("omt_water_intersection, NE ID: {}, OSM ID: {}",
+        lakeInfo.neId, element.source().id(), e);
+      final var geomFixed = GeometryFixer.fix(geom);
+      final var neGeomfixed = GeometryFixer.fix(neGeom);
+      try {
+        intersection = neGeomfixed.intersection(geomFixed);
+      } catch (TopologyException e2) {
+        throw new GeometryException("omt_water_intersection_fix", "Error getting intersection", e);
+      }
+    }
 
     // Should match following in OpenMapTiles: Distinct on keeps just the first occurence -> order by 'area_ratio DESC'
     // With a twist: NE geometry is always the same, hence we can make it a little bit faster by dropping "ratio"
@@ -275,6 +288,7 @@ public class Water implements
     String clazz;
     Geometry geom;
     Long osmId;
+    long neId;
     double area;
 
     public LakeInfo(int minZoom, int maxZoom, String clazz) {
@@ -283,6 +297,7 @@ public class Water implements
       this.maxZoom = maxZoom;
       this.clazz = clazz;
       this.osmId = null;
+      this.neId = -1;
       this.area = 0;
     }
 

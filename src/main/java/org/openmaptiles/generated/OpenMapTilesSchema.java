@@ -56,7 +56,7 @@ import org.openmaptiles.Layer;
 public class OpenMapTilesSchema {
   public static final String NAME = "OpenMapTiles";
   public static final String DESCRIPTION = "A tileset showcasing all layers in OpenMapTiles. https://openmaptiles.org";
-  public static final String VERSION = "3.14.0";
+  public static final String VERSION = "3.15.0";
   public static final String ATTRIBUTION =
     "<a href=\"https://www.openmaptiles.org/\" target=\"_blank\">&copy; OpenMapTiles</a> <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">&copy; OpenStreetMap contributors</a>";
   public static final List<String> LANGUAGES = List.of("am", "ar", "az", "be", "bg", "bn", "br", "bs", "ca", "co", "cs",

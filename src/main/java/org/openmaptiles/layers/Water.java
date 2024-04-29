@@ -127,7 +127,7 @@ public class Water implements
         if (geom.isValid()) {
           lakeInfo.geom = geom;
         } else {
-          LOGGER.warn("fixing geometry of NE lake {}", feature.getLong("ne_id"));
+          LOGGER.warn("Fixing geometry of NE lake {}", feature.getLong("ne_id"));
           lakeInfo.geom = GeometryFixer.fix(geom);
         }
         lakeInfo.name = feature.getString("name");

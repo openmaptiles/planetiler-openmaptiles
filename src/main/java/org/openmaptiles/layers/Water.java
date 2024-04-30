@@ -219,7 +219,16 @@ public class Water implements
     try {
       items = neLakeIndex.getIntersecting(geom);
     } catch (TopologyException e) {
-      throw new GeometryException("intersecting", "Error getting intersecting NE lakes from the index", e);
+      stats.dataError("omt_water_intersecting");
+      LOGGER.debug("omt_water_intersecting, OSM ID: {}",
+        element.source().id(), e);
+      final var geomFixed = GeometryFixer.fix(geom);
+      try {
+        items = neLakeIndex.getIntersecting(geomFixed);
+      } catch (TopologyException e2) {
+        throw new GeometryException("omt_water_intersecting_fix",
+          "Error getting intersecting for OSM ID " + element.source().id(), e2);
+      }
     }
     for (var lakeInfo : items) {
       fillOsmIdIntoNeLake(element, geom, lakeInfo, false);
@@ -233,21 +242,25 @@ public class Water implements
   void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element, Geometry geom, LakeInfo lakeInfo,
     boolean intersetsCheckNeeded) throws GeometryException {
     final Geometry neGeom = lakeInfo.geom;
-    if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
-      return;
-    }
     Geometry intersection;
     try {
+      if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
+        return;
+      }
       intersection = neGeom.intersection(geom);
     } catch (TopologyException e) {
       stats.dataError("omt_water_intersection");
-      LOGGER.warn("omt_water_intersection, NE ID: {}, OSM ID: {}",
+      LOGGER.debug("omt_water_intersection, NE ID: {}, OSM ID: {}",
         lakeInfo.neId, element.source().id(), e);
       final var geomFixed = GeometryFixer.fix(geom);
       try {
+        if (intersetsCheckNeeded && !neGeom.intersects(geomFixed)) {
+          return;
+        }
         intersection = neGeom.intersection(geomFixed);
       } catch (TopologyException e2) {
-        throw new GeometryException("omt_water_intersection_fix", "Error getting intersection", e);
+        throw new GeometryException("omt_water_intersection_fix",
+          "Error computing intersection for NE ID " + lakeInfo.neId + " and OSM ID " + element.source().id(), e2);
       }
     }
 

@@ -234,11 +234,10 @@ public class Water implements
   void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element, Geometry geom, LakeInfo lakeInfo,
     boolean intersetsCheckNeeded) {
     final Geometry neGeom = lakeInfo.geom;
-    Geometry intersection;
     if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
       return;
     }
-    intersection = neGeom.intersection(geom);
+    final var intersection = neGeom.intersection(geom);
 
     // Should match following in OpenMapTiles: Distinct on keeps just the first occurence -> order by 'area_ratio DESC'
     // With a twist: NE geometry is always the same, hence we can make it a little bit faster by dropping "ratio"

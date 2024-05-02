@@ -187,7 +187,7 @@ public class Water implements
         attemptNeLakeIdMapping(element);
       } catch (GeometryException e) {
         e.log(stats, "omt_water",
-          "Unable to process intersections", config.logJtsExceptions());
+          "Unable to to add OSM ID to natural earth water feature", config.logJtsExceptions());
       }
     }
   }

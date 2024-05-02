@@ -127,7 +127,7 @@ public class Water implements
         if (geom.isValid()) {
           lakeInfo.geom = geom;
         } else {
-          LOGGER.warn("Fixing geometry of NE lake {}", feature.getLong("ne_id"));
+          LOGGER.debug("Fixing geometry of NE lake {}", feature.getLong("ne_id"));
           lakeInfo.geom = GeometryFixer.fix(geom);
         }
         lakeInfo.name = feature.getString("name");
@@ -187,7 +187,7 @@ public class Water implements
         attemptNeLakeIdMapping(element);
       } catch (GeometryException e) {
         e.log(stats, "omt_water",
-          "Unable to process intersections", config.logJtsExceptions());
+          "Unable to add OSM ID to natural earth water feature", config.logJtsExceptions());
       }
     }
   }
@@ -197,6 +197,12 @@ public class Water implements
     var geom = element.source().worldGeometry();
     if (geom.getArea() < OSM_ID_MATCH_AREA_LIMIT) {
       return;
+    }
+
+    if (!geom.isValid()) {
+      geom = GeometryFixer.fix(geom);
+      stats.dataError("omt_fix_water_before_ne_intersect");
+      LOGGER.debug("Fixing geometry of OSM element {} before attempt to add ID to natural earth water feature", element.source().id());
     }
 
     // match by name:
@@ -215,21 +221,7 @@ public class Water implements
     }
 
     // match by intersection:
-    List<LakeInfo> items;
-    try {
-      items = neLakeIndex.getIntersecting(geom);
-    } catch (TopologyException e) {
-      stats.dataError("omt_water_intersecting");
-      LOGGER.debug("omt_water_intersecting, OSM ID: {}",
-        element.source().id(), e);
-      final var geomFixed = GeometryFixer.fix(geom);
-      try {
-        items = neLakeIndex.getIntersecting(geomFixed);
-      } catch (TopologyException e2) {
-        throw new GeometryException("omt_water_intersecting_fix",
-          "Error getting intersecting for OSM ID " + element.source().id(), e2);
-      }
-    }
+    List<LakeInfo> items = neLakeIndex.getIntersecting(geom);
     for (var lakeInfo : items) {
       fillOsmIdIntoNeLake(element, geom, lakeInfo, false);
     }
@@ -240,29 +232,12 @@ public class Water implements
    * otherwise `true`, to make sure we DO check the intersection but to avoid checking it twice.
    */
   void fillOsmIdIntoNeLake(Tables.OsmWaterPolygon element, Geometry geom, LakeInfo lakeInfo,
-    boolean intersetsCheckNeeded) throws GeometryException {
+    boolean intersetsCheckNeeded) {
     final Geometry neGeom = lakeInfo.geom;
-    Geometry intersection;
-    try {
-      if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
-        return;
-      }
-      intersection = neGeom.intersection(geom);
-    } catch (TopologyException e) {
-      stats.dataError("omt_water_intersection");
-      LOGGER.debug("omt_water_intersection, NE ID: {}, OSM ID: {}",
-        lakeInfo.neId, element.source().id(), e);
-      final var geomFixed = GeometryFixer.fix(geom);
-      try {
-        if (intersetsCheckNeeded && !neGeom.intersects(geomFixed)) {
-          return;
-        }
-        intersection = neGeom.intersection(geomFixed);
-      } catch (TopologyException e2) {
-        throw new GeometryException("omt_water_intersection_fix",
-          "Error computing intersection for NE ID " + lakeInfo.neId + " and OSM ID " + element.source().id(), e2);
-      }
+    if (intersetsCheckNeeded && !neGeom.intersects(geom)) {
+      return;
     }
+    final var intersection = neGeom.intersection(geom);
 
     // Should match following in OpenMapTiles: Distinct on keeps just the first occurence -> order by 'area_ratio DESC'
     // With a twist: NE geometry is always the same, hence we can make it a little bit faster by dropping "ratio"

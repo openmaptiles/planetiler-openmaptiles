@@ -220,9 +220,9 @@ public class Water implements
       items = neLakeIndex.getIntersecting(geom);
     } catch (TopologyException e) {
       stats.dataError("omt_water_intersecting");
-      final var geomFixed = GeometryFixer.fix(geom);
+      geom= GeometryFixer.fix(geom);
       try {
-        items = neLakeIndex.getIntersecting(geomFixed);
+        items = neLakeIndex.getIntersecting(geom);
       } catch (TopologyException e2) {
         throw new GeometryException("omt_water_intersecting_fix",
           "Error getting intersecting for OSM ID " + element.source().id(), e2);

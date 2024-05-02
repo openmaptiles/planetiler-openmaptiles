@@ -220,8 +220,8 @@ public class Water implements
       items = neLakeIndex.getIntersecting(geom);
     } catch (TopologyException e) {
       stats.dataError("omt_water_intersecting");
-      LOGGER.debug("omt_water_intersecting, OSM ID: {}",
-        element.source().id(), e);
+      LOGGER.debug("Unable to determine intersecting natural earth water features for OSM ID {}: {}",
+        element.source().id(), e.getMessage());
       geom = GeometryFixer.fix(geom);
       try {
         items = neLakeIndex.getIntersecting(geom);
@@ -250,8 +250,8 @@ public class Water implements
       intersection = neGeom.intersection(geom);
     } catch (TopologyException e) {
       stats.dataError("omt_water_intersection");
-      LOGGER.debug("omt_water_intersection, NE ID: {}, OSM ID: {}",
-        lakeInfo.neId, element.source().id(), e);
+      LOGGER.debug("Unable to compute intersection of natural earth water feature {} with OSM element {}: {}",
+        lakeInfo.neId, element.source().id(), e.getMessage());
       final var geomFixed = GeometryFixer.fix(geom);
       try {
         if (intersetsCheckNeeded && !neGeom.intersects(geomFixed)) {
@@ -261,7 +261,7 @@ public class Water implements
       } catch (TopologyException e2) {
         throw new GeometryException("omt_water_intersection_fix",
           "Error computing intersection for NE ID " + lakeInfo.neId + " and OSM ID " + element.source().id() +
-            " while trying to assign OSM ID to natural earth water feature",
+            " while trying to add OSM ID to natural earth water feature",
           e2);
       }
     }

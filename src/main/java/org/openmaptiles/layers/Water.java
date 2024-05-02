@@ -220,8 +220,6 @@ public class Water implements
       items = neLakeIndex.getIntersecting(geom);
     } catch (TopologyException e) {
       stats.dataError("omt_water_intersecting");
-      LOGGER.debug("omt_water_intersecting, OSM ID: {}",
-        element.source().id(), e);
       final var geomFixed = GeometryFixer.fix(geom);
       try {
         items = neLakeIndex.getIntersecting(geomFixed);
@@ -250,8 +248,6 @@ public class Water implements
       intersection = neGeom.intersection(geom);
     } catch (TopologyException e) {
       stats.dataError("omt_water_intersection");
-      LOGGER.debug("omt_water_intersection, NE ID: {}, OSM ID: {}",
-        lakeInfo.neId, element.source().id(), e);
       final var geomFixed = GeometryFixer.fix(geom);
       try {
         if (intersetsCheckNeeded && !neGeom.intersects(geomFixed)) {

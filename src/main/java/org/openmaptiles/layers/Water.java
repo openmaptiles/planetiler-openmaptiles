@@ -53,7 +53,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.TopologyException;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
@@ -202,7 +201,8 @@ public class Water implements
     if (!geom.isValid()) {
       geom = GeometryFixer.fix(geom);
       stats.dataError("omt_fix_water_before_ne_intersect");
-      LOGGER.debug("Fixing geometry of OSM element {} before attempt to add ID to natural earth water feature", element.source().id());
+      LOGGER.debug("Fixing geometry of OSM element {} before attempt to add ID to natural earth water feature",
+        element.source().id());
     }
 
     // match by name:

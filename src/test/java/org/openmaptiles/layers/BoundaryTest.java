@@ -104,6 +104,7 @@ class BoundaryTest extends AbstractLayerTest {
     assertFeatures(0, List.of(Map.of(
       "_layer", "boundary",
       "_type", "line",
+      "_minzoom", 4,
       "admin_level", 2
     )), process(SimpleFeature.create(
       newLineString(0, 0, 1, 1),
@@ -115,10 +116,65 @@ class BoundaryTest extends AbstractLayerTest {
       0
     )));
 
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "boundary",
+      "_type", "line",
+      "_minzoom", 1,
+      "admin_level", 2
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "featurecla", "Disputed (please verify)",
+        "adm0_left", "South Sudan",
+        "adm0_right", "Kenya"
+      ),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_admin_0_boundary_lines_land",
+      0
+    )));
+
     assertFeatures(0, List.of(), process(SimpleFeature.create(
       newLineString(0, 0, 1, 1),
       Map.of(
-        "featurecla", "Lease Limit"
+        "featurecla", "Lease limit"
+      ),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_admin_0_boundary_lines_land",
+      0
+    )));
+  }
+
+  @Test
+  void testNaturalEarthCountryKeSsBoundaryReversed() {
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "boundary",
+      "_minzoom", 1,
+      "admin_level", 2
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "featurecla", "Disputed (please verify)",
+        "adm0_right", "South Sudan",
+        "adm0_left", "Kenya"
+      ),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_admin_0_boundary_lines_land",
+      0
+    )));
+  }
+
+  @Test
+  void testNaturalEarthCountryNotKeSsBoundary() {
+    assertFeatures(0, List.of(Map.of(
+      "_layer", "boundary",
+      "_minzoom", 4,
+      "admin_level", 2
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      Map.of(
+        "featurecla", "Disputed (please verify)",
+        "adm0_left", "South Sudan",
+        "adm0_right", "Uganda"
       ),
       OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
       "ne_10m_admin_0_boundary_lines_land",
@@ -378,6 +434,29 @@ class BoundaryTest extends AbstractLayerTest {
         "disputed", "yes",
         "claimed_by", "A",
         "name", "AB"
+      ))
+    ));
+  }
+
+  @Test
+  void testOsmAl2BoundaryDisputedMinZoom() {
+    var relation = new OsmElement.Relation(1);
+    relation.setTag("type", "boundary");
+    relation.setTag("admin_level", "2");
+    relation.setTag("boundary", "administrative");
+
+    assertFeatures(3, List.of(Map.of(
+      "_layer", "boundary",
+      "_type", "line",
+      "_minzoom", 5,
+
+      "disputed", 1,
+      "maritime", 0,
+      "admin_level", 2
+    )), process(lineFeatureWithRelation(
+      profile.preprocessOsmRelation(relation),
+      Map.of(
+        "disputed", "yes"
       ))
     ));
   }

@@ -353,7 +353,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "trunk",
       "network", "us-state",
-      "_minzoom", 5
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -580,8 +580,8 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation_name",
       "class", "trunk",
       "name", "<null>",
-      "ref", "E 28",
-      "ref_length", 4,
+      "ref", "S7",
+      "ref_length", 2,
       "route_1_network", "e-road",
       "route_1_ref", "E 28",
       "route_2_network", "e-road",
@@ -668,6 +668,26 @@ class TransportationTest extends AbstractLayerTest {
       "route_1_ref", "90",
       "_minzoom", 6
     )), features);
+  }
+
+  @Test
+  void testMotorwayRoadConstruction() {
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "motorway_construction",
+      "oneway", 1,
+      "_minzoom", 4
+    ), Map.of(
+      "_layer", "transportation_name",
+      "name", "D4 II/118 – Milín",
+      "class", "motorway_construction",
+      "_minzoom", 6
+    )), process(lineFeature(Map.of(
+      "highway", "construction",
+      "construction", "motorway",
+      "name", "D4 II/118 – Milín",
+      "oneway", "yes"
+    ))));
   }
 
   @Test
@@ -1154,7 +1174,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 5
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1208,7 +1228,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 5
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1262,7 +1282,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 5
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1316,7 +1336,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 5
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1341,7 +1361,7 @@ class TransportationTest extends AbstractLayerTest {
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
-      "_minzoom", 5
+      "_minzoom", 6
     )), features);
     boolean caProvPresent = StreamSupport.stream(features.spliterator(), false)
       .flatMap(f -> f.getAttrsAtZoom(13).entrySet().stream())
@@ -1627,7 +1647,7 @@ class TransportationTest extends AbstractLayerTest {
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
-      "_minzoom", 5
+      "_minzoom", 4
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -2121,19 +2141,20 @@ class TransportationTest extends AbstractLayerTest {
     FeatureCollector features = process(lineFeatureWithRelation(
       profile.preprocessOsmRelation(rel),
       Map.of(
-        "highway", "trunk"
+        "highway", "trunk",
+        "name", "National Highway 7",
+        "ref", "7"
       )));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
-      "network", "a-road",
-      "_minzoom", 4
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
-      "ref", "AH11",
-      "network", "a-road"
+      "ref", "7",
+      "route_1_ref", "AH11"
     )), features);
   }
 
@@ -2143,24 +2164,24 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("type", "route");
     rel.setTag("route", "road");
     rel.setTag("network", "e-road");
-    rel.setTag("ref", "E 50");
+    rel.setTag("ref", "E 77");
 
     FeatureCollector features = process(lineFeatureWithRelation(
       profile.preprocessOsmRelation(rel),
       Map.of(
-        "highway", "motorway"
+        "highway", "motorway",
+        "ref", "S7"
       )));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "motorway",
-      "network", "e-road",
       "_minzoom", 4
     ), Map.of(
       "_layer", "transportation_name",
       "class", "motorway",
-      "ref", "E 50",
-      "network", "e-road"
+      "ref", "S7",
+      "route_1_ref", "E 77"
     )), features);
   }
 }

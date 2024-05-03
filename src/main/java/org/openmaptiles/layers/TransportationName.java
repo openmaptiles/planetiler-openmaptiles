@@ -113,11 +113,6 @@ public class TransportationName implements
     .put(9, 8_000)
     .put(10, 4_000)
     .put(11, 2_000);
-  private static final ZoomFunction<Number> BUFFER_PIXEL_OVERRIDES =
-    ZoomFunction.fromMaxZoomThresholds(Map.of(
-      13, 256,
-      6, 256
-    ));
   private final boolean brunnel;
   private final boolean sizeForShield;
   private final boolean limitMerge;
@@ -260,7 +255,7 @@ public class TransportationName implements
 
     FeatureCollector.Feature feature = features.line(LAYER_NAME)
       .setBufferPixels(BUFFER_SIZE)
-      .setBufferPixelOverrides(BUFFER_PIXEL_OVERRIDES)
+      .setBufferPixelOverrides(MIN_LENGTH)
       // TODO abbreviate road names - can't port osml10n because it is AGPL
       .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
       .setAttr(Fields.REF, ref)
@@ -321,7 +316,7 @@ public class TransportationName implements
     if (!nullOrEmpty(element.name())) {
       features.line(LAYER_NAME)
         .setBufferPixels(BUFFER_SIZE)
-        .setBufferPixelOverrides(BUFFER_PIXEL_OVERRIDES)
+        .setBufferPixelOverrides(MIN_LENGTH)
         .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
         .setAttr(Fields.CLASS, "aerialway")
         .setAttr(Fields.SUBCLASS, element.aerialway())
@@ -336,7 +331,7 @@ public class TransportationName implements
     if (!nullOrEmpty(element.name())) {
       features.line(LAYER_NAME)
         .setBufferPixels(BUFFER_SIZE)
-        .setBufferPixelOverrides(BUFFER_PIXEL_OVERRIDES)
+        .setBufferPixelOverrides(MIN_LENGTH)
         .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
         .setAttr(Fields.CLASS, element.shipway())
         .setMinPixelSize(0)

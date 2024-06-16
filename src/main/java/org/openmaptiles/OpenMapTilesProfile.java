@@ -143,7 +143,7 @@ public class OpenMapTilesProfile extends ForwardingProfile {
   }
 
   /** Returns the imposm3 table row constructors that match an input element's tags. */
-  private List<MultiExpression.Match<RowDispatch>> getTableMatches(SourceFeature input) {
+  public List<MultiExpression.Match<RowDispatch>> getTableMatches(SourceFeature input) {
     return osmMappings.getMatchesWithTriggers(input);
   }
 
@@ -262,7 +262,7 @@ public class OpenMapTilesProfile extends ForwardingProfile {
    */
   public interface IgnoreWikidata {}
 
-  private record RowDispatch(
+  public record RowDispatch(
     Tables.Constructor constructor,
     List<Tables.RowHandler<Tables.Row>> handlers
   ) {}

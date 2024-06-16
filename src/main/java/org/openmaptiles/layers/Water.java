@@ -72,8 +72,8 @@ public class Water implements
   Tables.OsmWaterPolygon.Handler,
   OpenMapTilesProfile.NaturalEarthProcessor,
   OpenMapTilesProfile.OsmWaterPolygonProcessor,
-  ForwardingProfile.FeaturePostProcessor,
-  OpenMapTilesProfile.FinishHandler {
+  ForwardingProfile.LayerPostProcesser,
+  ForwardingProfile.FinishHandler {
 
   /*
    * At low zoom levels, use natural earth for oceans and major lakes, and at high zoom levels

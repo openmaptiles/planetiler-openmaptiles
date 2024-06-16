@@ -80,8 +80,8 @@ public class Poi implements
   OpenMapTilesSchema.Poi,
   Tables.OsmPoiPoint.Handler,
   Tables.OsmPoiPolygon.Handler,
-  ForwardingProfile.FeaturePostProcessor,
-  OpenMapTilesProfile.FinishHandler {
+  ForwardingProfile.LayerPostProcesser,
+  ForwardingProfile.FinishHandler {
 
   /*
    * process() creates the raw POI feature from OSM elements and postProcess()
@@ -331,8 +331,8 @@ public class Poi implements
     for (VectorTile.Feature feature : items) {
       int gridrank = groupCounts.getOrDefault(feature.group(), 1);
       groupCounts.put(feature.group(), gridrank + 1);
-      if (!feature.attrs().containsKey(Fields.RANK)) {
-        feature.attrs().put(Fields.RANK, gridrank);
+      if (!feature.tags().containsKey(Fields.RANK)) {
+        feature.tags().put(Fields.RANK, gridrank);
       }
     }
     return items;

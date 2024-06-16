@@ -40,6 +40,7 @@ import static org.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.carrotsearch.hppc.LongIntMap;
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.ForwardingProfile;
 import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.collection.Hppc;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
@@ -74,7 +75,7 @@ public class MountainPeak implements
   OpenMapTilesSchema.MountainPeak,
   Tables.OsmPeakPoint.Handler,
   Tables.OsmMountainLinestring.Handler,
-  OpenMapTilesProfile.FeaturePostProcessor {
+  ForwardingProfile.LayerPostProcesser {
 
   /*
    * Mountain peaks come from OpenStreetMap data and are ranked by importance (based on if they
@@ -180,8 +181,8 @@ public class MountainPeak implements
       // now that we have accurate ranks, remove anything outside the desired buffer
       if (!insideTileBuffer(feature)) {
         items.set(i, null);
-      } else if (!feature.attrs().containsKey(Fields.RANK)) {
-        feature.attrs().put(Fields.RANK, gridrank);
+      } else if (!feature.tags().containsKey(Fields.RANK)) {
+        feature.tags().put(Fields.RANK, gridrank);
       }
     }
     return items;
@@ -196,7 +197,7 @@ public class MountainPeak implements
       Geometry geom = feature.geometry().decode();
       return !(geom instanceof Point point) || (insideTileBuffer(point.getX()) && insideTileBuffer(point.getY()));
     } catch (GeometryException e) {
-      e.log(stats, "mountain_peak_decode_point", "Error decoding mountain peak point: " + feature.attrs());
+      e.log(stats, "mountain_peak_decode_point", "Error decoding mountain peak point: " + feature.tags());
       return false;
     }
   }

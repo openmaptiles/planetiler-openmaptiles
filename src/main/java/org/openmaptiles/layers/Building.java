@@ -42,6 +42,7 @@ import static org.openmaptiles.util.Utils.coalesce;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.FeatureMerge;
+import com.onthegomap.planetiler.ForwardingProfile;
 import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.geo.GeometryException;
@@ -53,7 +54,6 @@ import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 
@@ -67,8 +67,8 @@ import org.openmaptiles.generated.Tables;
 public class Building implements
   OpenMapTilesSchema.Building,
   Tables.OsmBuildingPolygon.Handler,
-  OpenMapTilesProfile.FeaturePostProcessor,
-  OpenMapTilesProfile.OsmRelationPreprocessor {
+  ForwardingProfile.LayerPostProcesser,
+  ForwardingProfile.OsmRelationPreprocessor {
 
   /*
    * Emit all buildings from OSM data at z14.

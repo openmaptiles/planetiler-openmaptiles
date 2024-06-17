@@ -41,6 +41,7 @@ import com.carrotsearch.hppc.LongObjectHashMap;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.FeatureMerge;
+import com.onthegomap.planetiler.ForwardingProfile;
 import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.collection.Hppc;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
@@ -70,9 +71,9 @@ import org.openmaptiles.util.Utils;
 public class Waterway implements
   OpenMapTilesSchema.Waterway,
   Tables.OsmWaterwayLinestring.Handler,
-  OpenMapTilesProfile.FeaturePostProcessor,
+  ForwardingProfile.LayerPostProcesser,
   OpenMapTilesProfile.NaturalEarthProcessor,
-  OpenMapTilesProfile.OsmRelationPreprocessor,
+  ForwardingProfile.OsmRelationPreprocessor,
   OpenMapTilesProfile.OsmAllProcessor {
 
   /*
@@ -207,7 +208,7 @@ public class Waterway implements
       // remove ways for river relations if relation is not long enough
       double minSizeAtZoom = MIN_PIXEL_LENGTHS.apply(zoom).doubleValue() / Math.pow(2, zoom) / 256d;
       for (int i = 0; i < items.size(); i++) {
-        Object relIdObj = items.get(i).attrs().remove(TEMP_REL_ID_ADDR);
+        Object relIdObj = items.get(i).tags().remove(TEMP_REL_ID_ADDR);
         if (relIdObj instanceof Long relId && riverRelationLengths.get(relId).get() < minSizeAtZoom) {
           items.set(i, null);
         }

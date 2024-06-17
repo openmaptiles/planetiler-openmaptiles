@@ -81,7 +81,7 @@ public class TransportationName implements
   Tables.OsmHighwayLinestring.Handler,
   Tables.OsmAerialwayLinestring.Handler,
   Tables.OsmShipwayLinestring.Handler,
-  OpenMapTilesProfile.FeaturePostProcessor,
+  ForwardingProfile.LayerPostProcesser,
   OpenMapTilesProfile.IgnoreWikidata,
   ForwardingProfile.OsmNodePreprocessor,
   ForwardingProfile.OsmWayPreprocessor {
@@ -357,8 +357,8 @@ public class TransportationName implements
     if (limitMerge) {
       // remove temp keys that were just used to improve line merging
       for (var feature : result) {
-        feature.attrs().remove(LINK_TEMP_KEY);
-        feature.attrs().remove(RELATION_ID_TEMP_KEY);
+        feature.tags().remove(LINK_TEMP_KEY);
+        feature.tags().remove(RELATION_ID_TEMP_KEY);
       }
     }
     return result;

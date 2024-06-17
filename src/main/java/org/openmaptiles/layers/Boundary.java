@@ -44,6 +44,7 @@ import static java.util.stream.Collectors.groupingBy;
 import com.carrotsearch.hppc.LongObjectMap;
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.FeatureMerge;
+import com.onthegomap.planetiler.ForwardingProfile;
 import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.collection.Hppc;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
@@ -95,11 +96,11 @@ import org.slf4j.LoggerFactory;
 public class Boundary implements
   OpenMapTilesSchema.Boundary,
   OpenMapTilesProfile.NaturalEarthProcessor,
-  OpenMapTilesProfile.OsmRelationPreprocessor,
+  ForwardingProfile.OsmRelationPreprocessor,
   OpenMapTilesProfile.OsmAllProcessor,
   Tables.OsmBoundaryPolygon.Handler,
-  OpenMapTilesProfile.FeaturePostProcessor,
-  OpenMapTilesProfile.FinishHandler {
+  ForwardingProfile.LayerPostProcesser,
+  ForwardingProfile.FinishHandler {
 
   /*
    * Uses natural earth at lower zoom levels and OpenStreetMap at higher zoom levels.

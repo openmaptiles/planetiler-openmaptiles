@@ -41,7 +41,7 @@ import org.openmaptiles.layers.TransportationName;
  * </ul>
  * Layers can also subscribe to notifications when we finished processing an input source by implementing
  * {@link FinishHandler} or post-process features in that layer before rendering the output tile by implementing
- * {@link FeaturePostProcessor}.
+ * {@link LayerPostProcesser}.
  */
 public class OpenMapTilesProfile extends ForwardingProfile {
 
@@ -133,7 +133,7 @@ public class OpenMapTilesProfile extends ForwardingProfile {
       registerSourceHandler(OSM_SOURCE, (source, features) -> {
         for (var match : getTableMatches(source)) {
           RowDispatch rowDispatch = match.match();
-          var row = rowDispatch.constructor.create(source, match.keys().get(0));
+          var row = rowDispatch.constructor.create(source, match.keys().getFirst());
           for (Tables.RowHandler<Tables.Row> handler : rowDispatch.handlers()) {
             handler.process(row, features);
           }
@@ -150,16 +150,13 @@ public class OpenMapTilesProfile extends ForwardingProfile {
   @Override
   public boolean caresAboutWikidataTranslation(OsmElement elem) {
     var tags = elem.tags();
-    if (elem instanceof OsmElement.Node) {
-      return wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POINT, tags), false);
-    } else if (elem instanceof OsmElement.Way) {
-      return wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POLYGON, tags), false) ||
+    return switch (elem) {
+      case OsmElement.Node ignored -> wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POINT, tags), false);
+      case OsmElement.Way ignored -> wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POLYGON, tags), false) ||
         wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_LINE, tags), false);
-    } else if (elem instanceof OsmElement.Relation) {
-      return wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POLYGON, tags), false);
-    } else {
-      return false;
-    }
+      case OsmElement.Relation ignored -> wikidataMappings.getOrElse(SimpleFeature.create(EMPTY_POLYGON, tags), false);
+      default -> false;
+    };
   }
 
   /*
@@ -265,7 +262,7 @@ public class OpenMapTilesProfile extends ForwardingProfile {
    */
   public interface IgnoreWikidata {}
 
-  private record RowDispatch(
+  public record RowDispatch(
     Tables.Constructor constructor,
     List<Tables.RowHandler<Tables.Row>> handlers
   ) {}

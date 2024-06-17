@@ -40,6 +40,7 @@ import static org.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.FeatureMerge;
+import com.onthegomap.planetiler.ForwardingProfile;
 import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.geo.GeometryException;
@@ -67,7 +68,7 @@ import org.openmaptiles.generated.Tables;
 public class Landuse implements
   OpenMapTilesSchema.Landuse,
   OpenMapTilesProfile.NaturalEarthProcessor,
-  OpenMapTilesProfile.FeaturePostProcessor,
+  ForwardingProfile.LayerPostProcesser,
   Tables.OsmLandusePolygon.Handler {
 
   private static final ZoomFunction<Number> MIN_PIXEL_SIZE_THRESHOLDS = ZoomFunction.fromMaxZoomThresholds(Map.of(
@@ -137,7 +138,7 @@ public class Landuse implements
     List<VectorTile.Feature> toMerge = new ArrayList<>();
     List<VectorTile.Feature> result = new ArrayList<>();
     for (var item : items) {
-      if (FieldValues.CLASS_RESIDENTIAL.equals(item.attrs().get(Fields.CLASS))) {
+      if (FieldValues.CLASS_RESIDENTIAL.equals(item.tags().get(Fields.CLASS))) {
         toMerge.add(item);
       } else {
         result.add(item);

@@ -141,6 +141,11 @@ public class OpenMapTilesProfile extends ForwardingProfile {
     }
   }
 
+  @Override
+  public boolean dependsOnLayer(String dependent, String dependency) {
+    return "transportation_name".equals(dependent) && "transportation".equals(dependency);
+  }
+
   /** Returns the imposm3 table row constructors that match an input element's tags. */
   public List<MultiExpression.Match<RowDispatch>> getTableMatches(SourceFeature input) {
     return osmMappings.getMatchesWithTriggers(input);

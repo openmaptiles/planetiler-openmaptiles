@@ -17,6 +17,7 @@ import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.openmaptiles.addons.ExtraLayers;
 import org.openmaptiles.generated.OpenMapTilesSchema;
@@ -142,8 +143,8 @@ public class OpenMapTilesProfile extends ForwardingProfile {
   }
 
   @Override
-  public boolean dependsOnLayer(String dependent, String dependency) {
-    return "transportation_name".equals(dependent) && "transportation".equals(dependency);
+  public Map<String, List<String>> dependsOnLayer() {
+    return Map.of("transportation_name", List.of("transportation"));
   }
 
   /** Returns the imposm3 table row constructors that match an input element's tags. */

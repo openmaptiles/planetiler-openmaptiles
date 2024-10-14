@@ -114,6 +114,14 @@ public class OmtLanguageUtils {
     return result;
   }
 
+  public static String string(Object obj) {
+    return nullIfEmpty(obj == null ? null : obj.toString());
+  }
+
+  public static String transliteratedName(Map<String, Object> tags) {
+    return Translations.transliterate(string(tags.get("name")));
+  }
+
   private static Stream<String> getAllNameTranslationsBesidesEnglishAndGerman(Map<String, Object> tags) {
     return tags.entrySet().stream()
       .filter(e -> !EN_DE_NAME_KEYS.contains(e.getKey()) && VALID_NAME_TAGS.test(e.getKey()))

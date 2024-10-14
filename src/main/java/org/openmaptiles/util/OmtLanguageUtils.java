@@ -126,6 +126,6 @@ public class OmtLanguageUtils {
     return tags.entrySet().stream()
       .filter(e -> !EN_DE_NAME_KEYS.contains(e.getKey()) && VALID_NAME_TAGS.test(e.getKey()))
       .map(Map.Entry::getValue)
-      .map(LanguageUtils::string);
+      .map(OmtLanguageUtils::string);
   }
 }

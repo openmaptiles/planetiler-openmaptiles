@@ -94,7 +94,7 @@ public class Transportation implements
   Tables.OsmShipwayLinestring.Handler,
   Tables.OsmHighwayPolygon.Handler,
   OpenMapTilesProfile.NaturalEarthProcessor,
-  ForwardingProfile.LayerPostProcesser,
+  ForwardingProfile.LayerPostProcessor,
   ForwardingProfile.OsmRelationPreprocessor,
   OpenMapTilesProfile.IgnoreWikidata {
 

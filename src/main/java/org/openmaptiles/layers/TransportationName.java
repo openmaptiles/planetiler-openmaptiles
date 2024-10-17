@@ -81,7 +81,7 @@ public class TransportationName implements
   Tables.OsmHighwayLinestring.Handler,
   Tables.OsmAerialwayLinestring.Handler,
   Tables.OsmShipwayLinestring.Handler,
-  ForwardingProfile.LayerPostProcesser,
+  ForwardingProfile.LayerPostProcessor,
   OpenMapTilesProfile.IgnoreWikidata,
   ForwardingProfile.OsmNodePreprocessor,
   ForwardingProfile.OsmWayPreprocessor {

@@ -68,7 +68,7 @@ import org.openmaptiles.util.OmtLanguageUtils;
 public class Park implements
   OpenMapTilesSchema.Park,
   Tables.OsmParkPolygon.Handler,
-  ForwardingProfile.LayerPostProcesser {
+  ForwardingProfile.LayerPostProcessor {
 
   // constants for determining the minimum zoom level for a park label based on its area
   private static final double WORLD_AREA_FOR_70K_SQUARE_METERS =

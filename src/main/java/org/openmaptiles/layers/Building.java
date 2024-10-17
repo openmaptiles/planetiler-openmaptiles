@@ -67,7 +67,7 @@ import org.openmaptiles.generated.Tables;
 public class Building implements
   OpenMapTilesSchema.Building,
   Tables.OsmBuildingPolygon.Handler,
-  ForwardingProfile.LayerPostProcesser,
+  ForwardingProfile.LayerPostProcessor,
   ForwardingProfile.OsmRelationPreprocessor {
 
   /*

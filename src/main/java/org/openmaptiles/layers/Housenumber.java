@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
 public class Housenumber implements
   OpenMapTilesSchema.Housenumber,
   Tables.OsmHousenumberPoint.Handler,
-  ForwardingProfile.LayerPostProcesser {
+  ForwardingProfile.LayerPostProcessor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Housenumber.class);
   private static final String OSM_SEPARATOR = ";";

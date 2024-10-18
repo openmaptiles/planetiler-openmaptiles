@@ -75,7 +75,7 @@ public class MountainPeak implements
   OpenMapTilesSchema.MountainPeak,
   Tables.OsmPeakPoint.Handler,
   Tables.OsmMountainLinestring.Handler,
-  ForwardingProfile.LayerPostProcesser {
+  ForwardingProfile.LayerPostProcessor {
 
   /*
    * Mountain peaks come from OpenStreetMap data and are ranked by importance (based on if they

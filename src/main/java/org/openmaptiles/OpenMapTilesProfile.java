@@ -42,7 +42,7 @@ import org.openmaptiles.layers.TransportationName;
  * </ul>
  * Layers can also subscribe to notifications when we finished processing an input source by implementing
  * {@link FinishHandler} or post-process features in that layer before rendering the output tile by implementing
- * {@link LayerPostProcesser}.
+ * {@link LayerPostProcessor}.
  */
 public class OpenMapTilesProfile extends ForwardingProfile {
 

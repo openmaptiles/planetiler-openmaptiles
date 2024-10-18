@@ -99,7 +99,7 @@ public class Boundary implements
   ForwardingProfile.OsmRelationPreprocessor,
   OpenMapTilesProfile.OsmAllProcessor,
   Tables.OsmBoundaryPolygon.Handler,
-  ForwardingProfile.LayerPostProcesser,
+  ForwardingProfile.LayerPostProcessor,
   ForwardingProfile.FinishHandler {
 
   /*

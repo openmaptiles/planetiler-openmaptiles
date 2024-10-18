@@ -66,7 +66,7 @@ public class Landcover implements
   OpenMapTilesSchema.Landcover,
   OpenMapTilesProfile.NaturalEarthProcessor,
   Tables.OsmLandcoverPolygon.Handler,
-  ForwardingProfile.LayerPostProcesser {
+  ForwardingProfile.LayerPostProcessor {
 
   /*
    * Large ice areas come from natural earth and the rest come from OpenStreetMap at higher zoom

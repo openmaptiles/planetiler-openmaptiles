@@ -90,7 +90,7 @@ public class Place implements
   Tables.OsmIslandPolygon.Handler,
   Tables.OsmCityPoint.Handler,
   Tables.OsmBoundaryPolygon.Handler,
-  ForwardingProfile.LayerPostProcesser {
+  ForwardingProfile.LayerPostProcessor {
 
   /*
    * Place labels locations and names come from OpenStreetMap, but we also join with natural

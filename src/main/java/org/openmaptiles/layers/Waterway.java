@@ -71,7 +71,7 @@ import org.openmaptiles.util.Utils;
 public class Waterway implements
   OpenMapTilesSchema.Waterway,
   Tables.OsmWaterwayLinestring.Handler,
-  ForwardingProfile.LayerPostProcesser,
+  ForwardingProfile.LayerPostProcessor,
   OpenMapTilesProfile.NaturalEarthProcessor,
   ForwardingProfile.OsmRelationPreprocessor,
   OpenMapTilesProfile.OsmAllProcessor {

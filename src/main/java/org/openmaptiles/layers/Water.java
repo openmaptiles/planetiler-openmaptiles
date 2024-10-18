@@ -72,7 +72,7 @@ public class Water implements
   Tables.OsmWaterPolygon.Handler,
   OpenMapTilesProfile.NaturalEarthProcessor,
   OpenMapTilesProfile.OsmWaterPolygonProcessor,
-  ForwardingProfile.LayerPostProcesser,
+  ForwardingProfile.LayerPostProcessor,
   ForwardingProfile.FinishHandler {
 
   /*

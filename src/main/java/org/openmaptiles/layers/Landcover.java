@@ -77,9 +77,8 @@ public class Landcover implements
    */
 
   public static final ZoomFunction<Number> MIN_PIXEL_SIZE_THRESHOLDS = ZoomFunction.fromMaxZoomThresholds(Map.of(
-    13, 8,
-    10, 4,
-    9, 2
+    13, 4,
+    11, 2
   ));
   private static final String TEMP_NUM_POINTS_ATTR = "_numpoints";
   private static final Set<String> WOOD_OR_FOREST = Set.of(

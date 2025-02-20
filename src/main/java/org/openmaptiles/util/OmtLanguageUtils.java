@@ -42,7 +42,11 @@ import com.onthegomap.planetiler.util.LanguageUtils;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities to extract common name fields (name, name_en, name_de, name:latin, name:nonlatin, name_int) that the
@@ -65,9 +69,35 @@ public class OmtLanguageUtils {
    * <li>name_int is the first of int_name name:en name:latin name</li>
    * </ul>
    */
+  private static final Logger LOGGER = LoggerFactory.getLogger(OmtLanguageUtils.class);
+  private static List<String> extraNameTags = List.of();
+
   public static Map<String, Object> getNamesWithoutTranslations(Map<String, Object> tags) {
     return getNames(tags, null);
   }
+
+  public static List<String> setExtraNameTags(List<String> extraNameTags) {
+    if (extraNameTags != null) {
+      OmtLanguageUtils.extraNameTags = extraNameTags;
+    }
+    return extraNameTags;
+  }
+
+  private static Map<String, Object> getExtraNameTags(Map<String,Object> tags) {
+    if (!extraNameTags.isEmpty()) {
+      Map<String,Object> extraTags =  extraNameTags.stream()
+        .filter(tags::containsKey)
+        .filter(tag -> tags.get(tag) != null && !tags.get(tag).equals(""))
+        .collect(Collectors.toMap(t -> t, tags::get));
+      if (!extraTags.isEmpty()) {
+        LOGGER.debug("Found {} extra tags from OSM object with name {}", extraTags.size(), tags.get("name"));
+      }
+      return extraTags;
+    } else {
+      return HashMap.newHashMap(0);
+    }
+  }
+
 
   /**
    * Returns a map with default name attributes that {@link #getNamesWithoutTranslations(Map)} adds, but also
@@ -111,6 +141,8 @@ public class OmtLanguageUtils {
       translations.addTranslations(result, tags);
     }
 
+    result.putAll(getExtraNameTags(tags));
+
     return result;
   }
 
@@ -128,4 +160,5 @@ public class OmtLanguageUtils {
       .map(Map.Entry::getValue)
       .map(OmtLanguageUtils::string);
   }
+
 }

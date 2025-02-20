@@ -32,6 +32,7 @@ import java.util.TreeMap;
 import java.util.stream.Stream;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
+import org.openmaptiles.util.OmtLanguageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
@@ -143,6 +144,8 @@ public class Generate {
     // then crawl table definitions from each layers/<layer>/mapping.yaml file that the layer references
     String rootUrl = base + "openmaptiles.yaml";
     OpenmaptilesConfig config = loadAndParseYaml(rootUrl, planetilerConfig, OpenmaptilesConfig.class);
+
+    OmtLanguageUtils.setExtraNameTags(planetilerConfig.extraNameTags());
 
     List<LayerConfig> layers = new ArrayList<>();
     Set<String> imposm3MappingFiles = new LinkedHashSet<>();

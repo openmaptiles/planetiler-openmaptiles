@@ -24,6 +24,7 @@ import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.layers.Transportation;
 import org.openmaptiles.layers.TransportationName;
+import org.openmaptiles.util.OmtLanguageUtils;
 
 /**
  * Delegates the logic for generating a map to individual implementations in the {@code layers} package.
@@ -139,6 +140,10 @@ public class OpenMapTilesProfile extends ForwardingProfile {
           }
         }
       });
+    }
+
+    if (config.extraNameTags() != null && !config.extraNameTags().isEmpty()) {
+      OmtLanguageUtils.setExtraNameTags(config.extraNameTags());
     }
   }
 

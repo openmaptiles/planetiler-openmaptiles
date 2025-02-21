@@ -4,6 +4,7 @@ import static com.onthegomap.planetiler.TestUtils.assertSubmap;
 import static com.onthegomap.planetiler.util.LanguageUtils.containsOnlyLatinCharacters;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.onthegomap.planetiler.util.Translations;
@@ -262,5 +263,25 @@ class OmtLanguageUtilsTest {
       "name:ja", "ja name osm"
     ));
     assertNull(result.get("name:ja"));
+  }
+
+  @Test
+  void testExtraNameTags() {
+    Map<String, Object> tags = Map.of(
+      "extra", "extra",
+      "name", "name",
+      "name:en", "english name",
+      "name:de", "german name"
+    );
+    assertFalse(
+      OmtLanguageUtils.getNames(tags, translations).containsKey("extra"));
+    try {
+      OmtLanguageUtils.setExtraNameTags(List.of("extra"));
+      assertTrue(
+        OmtLanguageUtils.getNames(tags, translations).containsKey("extra"));
+    }
+    finally {
+      OmtLanguageUtils.setExtraNameTags(List.of());
+    }
   }
 }

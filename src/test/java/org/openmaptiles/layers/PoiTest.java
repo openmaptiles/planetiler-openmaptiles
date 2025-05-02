@@ -21,6 +21,25 @@ class PoiTest extends AbstractLayerTest {
     return area ? polygonFeature(tags) : pointFeature(tags);
   }
 
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void testRatpSubwayStation(boolean area) {
+    assertFeatures(7, List.of(Map.of(
+      "_layer", "poi",
+      "class", "railway",
+      "subclass", "subway",
+      "rank", "<null>",
+      "_minzoom", 12,
+      "network", "ratp-metro"
+    )), process(feature(area, Map.of(
+      "railway", "station",
+      "station", "subway",
+      "name", "station",
+      "type:RATP", "METRO"
+    ))));
+  }
+
+
   @Test
   void testFenwayPark() {
     assertFeatures(7, List.of(Map.of(

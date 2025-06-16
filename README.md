@@ -32,6 +32,7 @@ available options.
   or wikipedia page or name)
 - Some line and polygon tolerances are different, can be tweaked with `--simplify-tolerance` parameter
 - For bigger bays whose label points show above Z9, centerline is used for Z9+
+- MVT IDs encoded as `{ID} * 10 + {1 for OSM nodes, 2 for OSM ways, 3 for OSM relations, 0 for any other source}` by default
 
 ## Customizing
 

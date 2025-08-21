@@ -28,7 +28,7 @@ jobs:
     - uses: actions/checkout@v5
     - name: Cache data/sources
       uses: ./.github/cache-sources-action
-    - uses: actions/setup-java@v4
+    - uses: actions/setup-java@v5
       with:
         java-version: '21'
         distribution: 'temurin'

@@ -59,11 +59,11 @@ public class OpenMapTilesSchema {
   public static final String VERSION = "3.15.0";
   public static final String ATTRIBUTION =
     "<a href=\"https://www.openmaptiles.org/\" target=\"_blank\">&copy; OpenMapTiles</a> <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">&copy; OpenStreetMap contributors</a>";
-  public static final List<String> LANGUAGES = List.of("am", "ar", "az", "be", "bg", "bn", "br", "bs", "ca", "co", "cs",
-    "cy", "da", "de", "el", "en", "eo", "es", "et", "eu", "fa", "fi", "fr", "fy", "ga", "gd", "he", "hi", "hr", "hu",
-    "hy", "id", "is", "it", "ja", "ja_kana", "ja_rm", "ja-Latn", "ja-Hira", "ka", "kk", "kn", "ko", "ko-Latn", "ku",
-    "la", "lb", "lt", "lv", "mk", "mt", "ml", "nl", "no", "oc", "pa", "pnb", "pl", "pt", "rm", "ro", "ru", "sk", "sl",
-    "sq", "sr", "sr-Latn", "sv", "ta", "te", "th", "tr", "uk", "ur", "vi", "zh", "zh-Hant", "zh-Hans");
+  public static final List<String> LANGUAGES = List.of("af", "am", "ar", "az", "be", "bg", "bn", "br", "bs", "ca", "co",
+    "cs", "cy", "da", "de", "el", "en", "eo", "es", "et", "eu", "fa", "fi", "fr", "fy", "ga", "gd", "he", "hi", "hr",
+    "hu", "hy", "id", "is", "it", "ja", "ja_kana", "ja_rm", "ja-Latn", "ja-Hira", "ka", "kk", "kn", "ko", "ko-Latn",
+    "ku", "la", "lb", "lt", "lv", "mk", "mt", "ml", "nl", "no", "oc", "pa", "pnb", "pl", "pt", "rm", "ro", "ru", "sk",
+    "sl", "sq", "sr", "sr-Latn", "sv", "ta", "te", "th", "tok", "tr", "uk", "ur", "vi", "zh", "zh-Hant", "zh-Hans");
 
   /** Returns a list of expected layer implementation instances from the {@code layers} package. */
   public static List<Layer> createInstances(Translations translations, PlanetilerConfig config, Stats stats) {

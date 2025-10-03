@@ -1,0 +1,7 @@
+services:
+  planetiler-app:
+    build: .
+    container_name: planetiler-app
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

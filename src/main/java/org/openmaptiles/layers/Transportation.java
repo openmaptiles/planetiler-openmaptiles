@@ -226,6 +226,24 @@ public class Transportation implements
     return (value == null || !SERVICE_VALUES.contains(value)) ? null : value;
   }
 
+  /**
+   * Returns a value for {@code official} field based on OSM {@code operator} and {@code informal} tags. Only applies to
+   * highway=path/footway/cycleway/bridleway.
+   */
+  private static Integer official(String highway, String informal, String operator) {
+    if (highway == null || !(highway.equals("path") || highway.equals("footway") ||
+      highway.equals("cycleway") || highway.equals("bridleway"))) {
+      return null;
+    }
+    if ("yes".equals(informal)) {
+      return 0;
+    }
+    if ("no".equals(informal) || !nullOrEmpty(operator)) {
+      return 1;
+    }
+    return null;
+  }
+
   private static String railwayClass(String value) {
     return value == null ? null :
       RAILWAY_RAIL_VALUES.contains(value) ? "rail" :
@@ -506,6 +524,7 @@ public class Transportation implements
         .setAttrWithMinzoom(Fields.FOOT, nullIfEmpty(element.foot()), 9)
         .setAttrWithMinzoom(Fields.HORSE, nullIfEmpty(element.horse()), 9)
         .setAttrWithMinzoom(Fields.MTB_SCALE, nullIfEmpty(element.mtbScale()), 9)
+        .setAttrWithMinzoom(Fields.OFFICIAL, official(highway, element.informal(), element.operator()), 9)
         .setAttrWithMinzoom(Fields.ACCESS, access(element.access()), 9)
         .setAttrWithMinzoom(Fields.TOLL, element.toll() ? 1 : null, 9)
         // sometimes z9+, sometimes z12+

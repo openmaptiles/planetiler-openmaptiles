@@ -1074,6 +1074,17 @@ public class OpenMapTilesSchema {
       public static final String MTB_SCALE = "mtb_scale";
 
       /**
+       * Whether or not a path or trail is official according to the land manager.
+       * <p>
+       * allowed values:
+       * <ul>
+       * <li>0
+       * <li>1
+       * </ul>
+       */
+      public static final String OFFICIAL = "official";
+
+      /**
        * Values of <a href="https://wiki.openstreetmap.org/wiki/Key:surface"><code>surface</code></a> tag devided into 2
        * groups <code>paved</code> (paved, asphalt, cobblestone, concrete, concrete:lanes, concrete:plates, metal,
        * paving_stones, sett, unhewn_cobblestone, wood) and <code>unpaved</code> (unpaved, compacted, dirt, earth,

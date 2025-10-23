@@ -176,6 +176,49 @@ class TransportationTest extends AbstractLayerTest {
   }
 
   @Test
+  void testOfficialPath() {
+    assertFeatures(9, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "path",
+      "subclass", "footway",
+      "official", 1
+    )), process(lineFeature(Map.of(
+      "highway", "footway",
+      "operator", "National Park Service"
+    ))));
+    assertFeatures(9, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "path",
+      "subclass", "bridleway",
+      "official", 1
+    )), process(lineFeature(Map.of(
+      "highway", "bridleway",
+      "informal", "no"
+    ))));
+    assertFeatures(9, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "path",
+      "subclass", "cycleway",
+      "official", "<null>"
+    )), process(lineFeature(Map.of(
+      "highway", "cycleway"
+    ))));
+  }
+
+  @Test
+  void testInformalPath() {
+    assertFeatures(9, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "path",
+      "subclass", "path",
+      "official", 0
+    )), process(lineFeature(Map.of(
+      "highway", "path",
+      "informal", "yes"
+    ))));
+  }
+
+  @Test
   void testExpressway() {
     assertFeatures(8, List.of(Map.of(
       "_layer", "transportation",

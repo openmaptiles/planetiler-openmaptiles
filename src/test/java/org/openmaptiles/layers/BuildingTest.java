@@ -115,10 +115,10 @@ class BuildingTest extends AbstractLayerTest {
   })
   void testRenderHeightUnits(String input, int expected) {
     assertFeatures(14, List.of(Map.of(
-        "render_height", expected
+      "render_height", expected
     )), process(polygonFeature(Map.of(
-        "building", "yes",
-        "building:height", input
+      "building", "yes",
+      "building:height", input
     ))));
   }
 

@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.openmaptiles.OpenMapTilesProfile;
 
 class BuildingTest extends AbstractLayerTest {
@@ -99,6 +101,24 @@ class BuildingTest extends AbstractLayerTest {
       "building", "yes",
       "building:min_level", "1500",
       "building:levels", "1500"
+    ))));
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "2, 2",
+    "2m, 2",
+    "2 m, 2",
+    "2.5 m, 3",
+    "6', 2",
+    "6'10\", 3",
+  })
+  void testRenderHeightUnits(String input, int expected) {
+    assertFeatures(14, List.of(Map.of(
+      "render_height", expected
+    )), process(polygonFeature(Map.of(
+      "building", "yes",
+      "building:height", input
     ))));
   }
 

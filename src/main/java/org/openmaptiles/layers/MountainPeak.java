@@ -122,7 +122,7 @@ public class MountainPeak implements
         .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
         .putAttrs(meters != null ? elevationTags(meters) : Map.of())
         .setSortKeyDescending(
-            (meters != null ? meters.intValue() : 0) +
+          (meters != null ? meters.intValue() : 0) +
             (nullIfEmpty(element.wikipedia()) != null ? 10_000 : 0) +
             (nullIfEmpty(element.name()) != null ? 10_000 : 0)
         )

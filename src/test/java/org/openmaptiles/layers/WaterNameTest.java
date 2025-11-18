@@ -271,4 +271,16 @@ class WaterNameTest extends AbstractLayerTest {
       "place", "sea"
     ))));
   }
+
+  @Test
+  void testSwimmingPoolWithName() {
+    assertFeatures(14, List.of(Map.of(
+      "_layer", "poi"
+    ), Map.of(
+      "_layer", "water"
+    )), process(polygonFeatureWithArea(1, Map.of(
+      "name", "test",
+      "leisure", "swimming_pool"
+    ))));
+  }
 }

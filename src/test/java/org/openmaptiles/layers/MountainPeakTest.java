@@ -108,11 +108,23 @@ class MountainPeakTest extends AbstractLayerTest {
     ))));
   }
 
-
   @Test
   void testNoElevation() {
     assertFeatures(14, List.of(), process(pointFeature(Map.of(
       "natural", "volcano"
+    ))));
+  }
+
+  @Test
+  void testNoElevationButWithName() {
+    assertFeatures(14, List.of(Map.of(
+      "class", "peak",
+      "name", "test",
+      "ele", "<null>",
+      "ele_ft", "<null>"
+    )), process(pointFeature(Map.of(
+      "natural", "peak",
+      "name", "test"
     ))));
   }
 

@@ -50,6 +50,7 @@ import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
@@ -115,13 +116,13 @@ public class MountainPeak implements
   @Override
   public void process(Tables.OsmPeakPoint element, FeatureCollector features) {
     Double meters = Parse.meters(element.ele());
-    if (meters != null && Math.abs(meters) < 10_000) {
+    if ((meters != null && Math.abs(meters) < 10_000) || nullIfEmpty(element.name()) != null) {
       var feature = features.point(LAYER_NAME)
         .setAttr(Fields.CLASS, element.source().getTag("natural"))
         .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
-        .putAttrs(elevationTags(meters))
+        .putAttrs(meters != null ? elevationTags(meters) : Map.of())
         .setSortKeyDescending(
-          meters.intValue() +
+          (meters != null ? meters.intValue() : 0) +
             (nullIfEmpty(element.wikipedia()) != null ? 10_000 : 0) +
             (nullIfEmpty(element.name()) != null ? 10_000 : 0)
         )

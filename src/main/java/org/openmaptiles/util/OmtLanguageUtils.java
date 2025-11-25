@@ -124,7 +124,7 @@ public class OmtLanguageUtils {
 
   private static Stream<String> getAllNameTranslationsBesidesEnglishAndGerman(Map<String, Object> tags) {
     return tags.entrySet().stream()
-      .filter(e -> !EN_DE_NAME_KEYS.contains(e.getKey()) && VALID_NAME_TAGS.test(e.getKey()))
+      .filter(e -> !EN_DE_NAME_KEYS.contains(e.getKey()) && isValidOsmNameTag(e.getKey()))
       .map(Map.Entry::getValue)
       .map(OmtLanguageUtils::string);
   }

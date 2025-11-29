@@ -168,6 +168,8 @@ public class Transportation implements
     .put(6, 100)
     .put(5, 500)
     .put(4, 1_000);
+  private static final ZoomFunction.MeterToPixelThresholds TRUNK_UPGRADE_LENGTH = ZoomFunction.meterThresholds()
+    .put(5, 1_000);
   // ORDER BY network_type, network, LENGTH(ref), ref)
   private static final Comparator<RouteRelation> RELATION_ORDERING = Comparator
     .<RouteRelation>comparingInt(
@@ -699,6 +701,30 @@ public class Transportation implements
       var oneway = item.tags().get(Fields.ONEWAY);
       if (oneway instanceof Number n && ONEWAY_VALUES.contains(n.intValue())) {
         item.tags().put(LIMIT_MERGE_TAG, onewayId++);
+      }
+
+      // At zoom 5 only, upgrade tiny trunk sections to motorway for merging purposes.
+      if (zoom == 5) {
+        try {
+          Geometry geom = item.geometry().decode();
+          if (geom instanceof LineString lineString) {
+            double pixelLength = lineString.getLength();
+
+            if (pixelLength < TRUNK_UPGRADE_LENGTH.apply(zoom).doubleValue()) {
+              Object classValue = item.tags().get(Fields.CLASS);
+              if (classValue instanceof String currentClass) {
+                if (FieldValues.CLASS_TRUNK.equals(currentClass)) {
+                  item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
+                }
+                if (FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(currentClass)) {
+                  item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY_CONSTRUCTION);
+                }
+              }
+            }
+          }
+        } catch (GeometryException e) {
+          // Do nothing: skip problematic geometry for trunk upgrade
+        }
       }
     }
 

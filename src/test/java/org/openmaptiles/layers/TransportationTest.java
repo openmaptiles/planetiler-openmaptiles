@@ -379,7 +379,7 @@ class TransportationTest extends AbstractLayerTest {
     rel2.setTag("ref", "104");
     rel2.setTag("direction", "south");
 
-    FeatureCollector features = process(lineFeatureWithRelation(
+    FeatureCollector features = process(lineFeatureWithRelationAndLength(
       Stream.concat(
         profile.preprocessOsmRelation(rel2).stream(),
         profile.preprocessOsmRelation(rel1).stream()
@@ -390,13 +390,14 @@ class TransportationTest extends AbstractLayerTest {
         "lanes", 5,
         "maxspeed", "55 mph",
         "expressway", "no"
-      )));
+      ),
+      2000.0));
 
     assertFeatures(13, List.of(mapOf(
       "_layer", "transportation",
       "class", "trunk",
       "network", "us-state",
-      "_minzoom", 6
+      "_minzoom", 5
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1207,17 +1208,18 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("network", "CA:ON:primary");
     rel.setTag("ref", "85");
 
-    FeatureCollector features = process(lineFeatureWithRelation(
+    FeatureCollector features = process(lineFeatureWithRelationAndLength(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk"
-      )));
+      ),
+      2000.0));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 6
+      "_minzoom", 5
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1261,17 +1263,18 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("network", "CA:MB:PTH");
     rel.setTag("ref", "77");
 
-    FeatureCollector features = process(lineFeatureWithRelation(
+    FeatureCollector features = process(lineFeatureWithRelationAndLength(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk"
-      )));
+      ),
+      2000.0));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 6
+      "_minzoom", 5
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1315,17 +1318,18 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("network", "CA:AB:primary");
     rel.setTag("ref", "10");
 
-    FeatureCollector features = process(lineFeatureWithRelation(
+    FeatureCollector features = process(lineFeatureWithRelationAndLength(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk"
-      )));
+      ),
+      2000.0));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 6
+      "_minzoom", 5
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1369,17 +1373,18 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("network", "CA:BC");
     rel.setTag("ref", "10");
 
-    FeatureCollector features = process(lineFeatureWithRelation(
+    FeatureCollector features = process(lineFeatureWithRelationAndLength(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk"
-      )));
+      ),
+      2000.0));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 6
+      "_minzoom", 5
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1395,16 +1400,17 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("route", "road");
     rel.setTag("network", "CA:yellowhead");
 
-    FeatureCollector features = process(lineFeatureWithRelation(
+    FeatureCollector features = process(lineFeatureWithRelationAndLength(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk"
-      )));
+      ),
+      2000.0));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
-      "_minzoom", 6
+      "_minzoom", 5
     )), features);
     boolean caProvPresent = StreamSupport.stream(features.spliterator(), false)
       .flatMap(f -> f.getAttrsAtZoom(13).entrySet().stream())
@@ -2181,18 +2187,19 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("network", "AsianHighway");
     rel.setTag("ref", "AH11");
 
-    FeatureCollector features = process(lineFeatureWithRelation(
+    FeatureCollector features = process(lineFeatureWithRelationAndLength(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk",
         "name", "National Highway 7",
         "ref", "7"
-      )));
+      ),
+      2000.0));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
-      "_minzoom", 6
+      "_minzoom", 5
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -2227,4 +2234,19 @@ class TransportationTest extends AbstractLayerTest {
       "route_1_ref", "E 77"
     )), features);
   }
+
+  @Test
+  void testShortTrunkSegmentWithoutNetwork() {
+    // Short trunk segment (< 1000m) should appear at z5 to allow merging with surrounding motorways
+    FeatureCollector features = process(lineFeatureWithLength(500.0, Map.of(
+      "highway", "trunk"
+    )));
+
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "trunk",
+      "_minzoom", 5
+    )), features);
+  }
+
 }

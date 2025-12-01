@@ -26,6 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.StreamSupport;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.util.Utils;
 
@@ -137,9 +140,28 @@ public abstract class AbstractLayerTest {
     );
   }
 
+  /**
+   * Creates a {@link SourceFeature} representing a linestring of the specified real-world length in meters,
+   * using a vertical line starting at (0, 0) in lat/lon coordinates.
+   * 
+   * @param length Length of the line in meters.
+   * @param props  Properties to include in the feature.
+   * @return       A {@link SourceFeature} of the requested length and properties.
+   */
   SourceFeature lineFeatureWithLength(double length, Map<String, Object> props) {
+
+    // Convert meters to degrees of latitude (at equator: 1 degree ≈ 111,320 meters)
+    // Create a line in lat/lon coordinates going north from (0, 0)
+    // Using JTS to create the geometry directly in lat/lon (longitude, latitude order)
+    double lengthInDegrees = length / 111320.0;
+    GeometryFactory geometryFactory = new GeometryFactory();
+    Coordinate[] coordinates = new Coordinate[]{
+      new Coordinate(0.0, 0.0),  // Start at (lon=0, lat=0)
+      new Coordinate(0.0, lengthInDegrees)  // End at (lon=0, lat=lengthInDegrees)
+    };
+    LineString lineString = geometryFactory.createLineString(coordinates);
     return SimpleFeature.create(
-      GeoUtils.worldToLatLonCoords(newLineString(0, 0, 0, length)),
+      lineString,
       new HashMap<>(props),
       OpenMapTilesProfile.OSM_SOURCE,
       null,
@@ -177,6 +199,29 @@ public abstract class AbstractLayerTest {
     Map<String, Object> map) {
     return SimpleFeature.createFakeOsmFeature(
       newLineString(0, 0, 1, 1),
+      map,
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      0,
+      (relationInfos == null ? List.<OsmRelationInfo>of() : relationInfos).stream()
+        .map(r -> new OsmReader.RelationMember<>("", r)).toList()
+    );
+  }
+
+  protected SimpleFeature lineFeatureWithRelationAndLength(List<OsmRelationInfo> relationInfos,
+    Map<String, Object> map, double length) {
+    // Convert meters to degrees of latitude (at equator: 1 degree ≈ 111,320 meters)
+    // Create a line in lat/lon coordinates going north from (0, 0)
+    // Using JTS to create the geometry directly in lat/lon (longitude, latitude order)
+    double lengthInDegrees = length / 111320.0;
+    GeometryFactory geometryFactory = new GeometryFactory();
+    Coordinate[] coordinates = new Coordinate[]{
+      new Coordinate(0.0, 0.0),  // Start at (lon=0, lat=0)
+      new Coordinate(0.0, lengthInDegrees)  // End at (lon=0, lat=lengthInDegrees)
+    };
+    LineString lineString = geometryFactory.createLineString(coordinates);
+    return SimpleFeature.createFakeOsmFeature(
+      lineString,
       map,
       OpenMapTilesProfile.OSM_SOURCE,
       null,

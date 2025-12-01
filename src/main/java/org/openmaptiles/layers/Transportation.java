@@ -287,6 +287,21 @@ public class Transportation implements
       .anyMatch(Z5_TRUNK_BY_NETWORK::contains);
   }
 
+  /**
+   * Checks if a trunk segment is small enough to be processed at z5 so it can merge with surrounding motorways.
+   * @param element the highway linestring element to check
+   * @return true if the trunk segment length is less than the threshold, false otherwise
+   */
+  private boolean isTrunkZ5MergeableLength(Tables.OsmHighwayLinestring element) {
+    try {
+      return element.source().length() < TRUNK_UPGRADE_LENGTH.apply(5).doubleValue();
+    } catch (GeometryException e) {
+      e.log(stats, "omt_transportation_trunk_length",
+        "Unable to get feature length for trunk upgrade: " + element.source().id());
+      return false;
+    }
+  }
+
   private static boolean isMotorwayWithNetworkForZ4(List<RouteRelation> routeRelations) {
     // All roads in network included in osm_national_network except gb-trunk and us-highway
     return routeRelations.stream()
@@ -572,6 +587,12 @@ public class Transportation implements
           (z13Paths || !nullOrEmpty(element.name()) || routeRank <= 2 || !nullOrEmpty(element.sacScale())) ? 13 : 14;
         case FieldValues.CLASS_TRUNK -> {
           boolean z5trunk = isTrunkForZ5(highway, routeRelations);
+
+          //Allow small trunk segments to be processed at z5 so they can merge with surrounding motorways
+          if (isTrunkZ5MergeableLength(element)) {
+            z5trunk = true;
+          }
+
           // and if it is good for Z5, it may be good also for Z4 (see CLASS_MOTORWAY bellow):
           String clazz = FieldValues.CLASS_TRUNK;
           if (z5trunk && isMotorwayWithNetworkForZ4(routeRelations)) {
@@ -701,6 +722,19 @@ public class Transportation implements
       var oneway = item.tags().get(Fields.ONEWAY);
       if (oneway instanceof Number n && ONEWAY_VALUES.contains(n.intValue())) {
         item.tags().put(LIMIT_MERGE_TAG, onewayId++);
+      }
+    }
+
+    //Upgrade small trunk segments at z5 so they can merge with surrounding motorways
+    if(zoom == 5) {
+      for (var item : items) {
+        var highway = item.tags().get(Fields.CLASS);
+        if (highway instanceof String highwayStr && highwayStr.equals(FieldValues.CLASS_TRUNK)) {
+          item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
+        }
+        if (highway instanceof String highwayStr && highwayStr.equals(FieldValues.CLASS_TRUNK_CONSTRUCTION)) {
+          item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY_CONSTRUCTION);
+        }
       }
     }
 

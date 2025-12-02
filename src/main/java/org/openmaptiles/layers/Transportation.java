@@ -168,7 +168,7 @@ public class Transportation implements
     .put(6, 100)
     .put(5, 500)
     .put(4, 1_000);
-    private static final ZoomFunction.MeterToPixelThresholds TRUNK_UPGRADE_LENGTH = ZoomFunction.meterThresholds()
+  private static final ZoomFunction.MeterToPixelThresholds TRUNK_UPGRADE_LENGTH = ZoomFunction.meterThresholds()
     .put(5, 1_000);
   // ORDER BY network_type, network, LENGTH(ref), ref)
   private static final Comparator<RouteRelation> RELATION_ORDERING = Comparator
@@ -289,6 +289,7 @@ public class Transportation implements
 
   /**
    * Checks if a trunk segment is small enough to be processed at z5 so it can merge with surrounding motorways.
+   * 
    * @param element the highway linestring element to check
    * @return true if the trunk segment length is less than the threshold, false otherwise
    */
@@ -726,7 +727,7 @@ public class Transportation implements
     }
 
     //Upgrade small trunk segments at z5 so they can merge with surrounding motorways
-    if(zoom == 5) {
+    if (zoom == 5) {
       for (var item : items) {
         var highway = item.tags().get(Fields.CLASS);
         if (highway instanceof String highwayStr && highwayStr.equals(FieldValues.CLASS_TRUNK)) {

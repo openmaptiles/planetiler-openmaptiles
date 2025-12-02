@@ -141,12 +141,12 @@ public abstract class AbstractLayerTest {
   }
 
   /**
-   * Creates a {@link SourceFeature} representing a linestring of the specified real-world length in meters,
-   * using a vertical line starting at (0, 0) in lat/lon coordinates.
+   * Creates a {@link SourceFeature} representing a linestring of the specified real-world length in meters, using a
+   * vertical line starting at (0, 0) in lat/lon coordinates.
    * 
    * @param length Length of the line in meters.
    * @param props  Properties to include in the feature.
-   * @return       A {@link SourceFeature} of the requested length and properties.
+   * @return A {@link SourceFeature} of the requested length and properties.
    */
   SourceFeature lineFeatureWithLength(double length, Map<String, Object> props) {
 
@@ -156,8 +156,8 @@ public abstract class AbstractLayerTest {
     double lengthInDegrees = length / 111320.0;
     GeometryFactory geometryFactory = new GeometryFactory();
     Coordinate[] coordinates = new Coordinate[]{
-      new Coordinate(0.0, 0.0),  // Start at (lon=0, lat=0)
-      new Coordinate(0.0, lengthInDegrees)  // End at (lon=0, lat=lengthInDegrees)
+      new Coordinate(0.0, 0.0), // Start at (lon=0, lat=0)
+      new Coordinate(0.0, lengthInDegrees) // End at (lon=0, lat=lengthInDegrees)
     };
     LineString lineString = geometryFactory.createLineString(coordinates);
     return SimpleFeature.create(
@@ -216,8 +216,8 @@ public abstract class AbstractLayerTest {
     double lengthInDegrees = length / 111320.0;
     GeometryFactory geometryFactory = new GeometryFactory();
     Coordinate[] coordinates = new Coordinate[]{
-      new Coordinate(0.0, 0.0),  // Start at (lon=0, lat=0)
-      new Coordinate(0.0, lengthInDegrees)  // End at (lon=0, lat=lengthInDegrees)
+      new Coordinate(0.0, 0.0), // Start at (lon=0, lat=0)
+      new Coordinate(0.0, lengthInDegrees) // End at (lon=0, lat=lengthInDegrees)
     };
     LineString lineString = geometryFactory.createLineString(coordinates);
     return SimpleFeature.createFakeOsmFeature(

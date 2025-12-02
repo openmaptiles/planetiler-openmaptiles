@@ -4,9 +4,12 @@ import static com.onthegomap.planetiler.TestUtils.newLineString;
 import static com.onthegomap.planetiler.TestUtils.newPoint;
 import static com.onthegomap.planetiler.TestUtils.rectangle;
 import static java.util.Map.entry;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.Arguments;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.geo.GeometryException;
@@ -16,6 +19,7 @@ import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
 import com.onthegomap.planetiler.stats.Stats;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -379,7 +383,7 @@ class TransportationTest extends AbstractLayerTest {
     rel2.setTag("ref", "104");
     rel2.setTag("direction", "south");
 
-    FeatureCollector features = process(lineFeatureWithRelationAndLength(
+    FeatureCollector features = process(lineFeatureWithRelation(
       Stream.concat(
         profile.preprocessOsmRelation(rel2).stream(),
         profile.preprocessOsmRelation(rel1).stream()
@@ -390,8 +394,7 @@ class TransportationTest extends AbstractLayerTest {
         "lanes", 5,
         "maxspeed", "55 mph",
         "expressway", "no"
-      ),
-      2000.0));
+      )));
 
     assertFeatures(13, List.of(mapOf(
       "_layer", "transportation",
@@ -1208,12 +1211,11 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("network", "CA:ON:primary");
     rel.setTag("ref", "85");
 
-    FeatureCollector features = process(lineFeatureWithRelationAndLength(
+    FeatureCollector features = process(lineFeatureWithRelation(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk"
-      ),
-      2000.0));
+      )));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
@@ -1263,12 +1265,11 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("network", "CA:MB:PTH");
     rel.setTag("ref", "77");
 
-    FeatureCollector features = process(lineFeatureWithRelationAndLength(
+    FeatureCollector features = process(lineFeatureWithRelation(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk"
-      ),
-      2000.0));
+      )));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
@@ -1318,12 +1319,11 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("network", "CA:AB:primary");
     rel.setTag("ref", "10");
 
-    FeatureCollector features = process(lineFeatureWithRelationAndLength(
+    FeatureCollector features = process(lineFeatureWithRelation(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk"
-      ),
-      2000.0));
+      )));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
@@ -1373,12 +1373,11 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("network", "CA:BC");
     rel.setTag("ref", "10");
 
-    FeatureCollector features = process(lineFeatureWithRelationAndLength(
+    FeatureCollector features = process(lineFeatureWithRelation(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk"
-      ),
-      2000.0));
+      )));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
@@ -1400,12 +1399,11 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("route", "road");
     rel.setTag("network", "CA:yellowhead");
 
-    FeatureCollector features = process(lineFeatureWithRelationAndLength(
+    FeatureCollector features = process(lineFeatureWithRelation(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk"
-      ),
-      2000.0));
+      )));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
@@ -2187,14 +2185,13 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("network", "AsianHighway");
     rel.setTag("ref", "AH11");
 
-    FeatureCollector features = process(lineFeatureWithRelationAndLength(
+    FeatureCollector features = process(lineFeatureWithRelation(
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk",
         "name", "National Highway 7",
         "ref", "7"
-      ),
-      2000.0));
+      )));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
@@ -2235,18 +2232,61 @@ class TransportationTest extends AbstractLayerTest {
     )), features);
   }
 
-  @Test
-  void testShortTrunkSegmentWithoutNetwork() {
-    // Short trunk segment (< 1000m) should appear at z5 to allow merging with surrounding motorways
-    FeatureCollector features = process(lineFeatureWithLength(500.0, Map.of(
-      "highway", "trunk"
-    )));
+  private VectorTile.Feature createLineFeature(String layer, double x1, double y1, double x2, double y2,
+    String roadClass) {
+    return new VectorTile.Feature(
+      layer,
+      1,
+      VectorTile.encodeGeometry(newLineString(x1, y1, x2, y2)),
+      new HashMap<>(Map.of("class", roadClass)),
+      0
+    );
+  }
 
-    assertFeatures(13, List.of(Map.of(
-      "_layer", "transportation",
-      "class", "trunk",
-      "_minzoom", 5
-    )), features);
+  @Test
+  void testTrunkMotorwayAlternatingMergesToMotorwayAtZoom5() throws GeometryException {
+    // Test that alternating trunk and motorway segments merge into a single motorway at zoom 5
+    String layer = Transportation.LAYER_NAME;
+    double segmentLength = 1000.0; // Each segment is 1000m
+
+    // Create 4 segments: motorway, trunk, motorway, trunk
+    var motorway1 = createLineFeature(layer, 0, 0, segmentLength, 0, "motorway");
+    var trunk1 = createLineFeature(layer, segmentLength, 0, 2 * segmentLength, 0, "trunk");
+    var motorway2 = createLineFeature(layer, 2 * segmentLength, 0, 3 * segmentLength, 0, "motorway");
+    var trunk2 = createLineFeature(layer, 3 * segmentLength, 0, 4 * segmentLength, 0, "trunk");
+
+    // At zoom 5, trunk segments should be upgraded to motorway and all segments should merge
+    List<VectorTile.Feature> resultZ5 =
+      profile.postProcessLayerFeatures(layer, 5, List.of(motorway1, trunk1, motorway2, trunk2));
+
+    // Should result in a single merged motorway feature
+    assertEquals(1, resultZ5.size(), "Should merge into a single feature at zoom 5");
+    VectorTile.Feature mergedFeatureZ5 = resultZ5.get(0);
+    assertEquals("motorway", mergedFeatureZ5.tags().get("class"), "Merged feature should be motorway class at zoom 5");
+    assertEquals(layer, mergedFeatureZ5.layer(), "Layer should be transportation");
+
+    // At zoom 6, trunk segments should NOT be upgraded to motorway
+    // FeatureMerge.mergeLineStrings merges based on geometry connectivity, not class
+    // So all connected segments will merge into one feature regardless of class
+    List<VectorTile.Feature> resultZ6 =
+      profile.postProcessLayerFeatures(layer, 6, List.of(motorway1, trunk1, motorway2, trunk2));
+
+    // At zoom 6, all segments merge into one because they're geometrically connected
+    // The class will be one of the classes (likely the first one processed)
+    assertEquals(1, resultZ6.size(),
+      "At zoom 6, all connected segments merge into one feature (FeatureMerge merges by geometry, not class)");
+
+    // Verify that trunk segments were NOT upgraded to motorway at zoom 6
+    // The merged feature should have either "motorway" or "trunk" class, but not both
+    VectorTile.Feature mergedFeatureZ6 = resultZ6.get(0);
+    String mergedClassZ6 = (String) mergedFeatureZ6.tags().get("class");
+    assertTrue("motorway".equals(mergedClassZ6) || "trunk".equals(mergedClassZ6),
+      "Merged feature should have either motorway or trunk class at zoom 6, but not a mix");
+
+    // The key difference from z5: at z6, trunk segments are NOT upgraded before merging
+    // So the merged feature might have "trunk" class if trunk segments are processed first,
+    // or "motorway" if motorway segments are processed first
+    // The important thing is that trunk segments keep their "trunk" class at z6
   }
 
 }

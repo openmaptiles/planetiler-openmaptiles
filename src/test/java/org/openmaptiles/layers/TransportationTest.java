@@ -6,7 +6,6 @@ import static com.onthegomap.planetiler.TestUtils.rectangle;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.VectorTile;
@@ -2232,61 +2231,54 @@ class TransportationTest extends AbstractLayerTest {
     )), features);
   }
 
-  private VectorTile.Feature createLineFeature(String layer, double x1, double y1, double x2, double y2,
-    String roadClass) {
-    return new VectorTile.Feature(
+  @Test
+  void testShortTrunkMerge() throws GeometryException {
+    var layer = Transportation.LAYER_NAME;
+
+    var motorwayZ6 = new VectorTile.Feature(
       layer,
       1,
-      VectorTile.encodeGeometry(newLineString(x1, y1, x2, y2)),
-      new HashMap<>(Map.of("class", roadClass)),
+      VectorTile.encodeGeometry(newLineString(0, 0, 10, 10)),
+      new HashMap<>(Map.of("class", "motorway")),
       0
     );
-  }
+    var trunkZ6 = new VectorTile.Feature(
+      layer,
+      2,
+      VectorTile.encodeGeometry(newLineString(10, 10, 10, 11)),
+      new HashMap<>(Map.of("class", "trunk")),
+      0
+    );
+    var motorwayZ5 = new VectorTile.Feature(
+      layer,
+      1,
+      VectorTile.encodeGeometry(newLineString(0, 0, 10, 10)),
+      new HashMap<>(Map.of("class", "motorway")),
+      0
+    );
+    var trunkZ5 = new VectorTile.Feature(
+      layer,
+      2,
+      VectorTile.encodeGeometry(newLineString(10, 10, 10, 11)),
+      new HashMap<>(Map.of("class", "trunk")),
+      0
+    );
 
-  @Test
-  void testTrunkMotorwayAlternatingMergesToMotorwayAtZoom5() throws GeometryException {
-    // Test that alternating trunk and motorway segments merge into a single motorway at zoom 5
-    String layer = Transportation.LAYER_NAME;
-    double segmentLength = 1000.0; // Each segment is 1000m
+    List<VectorTile.Feature> inputZ6 = List.<VectorTile.Feature>of(motorwayZ6, trunkZ6);
+    List<VectorTile.Feature> inputZ5 = List.<VectorTile.Feature>of(motorwayZ5, trunkZ5);
 
-    // Create 4 segments: motorway, trunk, motorway, trunk
-    var motorway1 = createLineFeature(layer, 0, 0, segmentLength, 0, "motorway");
-    var trunk1 = createLineFeature(layer, segmentLength, 0, 2 * segmentLength, 0, "trunk");
-    var motorway2 = createLineFeature(layer, 2 * segmentLength, 0, 3 * segmentLength, 0, "motorway");
-    var trunk2 = createLineFeature(layer, 3 * segmentLength, 0, 4 * segmentLength, 0, "trunk");
+    List<VectorTile.Feature> resultZ6 = profile.postProcessLayerFeatures(layer, 6, inputZ6);
+    List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
 
-    // At zoom 5, trunk segments should be upgraded to motorway and all segments should merge
-    List<VectorTile.Feature> resultZ5 =
-      profile.postProcessLayerFeatures(layer, 5, List.of(motorway1, trunk1, motorway2, trunk2));
-
-    // Should result in a single merged motorway feature
+    assertEquals(2, resultZ6.size(), "Should be separate features at zoom 6");
     assertEquals(1, resultZ5.size(), "Should merge into a single feature at zoom 5");
+
     VectorTile.Feature mergedFeatureZ5 = resultZ5.get(0);
     assertEquals("motorway", mergedFeatureZ5.tags().get("class"), "Merged feature should be motorway class at zoom 5");
-    assertEquals(layer, mergedFeatureZ5.layer(), "Layer should be transportation");
 
-    // At zoom 6, trunk segments should NOT be upgraded to motorway
-    // FeatureMerge.mergeLineStrings merges based on geometry connectivity, not class
-    // So all connected segments will merge into one feature regardless of class
-    List<VectorTile.Feature> resultZ6 =
-      profile.postProcessLayerFeatures(layer, 6, List.of(motorway1, trunk1, motorway2, trunk2));
-
-    // At zoom 6, all segments merge into one because they're geometrically connected
-    // The class will be one of the classes (likely the first one processed)
-    assertEquals(1, resultZ6.size(),
-      "At zoom 6, all connected segments merge into one feature (FeatureMerge merges by geometry, not class)");
-
-    // Verify that trunk segments were NOT upgraded to motorway at zoom 6
-    // The merged feature should have either "motorway" or "trunk" class, but not both
-    VectorTile.Feature mergedFeatureZ6 = resultZ6.get(0);
-    String mergedClassZ6 = (String) mergedFeatureZ6.tags().get("class");
-    assertTrue("motorway".equals(mergedClassZ6) || "trunk".equals(mergedClassZ6),
-      "Merged feature should have either motorway or trunk class at zoom 6, but not a mix");
-
-    // The key difference from z5: at z6, trunk segments are NOT upgraded before merging
-    // So the merged feature might have "trunk" class if trunk segments are processed first,
-    // or "motorway" if motorway segments are processed first
-    // The important thing is that trunk segments keep their "trunk" class at z6
+    List<String> classesZ6 = resultZ6.stream()
+      .map(f -> (String) f.tags().get("class"))
+      .toList();
+    assertEquals(List.of("motorway", "trunk"), classesZ6, "At zoom 6, should have motorway and trunk classes");
   }
-
 }

@@ -730,7 +730,7 @@ public class Transportation implements
     if (zoom == 5) {
       for (var item : items) {
         var highway = item.tags().get(Fields.CLASS);
-        if (highway instanceof String highwayStr && highwayStr.equals(FieldValues.CLASS_TRUNK)) {
+        if (FieldValues.CLASS_TRUNK.equals(highway)) {
           item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
         }
         if (highway instanceof String highwayStr && highwayStr.equals(FieldValues.CLASS_TRUNK_CONSTRUCTION)) {

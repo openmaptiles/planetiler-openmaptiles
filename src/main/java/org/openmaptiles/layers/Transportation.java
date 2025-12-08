@@ -733,7 +733,7 @@ public class Transportation implements
         if (FieldValues.CLASS_TRUNK.equals(highway)) {
           item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
         }
-        if (highway instanceof String highwayStr && highwayStr.equals(FieldValues.CLASS_TRUNK_CONSTRUCTION)) {
+        if (FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
           item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY_CONSTRUCTION);
         }
       }

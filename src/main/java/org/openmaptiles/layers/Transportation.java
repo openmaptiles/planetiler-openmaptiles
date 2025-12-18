@@ -59,19 +59,26 @@ import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
 import com.onthegomap.planetiler.util.ZoomFunction;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
+import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
@@ -96,6 +103,7 @@ public class Transportation implements
   OpenMapTilesProfile.NaturalEarthProcessor,
   ForwardingProfile.LayerPostProcessor,
   ForwardingProfile.OsmRelationPreprocessor,
+  ForwardingProfile.FinishHandler,
   OpenMapTilesProfile.IgnoreWikidata {
 
   /*
@@ -168,8 +176,9 @@ public class Transportation implements
     .put(6, 100)
     .put(5, 500)
     .put(4, 1_000);
-  private static final ZoomFunction.MeterToPixelThresholds TRUNK_UPGRADE_LENGTH = ZoomFunction.meterThresholds()
-    .put(5, 1_000);
+  private static final double TRUNK_UPGRADE_LENGTH_METERS = 1_000.0;
+  private static final double TRUNK_GROUP_MIN_LENGTH_METERS = 500.0;
+  private static final String TRUNK_GROUP_TEMP_KEY = "__trunk_group";
   // ORDER BY network_type, network, LENGTH(ref), ref)
   private static final Comparator<RouteRelation> RELATION_ORDERING = Comparator
     .<RouteRelation>comparingInt(
@@ -187,6 +196,8 @@ public class Transportation implements
   private final PlanetilerConfig config;
   private PreparedGeometry greatBritain = null;
   private PreparedGeometry ireland = null;
+  private final Map<Long, TrunkSegment> trunkSegments = new ConcurrentHashMap<>();
+  private Set<Long> eligibleTrunkSegmentIds = new HashSet<>();
 
   public Transportation(Translations translations, PlanetilerConfig config, Stats stats) {
     this.config = config;
@@ -295,7 +306,7 @@ public class Transportation implements
    */
   private boolean isTrunkZ5MergeableLength(Tables.OsmHighwayLinestring element) {
     try {
-      return element.source().length() < TRUNK_UPGRADE_LENGTH.apply(5).doubleValue();
+      return element.source().length() < TRUNK_UPGRADE_LENGTH_METERS;
     } catch (GeometryException e) {
       e.log(stats, "omt_transportation_trunk_length",
         "Unable to get feature length for trunk upgrade: " + element.source().id());
@@ -556,6 +567,23 @@ public class Transportation implements
         .setSortKey(element.zOrder())
         .setMinZoom(minzoom);
 
+      // Collect trunk segments for contiguous grouping
+      if ("trunk".equals(highway) && 
+          (FieldValues.CLASS_TRUNK.equals(highwayClass) || 
+           FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highwayClass))) {
+        try {
+          Geometry geometry = element.source().worldGeometry();
+          Geometry latLonGeometry = element.source().latLonGeometry();
+          double length = GeoUtils.lengthInMeters(latLonGeometry);
+          long id = element.source().id();
+          trunkSegments.put(id, new TrunkSegment(id, length, geometry, element));
+          feature.setAttr(TRUNK_GROUP_TEMP_KEY, id);
+        } catch (GeometryException e) {
+          e.log(stats, "omt_transportation_trunk_collect",
+            "Unable to collect trunk segment for grouping: " + element.source().id());
+        }
+      }
+
       if (isFootwayOrSteps(highway)) {
         feature
           .setAttr(Fields.LEVEL, Parse.parseLongOrNull(element.source().getTag("level")))
@@ -692,6 +720,90 @@ public class Transportation implements
   }
 
   @Override
+  public void finish(String sourceName, FeatureCollector.Factory featureCollectors,
+      Consumer<FeatureCollector.Feature> emit) {
+    if (!OpenMapTilesProfile.OSM_SOURCE.equals(sourceName)) {
+      return;
+    }
+    
+    if (trunkSegments.isEmpty()) {
+      return;
+    }
+
+    var timer = stats.startStage("trunk_grouping_z5");
+    try {
+      LineMerger merger = new LineMerger();
+      List<TrunkSegment> segmentList = new ArrayList<>(trunkSegments.values());
+      
+      segmentList.stream()
+        .map(TrunkSegment::geometry)
+        .filter(LineString.class::isInstance)
+        .map(LineString.class::cast)
+        .forEach(merger::add);
+
+      List<LineString> mergedLines = ((Collection<?>) merger.getMergedLineStrings()).stream()
+        .filter(LineString.class::isInstance)
+        .map(LineString.class::cast)
+        .toList();
+
+      Set<Long> eligibleIds = new HashSet<>();
+      
+      for (LineString mergedLine : mergedLines) {
+        List<TrunkSegment> groupSegments = segmentList.stream()
+          .filter(segment -> {
+            Geometry geom = segment.geometry();
+            return geom instanceof LineString && isLineStringPartOfGroup((LineString) geom, mergedLine);
+          })
+          .toList();
+        
+        double totalLengthMeters = groupSegments.stream()
+          .mapToDouble(TrunkSegment::lengthMeters)
+          .sum();
+        
+        if (totalLengthMeters >= TRUNK_GROUP_MIN_LENGTH_METERS) {
+          groupSegments.stream()
+            .map(TrunkSegment::id)
+            .forEach(id -> eligibleIds.add(id));
+        }
+      }
+
+      eligibleTrunkSegmentIds = eligibleIds;
+    } finally {
+      trunkSegments.clear();
+      timer.stop();
+    }
+  }
+
+  private boolean isLineStringPartOfGroup(LineString part, LineString whole) {
+    if (part.getNumPoints() == 0 || whole.getNumPoints() == 0) {
+      return false;
+    }
+    
+    Coordinate partStart = part.getCoordinateN(0);
+    Coordinate partEnd = part.getCoordinateN(part.getNumPoints() - 1);
+    
+    boolean startOnLine = false;
+    boolean endOnLine = false;
+    
+    for (int i = 0; i < whole.getNumPoints(); i++) {
+      Coordinate wholeCoord = whole.getCoordinateN(i);
+      if (coordinatesEqual(partStart, wholeCoord)) {
+        startOnLine = true;
+      }
+      if (coordinatesEqual(partEnd, wholeCoord)) {
+        endOnLine = true;
+      }
+    }
+    
+    return startOnLine && endOnLine;
+  }
+
+  private boolean coordinatesEqual(Coordinate c1, Coordinate c2) {
+    double tolerance = 0.001;
+    return Math.abs(c1.x - c2.x) < tolerance && Math.abs(c1.y - c2.y) < tolerance;
+  }
+
+  @Override
   public void process(Tables.OsmHighwayPolygon element, FeatureCollector features) {
     String manMade = element.manMade();
     if (isBridgeOrPier(manMade) ||
@@ -726,25 +838,63 @@ public class Transportation implements
       }
     }
 
-    //Upgrade small trunk segments at z5 so they can merge with surrounding motorways
+    //Upgrade eligible trunk segments at z5 so they can merge with surrounding motorways
     if (zoom == 5) {
+      // Step 1: Upgrade trunks that are in eligible groups OR are small individual segments
       for (var item : items) {
         var highway = item.tags().get(Fields.CLASS);
-        if (FieldValues.CLASS_TRUNK.equals(highway)) {
-          item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
-        }
-        if (FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
-          item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY_CONSTRUCTION);
+        var groupId = item.tags().get(TRUNK_GROUP_TEMP_KEY);
+        
+        if (FieldValues.CLASS_TRUNK.equals(highway) || 
+            FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
+          boolean shouldUpgrade = false;
+          
+          if (groupId instanceof Number groupIdNum) {
+            long id = groupIdNum.longValue();
+            if (eligibleTrunkSegmentIds.contains(id)) {
+              shouldUpgrade = true;
+            }
+          } else {
+            shouldUpgrade = true;
+          }
+          
+          if (shouldUpgrade) {
+            if (FieldValues.CLASS_TRUNK.equals(highway)) {
+              item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
+            } else if (FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
+              item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY_CONSTRUCTION);
+            }
+          }
         }
       }
+      
+      // Step 2: Filter out trunks that aren't eligible (not upgraded to motorway)
+      items = items.stream()
+        .filter(item -> {
+          var highway = item.tags().get(Fields.CLASS);
+          // Keep motorways (upgraded trunks) and non-trunk features
+          // Filter out trunks that weren't upgraded (not in eligible groups)
+          if (FieldValues.CLASS_TRUNK.equals(highway) || 
+              FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
+            return false;
+          }
+          return true;
+        })
+        .collect(Collectors.toList());
+      
+      // Merge all features
+      items = FeatureMerge.mergeLineStrings(items, 0, tolerance, BUFFER_SIZE);
+    } else {
+      // For other zoom levels, use standard merging
+      items = FeatureMerge.mergeLineStrings(items, minLength, tolerance, BUFFER_SIZE);
     }
 
-    var merged = FeatureMerge.mergeLineStrings(items, minLength, tolerance, BUFFER_SIZE);
-
-    for (var item : merged) {
+    // Remove temporary attributes
+    for (var item : items) {
       item.tags().remove(LIMIT_MERGE_TAG);
+      item.tags().remove(TRUNK_GROUP_TEMP_KEY);
     }
-    return merged;
+    return items;
   }
 
   enum RouteNetwork {
@@ -772,6 +922,14 @@ public class Transportation implements
       this.network = network;
     }
   }
+
+  /** Information about a trunk segment for grouping and length calculation. */
+  private record TrunkSegment(
+    long id,
+    double lengthMeters,
+    Geometry geometry,
+    Tables.OsmHighwayLinestring element
+  ) {}
 
   /** Information extracted from route relations to use when processing ways in that relation. */
   record RouteRelation(

@@ -2306,7 +2306,7 @@ class TransportationTest extends AbstractLayerTest {
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
-      "_minzoom", 9  // Links have minzoom=9 regardless of length
+      "_minzoom", 9 // Links have minzoom=9 regardless of length
     )), features);
   }
 
@@ -2335,7 +2335,7 @@ class TransportationTest extends AbstractLayerTest {
         "_layer", "transportation",
         "class", "trunk",
         "network", "us-interstate",
-        "_minzoom", 4  // US:I network qualifies for z4
+        "_minzoom", 4 // US:I network qualifies for z4
       ),
       Map.of(
         "_layer", "transportation_name",
@@ -2355,7 +2355,7 @@ class TransportationTest extends AbstractLayerTest {
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
-      "_minzoom", 5  // Just under 1000m should qualify
+      "_minzoom", 5 // Just under 1000m should qualify
     )), features);
   }
 
@@ -2364,20 +2364,20 @@ class TransportationTest extends AbstractLayerTest {
     // Test that small individual trunk segments (< 1000m) are upgraded to motorway at z5
     // (Features without __trunk_group represent small individual segments)
     var layer = Transportation.LAYER_NAME;
-    
+
     // Create trunk segment without __trunk_group (small individual segment)
     // This should upgrade to motorway at z5
     var trunk = new VectorTile.Feature(
       layer, 1, VectorTile.encodeGeometry(newLineString(0, 0, 10, 0)),
       new HashMap<>(Map.of("class", "trunk")), 0
     );
-    
+
     List<VectorTile.Feature> inputZ5 = List.of(trunk);
     List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
-    
+
     // Trunk should be upgraded to motorway (small individual segment)
     assertEquals(1, resultZ5.size(), "Should have 1 feature");
-    assertEquals("motorway", resultZ5.get(0).tags().get("class"), 
+    assertEquals("motorway", resultZ5.get(0).tags().get("class"),
       "Small individual trunk segment should upgrade to motorway at z5");
   }
 
@@ -2386,7 +2386,7 @@ class TransportationTest extends AbstractLayerTest {
     // Test that trunk segments with __trunk_group set but NOT in eligibleTrunkSegmentIds
     // are filtered out at z5 (they represent groups < 500m that didn't qualify)
     var layer = Transportation.LAYER_NAME;
-    
+
     // Create 2 trunk segments with __trunk_group set to IDs not in eligibleTrunkSegmentIds
     // (eligibleTrunkSegmentIds is empty in unit tests, so these represent ineligible groups)
     var trunk1 = new VectorTile.Feature(
@@ -2397,12 +2397,12 @@ class TransportationTest extends AbstractLayerTest {
       layer, 2, VectorTile.encodeGeometry(newLineString(5, 0, 10, 0)),
       new HashMap<>(Map.of("class", "trunk", "__trunk_group", 2L)), 0
     );
-    
+
     List<VectorTile.Feature> inputZ5 = List.of(trunk1, trunk2);
     List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
-    
+
     // Trunks in ineligible groups should be filtered out (not upgraded, removed)
-    assertEquals(0, resultZ5.size(), 
+    assertEquals(0, resultZ5.size(),
       "Trunk segments in ineligible groups should be filtered out at z5");
   }
 
@@ -2410,26 +2410,26 @@ class TransportationTest extends AbstractLayerTest {
   void testMixedLengthGroups() throws GeometryException {
     // Test that small individual segments upgrade, while segments in ineligible groups are filtered
     var layer = Transportation.LAYER_NAME;
-    
+
     // Segment without __trunk_group (small individual segment, should upgrade)
     var trunkA = new VectorTile.Feature(
       layer, 1, VectorTile.encodeGeometry(newLineString(0, 0, 10, 0)),
       new HashMap<>(Map.of("class", "trunk")), 0
     );
-    
+
     // Segment with __trunk_group but not in eligibleTrunkSegmentIds (should be filtered)
     var trunkB = new VectorTile.Feature(
       layer, 2, VectorTile.encodeGeometry(newLineString(0, 10, 5, 10)),
       new HashMap<>(Map.of("class", "trunk", "__trunk_group", 100L)), 0
     );
-    
+
     List<VectorTile.Feature> inputZ5 = List.of(trunkA, trunkB);
     List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
-    
+
     // Small individual segment should upgrade to motorway
     // Ineligible group segment should be filtered out
     assertEquals(1, resultZ5.size(), "Only small individual segment should remain");
-    assertEquals("motorway", resultZ5.get(0).tags().get("class"), 
+    assertEquals("motorway", resultZ5.get(0).tags().get("class"),
       "Small individual segment should upgrade to motorway");
   }
 
@@ -2437,7 +2437,7 @@ class TransportationTest extends AbstractLayerTest {
   void testDisconnectedTrunksStaySeparate() throws GeometryException {
     // Test that disconnected small individual trunk segments upgrade independently
     var layer = Transportation.LAYER_NAME;
-    
+
     // Two disconnected segments without __trunk_group (small individual segments, should both upgrade)
     // Use different coordinates and add oneway tag to prevent merging
     var trunk1 = new VectorTile.Feature(
@@ -2448,14 +2448,14 @@ class TransportationTest extends AbstractLayerTest {
       layer, 2, VectorTile.encodeGeometry(newLineString(0, 10, 10, 10)),
       new HashMap<>(Map.of("class", "trunk", "oneway", 1)), 0
     );
-    
+
     List<VectorTile.Feature> inputZ5 = List.of(trunk1, trunk2);
     List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
-    
+
     // Both should upgrade to motorway (small individual segments, oneway prevents merging)
     assertEquals(2, resultZ5.size(), "Both small individual segments should upgrade");
     for (var feature : resultZ5) {
-      assertEquals("motorway", feature.tags().get("class"), 
+      assertEquals("motorway", feature.tags().get("class"),
         "Each small individual segment should upgrade to motorway");
     }
   }

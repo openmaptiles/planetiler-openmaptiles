@@ -568,9 +568,9 @@ public class Transportation implements
         .setMinZoom(minzoom);
 
       // Collect trunk segments for contiguous grouping
-      if ("trunk".equals(highway) && 
-          (FieldValues.CLASS_TRUNK.equals(highwayClass) || 
-           FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highwayClass))) {
+      if ("trunk".equals(highway) &&
+        (FieldValues.CLASS_TRUNK.equals(highwayClass) ||
+          FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highwayClass))) {
         try {
           Geometry geometry = element.source().worldGeometry();
           Geometry latLonGeometry = element.source().latLonGeometry();
@@ -721,11 +721,11 @@ public class Transportation implements
 
   @Override
   public void finish(String sourceName, FeatureCollector.Factory featureCollectors,
-      Consumer<FeatureCollector.Feature> emit) {
+    Consumer<FeatureCollector.Feature> emit) {
     if (!OpenMapTilesProfile.OSM_SOURCE.equals(sourceName)) {
       return;
     }
-    
+
     if (trunkSegments.isEmpty()) {
       return;
     }
@@ -734,7 +734,7 @@ public class Transportation implements
     try {
       LineMerger merger = new LineMerger();
       List<TrunkSegment> segmentList = new ArrayList<>(trunkSegments.values());
-      
+
       segmentList.stream()
         .map(TrunkSegment::geometry)
         .filter(LineString.class::isInstance)
@@ -747,7 +747,7 @@ public class Transportation implements
         .toList();
 
       Set<Long> eligibleIds = new HashSet<>();
-      
+
       for (LineString mergedLine : mergedLines) {
         List<TrunkSegment> groupSegments = segmentList.stream()
           .filter(segment -> {
@@ -755,11 +755,11 @@ public class Transportation implements
             return geom instanceof LineString && isLineStringPartOfGroup((LineString) geom, mergedLine);
           })
           .toList();
-        
+
         double totalLengthMeters = groupSegments.stream()
           .mapToDouble(TrunkSegment::lengthMeters)
           .sum();
-        
+
         if (totalLengthMeters >= TRUNK_GROUP_MIN_LENGTH_METERS) {
           groupSegments.stream()
             .map(TrunkSegment::id)
@@ -778,13 +778,13 @@ public class Transportation implements
     if (part.getNumPoints() == 0 || whole.getNumPoints() == 0) {
       return false;
     }
-    
+
     Coordinate partStart = part.getCoordinateN(0);
     Coordinate partEnd = part.getCoordinateN(part.getNumPoints() - 1);
-    
+
     boolean startOnLine = false;
     boolean endOnLine = false;
-    
+
     for (int i = 0; i < whole.getNumPoints(); i++) {
       Coordinate wholeCoord = whole.getCoordinateN(i);
       if (coordinatesEqual(partStart, wholeCoord)) {
@@ -794,7 +794,7 @@ public class Transportation implements
         endOnLine = true;
       }
     }
-    
+
     return startOnLine && endOnLine;
   }
 
@@ -844,11 +844,11 @@ public class Transportation implements
       for (var item : items) {
         var highway = item.tags().get(Fields.CLASS);
         var groupId = item.tags().get(TRUNK_GROUP_TEMP_KEY);
-        
-        if (FieldValues.CLASS_TRUNK.equals(highway) || 
-            FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
+
+        if (FieldValues.CLASS_TRUNK.equals(highway) ||
+          FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
           boolean shouldUpgrade = false;
-          
+
           if (groupId instanceof Number groupIdNum) {
             long id = groupIdNum.longValue();
             if (eligibleTrunkSegmentIds.contains(id)) {
@@ -857,7 +857,7 @@ public class Transportation implements
           } else {
             shouldUpgrade = true;
           }
-          
+
           if (shouldUpgrade) {
             if (FieldValues.CLASS_TRUNK.equals(highway)) {
               item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
@@ -867,21 +867,21 @@ public class Transportation implements
           }
         }
       }
-      
+
       // Step 2: Filter out trunks that aren't eligible (not upgraded to motorway)
       items = items.stream()
         .filter(item -> {
           var highway = item.tags().get(Fields.CLASS);
           // Keep motorways (upgraded trunks) and non-trunk features
           // Filter out trunks that weren't upgraded (not in eligible groups)
-          if (FieldValues.CLASS_TRUNK.equals(highway) || 
-              FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
+          if (FieldValues.CLASS_TRUNK.equals(highway) ||
+            FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
             return false;
           }
           return true;
         })
         .collect(Collectors.toList());
-      
+
       // Merge all features
       items = FeatureMerge.mergeLineStrings(items, 0, tolerance, BUFFER_SIZE);
     } else {

@@ -763,7 +763,7 @@ public class Transportation implements
         if (totalLengthMeters >= TRUNK_GROUP_MIN_LENGTH_METERS) {
           groupSegments.stream()
             .map(TrunkSegment::id)
-            .forEach(id -> eligibleIds.add(id));
+            .forEach(eligibleIds::add);
         }
       }
 
@@ -861,7 +861,7 @@ public class Transportation implements
           if (shouldUpgrade) {
             if (FieldValues.CLASS_TRUNK.equals(highway)) {
               item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
-            } else if (FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
+            } else {
               item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY_CONSTRUCTION);
             }
           }
@@ -874,11 +874,8 @@ public class Transportation implements
           var highway = item.tags().get(Fields.CLASS);
           // Keep motorways (upgraded trunks) and non-trunk features
           // Filter out trunks that weren't upgraded (not in eligible groups)
-          if (FieldValues.CLASS_TRUNK.equals(highway) ||
-            FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
-            return false;
-          }
-          return true;
+          return !FieldValues.CLASS_TRUNK.equals(highway) &&
+              !FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway);
         })
         .collect(Collectors.toList());
 

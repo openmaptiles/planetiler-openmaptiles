@@ -879,9 +879,19 @@ public class Transportation implements
         })
         .collect(Collectors.toList());
 
+      // Remove TRUNK_GROUP_TEMP_KEY attributes before merging
+      for (var item : items) {
+        item.tags().remove(TRUNK_GROUP_TEMP_KEY);
+      }
+
       // Merge all features
       items = FeatureMerge.mergeLineStrings(items, 0, tolerance, BUFFER_SIZE);
     } else {
+      // Remove TRUNK_GROUP_TEMP_KEY attributes before merging
+      for (var item : items) {
+        item.tags().remove(TRUNK_GROUP_TEMP_KEY);
+      }
+
       // For other zoom levels, use standard merging
       items = FeatureMerge.mergeLineStrings(items, minLength, tolerance, BUFFER_SIZE);
     }
@@ -889,7 +899,6 @@ public class Transportation implements
     // Remove temporary attributes
     for (var item : items) {
       item.tags().remove(LIMIT_MERGE_TAG);
-      item.tags().remove(TRUNK_GROUP_TEMP_KEY);
     }
     return items;
   }

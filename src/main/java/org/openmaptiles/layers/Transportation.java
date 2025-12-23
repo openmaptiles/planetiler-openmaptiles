@@ -748,7 +748,7 @@ public class Transportation implements
 
       Set<Long> eligibleIds = new HashSet<>();
 
-      for (LineString mergedLine : mergedLines) {
+      mergedLines.parallelStream().forEach(mergedLine -> {
         List<TrunkSegment> groupSegments = segmentList.stream()
           .filter(segment -> {
             Geometry geom = segment.geometry();
@@ -763,9 +763,13 @@ public class Transportation implements
         if (totalLengthMeters >= TRUNK_GROUP_MIN_LENGTH_METERS) {
           groupSegments.stream()
             .map(TrunkSegment::id)
-            .forEach(eligibleIds::add);
+            .forEach(id -> {
+              synchronized (this) {
+                eligibleIds.add(id);
+              }
+            });
         }
-      }
+      });
 
       eligibleTrunkSegmentIds = eligibleIds;
     } finally {
@@ -875,7 +879,7 @@ public class Transportation implements
           // Keep motorways (upgraded trunks) and non-trunk features
           // Filter out trunks that weren't upgraded (not in eligible groups)
           return !FieldValues.CLASS_TRUNK.equals(highway) &&
-              !FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway);
+            !FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway);
         })
         .collect(Collectors.toList());
 

@@ -748,7 +748,7 @@ public class Transportation implements
 
       Set<Long> eligibleIds = new HashSet<>();
 
-      for (LineString mergedLine : mergedLines) {
+      mergedLines.parallelStream().forEach(mergedLine -> {
         List<TrunkSegment> groupSegments = segmentList.stream()
           .filter(segment -> {
             Geometry geom = segment.geometry();
@@ -763,9 +763,13 @@ public class Transportation implements
         if (totalLengthMeters >= TRUNK_GROUP_MIN_LENGTH_METERS) {
           groupSegments.stream()
             .map(TrunkSegment::id)
-            .forEach(id -> eligibleIds.add(id));
+            .forEach(id -> {
+              synchronized (this) {
+                eligibleIds.add(id);
+              }
+            });
         }
-      }
+      });
 
       eligibleTrunkSegmentIds = eligibleIds;
     } finally {
@@ -861,7 +865,7 @@ public class Transportation implements
           if (shouldUpgrade) {
             if (FieldValues.CLASS_TRUNK.equals(highway)) {
               item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
-            } else if (FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
+            } else {
               item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY_CONSTRUCTION);
             }
           }
@@ -874,27 +878,27 @@ public class Transportation implements
           var highway = item.tags().get(Fields.CLASS);
           // Keep motorways (upgraded trunks) and non-trunk features
           // Filter out trunks that weren't upgraded (not in eligible groups)
-          if (FieldValues.CLASS_TRUNK.equals(highway) ||
-            FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway)) {
-            return false;
-          }
-          return true;
+          return !FieldValues.CLASS_TRUNK.equals(highway) &&
+            !FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway);
         })
         .collect(Collectors.toList());
 
-      // Merge all features
-      items = FeatureMerge.mergeLineStrings(items, 0, tolerance, BUFFER_SIZE);
-    } else {
-      // For other zoom levels, use standard merging
-      items = FeatureMerge.mergeLineStrings(items, minLength, tolerance, BUFFER_SIZE);
+      minLength = 0;
     }
 
-    // Remove temporary attributes
+    // Remove TRUNK_GROUP_TEMP_KEY attributes before merging
     for (var item : items) {
-      item.tags().remove(LIMIT_MERGE_TAG);
       item.tags().remove(TRUNK_GROUP_TEMP_KEY);
     }
-    return items;
+
+    // Merge all features
+    var merged = FeatureMerge.mergeLineStrings(items, minLength, tolerance, BUFFER_SIZE);
+
+    // Remove temporary attributes
+    for (var item : merged) {
+      item.tags().remove(LIMIT_MERGE_TAG);
+    }
+    return merged;
   }
 
   enum RouteNetwork {

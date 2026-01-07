@@ -14,7 +14,7 @@ echo "::endgroup::"
 echo "::endgroup::"
 echo "::group::OpenMapTiles monaco (docker)"
 rm -f data/docker.mbtiles
-docker run -v "$(pwd)/data":/data openmaptiles/planetiler-openmaptiles:"${version}" --area=monaco --output=data/docker.mbtiles --threads=32
+docker run --rm -v "$(pwd)/data":/data openmaptiles/planetiler-openmaptiles:"${version}" --area=monaco --output=data/docker.mbtiles --threads=32
 ./scripts/check-monaco.sh data/docker.mbtiles
 echo "::endgroup::"
 

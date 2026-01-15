@@ -547,7 +547,8 @@ public class Transportation implements
   }
 
   private static final double TRUNK_Z0_UPGRADE_LENGTH = GeoUtils.metersToPixelAtEquator(0, 500);
-  private static final double TRUNK_Z5_UPGRADE_LENGTH = GeoUtils.metersToPixelAtEquator(5, 500);
+  // give it some extra buffer to account for snapping endpoints to tile grid
+  private static final double TRUNK_Z5_UPGRADE_LENGTH = 2 * GeoUtils.metersToPixelAtEquator(5, 500);
 
   private boolean isTrunkZ5MergeableLength(Tables.OsmHighwayLinestring element) {
     try {
@@ -727,11 +728,11 @@ public class Transportation implements
         try {
           var highway = item.tags().get(Fields.CLASS);
           if (FieldValues.CLASS_TRUNK.equals(highway) &&
-            item.geometry().decode().getLength() < TRUNK_Z5_UPGRADE_LENGTH) {
+            item.geometry().decode().getLength() <= TRUNK_Z5_UPGRADE_LENGTH) {
             item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
           }
           if (FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway) &&
-            item.geometry().decode().getLength() < TRUNK_Z5_UPGRADE_LENGTH) {
+            item.geometry().decode().getLength() <= TRUNK_Z5_UPGRADE_LENGTH) {
             item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY_CONSTRUCTION);
           }
         } catch (GeometryException e) {

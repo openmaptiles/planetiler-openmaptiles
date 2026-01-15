@@ -546,11 +546,13 @@ public class Transportation implements
     }
   }
 
-  private static final double TRUNK_UPGRADE_LENGTH = GeoUtils.metersToPixelAtEquator(0, 1000);
+  private static final double TRUNK_Z0_UPGRADE_LENGTH = GeoUtils.metersToPixelAtEquator(0, 500);
+  // give it some extra buffer to account for snapping endpoints to tile grid
+  private static final double TRUNK_Z5_UPGRADE_LENGTH = 2 * GeoUtils.metersToPixelAtEquator(5, 500);
 
   private boolean isTrunkZ5MergeableLength(Tables.OsmHighwayLinestring element) {
     try {
-      return element.source().length() < TRUNK_UPGRADE_LENGTH;
+      return element.source().length() < TRUNK_Z0_UPGRADE_LENGTH;
     } catch (GeometryException e) {
       e.log(stats, "omt_transportation_trunk_length",
         "Unable to get feature length for trunk upgrade: " + element.source().id());
@@ -723,12 +725,19 @@ public class Transportation implements
     //Upgrade small trunk segments at z5 so they can merge with surrounding motorways
     if (zoom == 5) {
       for (var item : items) {
-        var highway = item.tags().get(Fields.CLASS);
-        if (highway instanceof String highwayStr && highwayStr.equals(FieldValues.CLASS_TRUNK)) {
-          item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
-        }
-        if (highway instanceof String highwayStr && highwayStr.equals(FieldValues.CLASS_TRUNK_CONSTRUCTION)) {
-          item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY_CONSTRUCTION);
+        try {
+          var highway = item.tags().get(Fields.CLASS);
+          if (FieldValues.CLASS_TRUNK.equals(highway) &&
+            item.geometry().decode().getLength() <= TRUNK_Z5_UPGRADE_LENGTH) {
+            item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
+          }
+          if (FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway) &&
+            item.geometry().decode().getLength() <= TRUNK_Z5_UPGRADE_LENGTH) {
+            item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY_CONSTRUCTION);
+          }
+        } catch (GeometryException e) {
+          e.log(stats, "omt_transportation_trunk_length_postprocess",
+            "Unable to get feature length for postprocess trunk upgrade: " + item.id());
         }
       }
     }

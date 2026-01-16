@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.openmaptiles.OpenMapTilesProfile;
 
@@ -399,7 +400,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "trunk",
       "network", "us-state",
-      "_minzoom", 5
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1220,7 +1221,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 5
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1274,7 +1275,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 5
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1328,7 +1329,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 5
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1382,7 +1383,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "trunk",
       "network", "ca-provincial",
-      "_minzoom", 5
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -1407,7 +1408,7 @@ class TransportationTest extends AbstractLayerTest {
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
-      "_minzoom", 5
+      "_minzoom", 6
     )), features);
     boolean caProvPresent = StreamSupport.stream(features.spliterator(), false)
       .flatMap(f -> f.getAttrsAtZoom(13).entrySet().stream())
@@ -2195,7 +2196,7 @@ class TransportationTest extends AbstractLayerTest {
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
-      "_minzoom", 5
+      "_minzoom", 6
     ), Map.of(
       "_layer", "transportation_name",
       "class", "trunk",
@@ -2238,34 +2239,34 @@ class TransportationTest extends AbstractLayerTest {
     var motorwayZ6 = new VectorTile.Feature(
       layer,
       1,
-      VectorTile.encodeGeometry(newLineString(0, 0, 10, 10)),
+      VectorTile.encodeGeometry(newLineString(0, 0, 0.10, 0.10)),
       new HashMap<>(Map.of("class", "motorway")),
       0
     );
     var trunkZ6 = new VectorTile.Feature(
       layer,
       2,
-      VectorTile.encodeGeometry(newLineString(10, 10, 10, 11)),
+      VectorTile.encodeGeometry(newLineString(0.10, 0.10, 0.10, 0.2)),
       new HashMap<>(Map.of("class", "trunk")),
       0
     );
     var motorwayZ5 = new VectorTile.Feature(
       layer,
       1,
-      VectorTile.encodeGeometry(newLineString(0, 0, 10, 10)),
+      VectorTile.encodeGeometry(newLineString(0, 0, 0.10, 0.10)),
       new HashMap<>(Map.of("class", "motorway")),
       0
     );
     var trunkZ5 = new VectorTile.Feature(
       layer,
       2,
-      VectorTile.encodeGeometry(newLineString(10, 10, 10, 11)),
+      VectorTile.encodeGeometry(newLineString(0.10, 0.10, 0.10, 0.2)),
       new HashMap<>(Map.of("class", "trunk")),
       0
     );
 
-    List<VectorTile.Feature> inputZ6 = List.<VectorTile.Feature>of(motorwayZ6, trunkZ6);
-    List<VectorTile.Feature> inputZ5 = List.<VectorTile.Feature>of(motorwayZ5, trunkZ5);
+    List<VectorTile.Feature> inputZ6 = List.of(motorwayZ6, trunkZ6);
+    List<VectorTile.Feature> inputZ5 = List.of(motorwayZ5, trunkZ5);
 
     List<VectorTile.Feature> resultZ6 = profile.postProcessLayerFeatures(layer, 6, inputZ6);
     List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
@@ -2282,31 +2283,22 @@ class TransportationTest extends AbstractLayerTest {
     assertEquals(List.of("motorway", "trunk"), classesZ6, "At zoom 6, should have motorway and trunk classes");
   }
 
-  @Test
-  void testShortTrunkGetsZ5() {
+  @ParameterizedTest
+  @CsvSource({
+    "499, trunk, 5",
+    "501, trunk, 6",
+    "499, trunk_link, 9", // Links have minzoom=9 regardless of length
+  })
+  void testShortTrunkGetsZ5(int length, String highway, int expectedMinZoom) {
     // Test that a short trunk segment (< 1000m) gets minzoom=5
-    FeatureCollector features = process(lineFeatureWithLength(500, Map.of(
-      "highway", "trunk"
+    FeatureCollector features = process(lineFeatureWithLength(length, Map.of(
+      "highway", highway
     )));
 
     assertFeatures(13, List.of(Map.of(
       "_layer", "transportation",
       "class", "trunk",
-      "_minzoom", 5
-    )), features);
-  }
-
-  @Test
-  void testTrunkLinkExcludedFromUpgrade() {
-    // Test that trunk_link segments are excluded from z5 upgrade, even if short
-    FeatureCollector features = process(lineFeatureWithLength(500, Map.of(
-      "highway", "trunk_link"
-    )));
-
-    assertFeatures(13, List.of(Map.of(
-      "_layer", "transportation",
-      "class", "trunk",
-      "_minzoom", 9 // Links have minzoom=9 regardless of length
+      "_minzoom", expectedMinZoom
     )), features);
   }
 
@@ -2346,29 +2338,13 @@ class TransportationTest extends AbstractLayerTest {
   }
 
   @Test
-  void testTrunkJustUnder1000m() {
-    // Test that a trunk just under 1000m qualifies
-    FeatureCollector features = process(lineFeatureWithLength(999.9, Map.of(
-      "highway", "trunk"
-    )));
-
-    assertFeatures(13, List.of(Map.of(
-      "_layer", "transportation",
-      "class", "trunk",
-      "_minzoom", 5 // Just under 1000m should qualify
-    )), features);
-  }
-
-  @Test
   void testContiguousTrunksMergeAndUpgrade() throws GeometryException {
     // Test that small individual trunk segments (< 1000m) are upgraded to motorway at z5
-    // (Features without __trunk_group represent small individual segments)
     var layer = Transportation.LAYER_NAME;
 
-    // Create trunk segment without __trunk_group (small individual segment)
-    // This should upgrade to motorway at z5
+    // Create small individual trunk segment. This should upgrade to motorway at z5
     var trunk = new VectorTile.Feature(
-      layer, 1, VectorTile.encodeGeometry(newLineString(0, 0, 10, 0)),
+      layer, 1, VectorTile.encodeGeometry(newLineString(0, 0, 0.1, 0)),
       new HashMap<>(Map.of("class", "trunk")), 0
     );
 
@@ -2382,70 +2358,18 @@ class TransportationTest extends AbstractLayerTest {
   }
 
   @Test
-  void testShortContiguousGroupFilteredOut() throws GeometryException {
-    // Test that trunk segments with __trunk_group set but NOT in eligibleTrunkSegmentIds
-    // are filtered out at z5 (they represent groups < 500m that didn't qualify)
-    var layer = Transportation.LAYER_NAME;
-
-    // Create 2 trunk segments with __trunk_group set to IDs not in eligibleTrunkSegmentIds
-    // (eligibleTrunkSegmentIds is empty in unit tests, so these represent ineligible groups)
-    var trunk1 = new VectorTile.Feature(
-      layer, 1, VectorTile.encodeGeometry(newLineString(0, 0, 5, 0)),
-      new HashMap<>(Map.of("class", "trunk", "__trunk_group", 1L)), 0
-    );
-    var trunk2 = new VectorTile.Feature(
-      layer, 2, VectorTile.encodeGeometry(newLineString(5, 0, 10, 0)),
-      new HashMap<>(Map.of("class", "trunk", "__trunk_group", 2L)), 0
-    );
-
-    List<VectorTile.Feature> inputZ5 = List.of(trunk1, trunk2);
-    List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
-
-    // Trunks in ineligible groups should be filtered out (not upgraded, removed)
-    assertEquals(0, resultZ5.size(),
-      "Trunk segments in ineligible groups should be filtered out at z5");
-  }
-
-  @Test
-  void testMixedLengthGroups() throws GeometryException {
-    // Test that small individual segments upgrade, while segments in ineligible groups are filtered
-    var layer = Transportation.LAYER_NAME;
-
-    // Segment without __trunk_group (small individual segment, should upgrade)
-    var trunkA = new VectorTile.Feature(
-      layer, 1, VectorTile.encodeGeometry(newLineString(0, 0, 10, 0)),
-      new HashMap<>(Map.of("class", "trunk")), 0
-    );
-
-    // Segment with __trunk_group but not in eligibleTrunkSegmentIds (should be filtered)
-    var trunkB = new VectorTile.Feature(
-      layer, 2, VectorTile.encodeGeometry(newLineString(0, 10, 5, 10)),
-      new HashMap<>(Map.of("class", "trunk", "__trunk_group", 100L)), 0
-    );
-
-    List<VectorTile.Feature> inputZ5 = List.of(trunkA, trunkB);
-    List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
-
-    // Small individual segment should upgrade to motorway
-    // Ineligible group segment should be filtered out
-    assertEquals(1, resultZ5.size(), "Only small individual segment should remain");
-    assertEquals("motorway", resultZ5.get(0).tags().get("class"),
-      "Small individual segment should upgrade to motorway");
-  }
-
-  @Test
   void testDisconnectedTrunksStaySeparate() throws GeometryException {
     // Test that disconnected small individual trunk segments upgrade independently
     var layer = Transportation.LAYER_NAME;
 
-    // Two disconnected segments without __trunk_group (small individual segments, should both upgrade)
+    // Two disconnected small individual segments
     // Use different coordinates and add oneway tag to prevent merging
     var trunk1 = new VectorTile.Feature(
-      layer, 1, VectorTile.encodeGeometry(newLineString(0, 0, 10, 0)),
+      layer, 1, VectorTile.encodeGeometry(newLineString(0, 0, 0.1, 0)),
       new HashMap<>(Map.of("class", "trunk", "oneway", 1)), 0
     );
     var trunk2 = new VectorTile.Feature(
-      layer, 2, VectorTile.encodeGeometry(newLineString(0, 10, 10, 10)),
+      layer, 2, VectorTile.encodeGeometry(newLineString(0, 0.1, 0.1, 0.1)),
       new HashMap<>(Map.of("class", "trunk", "oneway", 1)), 0
     );
 
@@ -2459,5 +2383,4 @@ class TransportationTest extends AbstractLayerTest {
         "Each small individual segment should upgrade to motorway");
     }
   }
-
 }

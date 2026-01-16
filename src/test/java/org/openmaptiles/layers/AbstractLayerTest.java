@@ -139,7 +139,7 @@ public abstract class AbstractLayerTest {
 
   SourceFeature lineFeatureWithLength(double length, Map<String, Object> props) {
     return SimpleFeature.create(
-      GeoUtils.worldToLatLonCoords(newLineString(0, 0, 0, length)),
+      GeoUtils.worldToLatLonCoords(newLineString(0.5, 0.5, 0.5 + GeoUtils.metersToPixelAtEquator(0, length), 0.5)),
       new HashMap<>(props),
       OpenMapTilesProfile.OSM_SOURCE,
       null,

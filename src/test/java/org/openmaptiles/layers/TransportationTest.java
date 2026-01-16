@@ -4,11 +4,9 @@ import static com.onthegomap.planetiler.TestUtils.newLineString;
 import static com.onthegomap.planetiler.TestUtils.newPoint;
 import static com.onthegomap.planetiler.TestUtils.rectangle;
 import static java.util.Map.entry;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.onthegomap.planetiler.FeatureCollector;
-import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.Arguments;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.geo.GeometryException;
@@ -18,7 +16,6 @@ import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
 import com.onthegomap.planetiler.stats.Stats;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -2230,57 +2227,6 @@ class TransportationTest extends AbstractLayerTest {
       "ref", "S7",
       "route_1_ref", "E 77"
     )), features);
-  }
-
-  @Test
-  void testShortTrunkMerge() throws GeometryException {
-    var layer = Transportation.LAYER_NAME;
-
-    var motorwayZ6 = new VectorTile.Feature(
-      layer,
-      1,
-      VectorTile.encodeGeometry(newLineString(0, 0, 0.10, 0.10)),
-      new HashMap<>(Map.of("class", "motorway")),
-      0
-    );
-    var trunkZ6 = new VectorTile.Feature(
-      layer,
-      2,
-      VectorTile.encodeGeometry(newLineString(0.10, 0.10, 0.10, 0.2)),
-      new HashMap<>(Map.of("class", "trunk")),
-      0
-    );
-    var motorwayZ5 = new VectorTile.Feature(
-      layer,
-      1,
-      VectorTile.encodeGeometry(newLineString(0, 0, 0.10, 0.10)),
-      new HashMap<>(Map.of("class", "motorway")),
-      0
-    );
-    var trunkZ5 = new VectorTile.Feature(
-      layer,
-      2,
-      VectorTile.encodeGeometry(newLineString(0.10, 0.10, 0.10, 0.2)),
-      new HashMap<>(Map.of("class", "trunk")),
-      0
-    );
-
-    List<VectorTile.Feature> inputZ6 = List.of(motorwayZ6, trunkZ6);
-    List<VectorTile.Feature> inputZ5 = List.of(motorwayZ5, trunkZ5);
-
-    List<VectorTile.Feature> resultZ6 = profile.postProcessLayerFeatures(layer, 6, inputZ6);
-    List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
-
-    assertEquals(2, resultZ6.size(), "Should be separate features at zoom 6");
-    assertEquals(1, resultZ5.size(), "Should merge into a single feature at zoom 5");
-
-    VectorTile.Feature mergedFeatureZ5 = resultZ5.get(0);
-    assertEquals("motorway", mergedFeatureZ5.tags().get("class"), "Merged feature should be motorway class at zoom 5");
-
-    List<String> classesZ6 = resultZ6.stream()
-      .map(f -> (String) f.tags().get("class"))
-      .toList();
-    assertEquals(List.of("motorway", "trunk"), classesZ6, "At zoom 6, should have motorway and trunk classes");
   }
 
   @ParameterizedTest

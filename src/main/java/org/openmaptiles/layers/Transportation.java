@@ -546,6 +546,20 @@ public class Transportation implements
     }
   }
 
+  private static final double TRUNK_Z0_UPGRADE_LENGTH = GeoUtils.metersToPixelAtEquator(0, 500);
+  // give it some extra buffer to account for snapping endpoints to tile grid
+  private static final double TRUNK_Z5_UPGRADE_LENGTH = 2 * GeoUtils.metersToPixelAtEquator(5, 500);
+
+  private boolean isTrunkZ5MergeableLength(Tables.OsmHighwayLinestring element) {
+    try {
+      return element.source().length() < TRUNK_Z0_UPGRADE_LENGTH;
+    } catch (GeometryException e) {
+      e.log(stats, "omt_transportation_trunk_length",
+        "Unable to get feature length for trunk upgrade: " + element.source().id());
+      return false;
+    }
+  }
+
   int getMinzoom(Tables.OsmHighwayLinestring element, String highwayClass) {
     List<RouteRelation> routeRelations = getRouteRelations(element);
     int routeRank = 3;
@@ -570,6 +584,12 @@ public class Transportation implements
           (z13Paths || !nullOrEmpty(element.name()) || routeRank <= 2 || !nullOrEmpty(element.sacScale())) ? 13 : 14;
         case FieldValues.CLASS_TRUNK -> {
           boolean z5trunk = isTrunkForZ5(highway, routeRelations);
+
+          // Allow small trunk segments to be processed at z5 so they can merge with surrounding motorways
+          if (isTrunkZ5MergeableLength(element)) {
+            z5trunk = true;
+          }
+
           // and if it is good for Z5, it may be good also for Z4 (see CLASS_MOTORWAY bellow):
           String clazz = FieldValues.CLASS_TRUNK;
           if (z5trunk && isMotorwayWithNetworkForZ4(routeRelations)) {
@@ -593,7 +613,7 @@ public class Transportation implements
   private boolean isPierPolygon(Tables.OsmHighwayLinestring element) {
     if ("pier".equals(element.manMade())) {
       try {
-        if (element.source().worldGeometry()instanceof LineString lineString && lineString.isClosed()) {
+        if (element.source().worldGeometry() instanceof LineString lineString && lineString.isClosed()) {
           // ignore this because it's a polygon
           return true;
         }
@@ -699,6 +719,26 @@ public class Transportation implements
       var oneway = item.tags().get(Fields.ONEWAY);
       if (oneway instanceof Number n && ONEWAY_VALUES.contains(n.intValue())) {
         item.tags().put(LIMIT_MERGE_TAG, onewayId++);
+      }
+    }
+
+    //Upgrade small trunk segments at z5 so they can merge with surrounding motorways
+    if (zoom == 5) {
+      for (var item : items) {
+        try {
+          var highway = item.tags().get(Fields.CLASS);
+          if (FieldValues.CLASS_TRUNK.equals(highway) &&
+            item.geometry().decode().getLength() <= TRUNK_Z5_UPGRADE_LENGTH) {
+            item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY);
+          }
+          if (FieldValues.CLASS_TRUNK_CONSTRUCTION.equals(highway) &&
+            item.geometry().decode().getLength() <= TRUNK_Z5_UPGRADE_LENGTH) {
+            item.tags().put(Fields.CLASS, FieldValues.CLASS_MOTORWAY_CONSTRUCTION);
+          }
+        } catch (GeometryException e) {
+          e.log(stats, "omt_transportation_trunk_length_postprocess",
+            "Unable to get feature length for postprocess trunk upgrade: " + item.id());
+        }
       }
     }
 

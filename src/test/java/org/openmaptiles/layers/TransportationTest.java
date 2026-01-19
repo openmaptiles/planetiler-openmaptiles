@@ -4,11 +4,9 @@ import static com.onthegomap.planetiler.TestUtils.newLineString;
 import static com.onthegomap.planetiler.TestUtils.newPoint;
 import static com.onthegomap.planetiler.TestUtils.rectangle;
 import static java.util.Map.entry;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.onthegomap.planetiler.FeatureCollector;
-import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.Arguments;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.geo.GeometryException;
@@ -18,7 +16,6 @@ import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
 import com.onthegomap.planetiler.stats.Stats;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -2232,78 +2229,41 @@ class TransportationTest extends AbstractLayerTest {
     )), features);
   }
 
-  @Test
-  void testShortTrunkMerge() throws GeometryException {
-    var layer = Transportation.LAYER_NAME;
-
-    var motorwayZ6 = new VectorTile.Feature(
-      layer,
-      1,
-      VectorTile.encodeGeometry(newLineString(0, 0, 0.10, 0.10)),
-      new HashMap<>(Map.of("class", "motorway")),
-      0
-    );
-    var trunkZ6 = new VectorTile.Feature(
-      layer,
-      2,
-      VectorTile.encodeGeometry(newLineString(0.10, 0.10, 0.10, 0.2)),
-      new HashMap<>(Map.of("class", "trunk")),
-      0
-    );
-    var motorwayZ5 = new VectorTile.Feature(
-      layer,
-      1,
-      VectorTile.encodeGeometry(newLineString(0, 0, 0.10, 0.10)),
-      new HashMap<>(Map.of("class", "motorway")),
-      0
-    );
-    var trunkZ5 = new VectorTile.Feature(
-      layer,
-      2,
-      VectorTile.encodeGeometry(newLineString(0.10, 0.10, 0.10, 0.2)),
-      new HashMap<>(Map.of("class", "trunk")),
-      0
-    );
-
-    List<VectorTile.Feature> inputZ6 = List.of(motorwayZ6, trunkZ6);
-    List<VectorTile.Feature> inputZ5 = List.of(motorwayZ5, trunkZ5);
-
-    List<VectorTile.Feature> resultZ6 = profile.postProcessLayerFeatures(layer, 6, inputZ6);
-    List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
-
-    assertEquals(2, resultZ6.size(), "Should be separate features at zoom 6");
-    assertEquals(1, resultZ5.size(), "Should merge into a single feature at zoom 5");
-
-    VectorTile.Feature mergedFeatureZ5 = resultZ5.get(0);
-    assertEquals("motorway", mergedFeatureZ5.tags().get("class"), "Merged feature should be motorway class at zoom 5");
-
-    List<String> classesZ6 = resultZ6.stream()
-      .map(f -> (String) f.tags().get("class"))
-      .toList();
-    assertEquals(List.of("motorway", "trunk"), classesZ6, "At zoom 6, should have motorway and trunk classes");
-  }
-
   @ParameterizedTest
   @CsvSource({
-    "499, trunk, 5",
-    "501, trunk, 6",
-    "499, trunk_link, 9", // Links have minzoom=9 regardless of length
+    "499, trunk, 5, 5, motorway",
+    "499, trunk, 5, 6, trunk",
+    "501, trunk, 6, 5, trunk",
+    "501, trunk, 6, 6, trunk",
+    "499, trunk_link, 9, 9, trunk", // Links have minzoom=9 regardless of length
   })
-  void testShortTrunkGetsZ5(int length, String highway, int expectedMinZoom) {
-    // Test that a short trunk segment (< 1000m) gets minzoom=5
+  void testShortTrunkGetsZ5(int length, String highway, int expectedMinZoom, int classZoom,
+    String expectedClass) {
+    // Test that a short trunk segment (< 500m) gets minzoom=5
     FeatureCollector features = process(lineFeatureWithLength(length, Map.of(
       "highway", highway
     )));
 
-    assertFeatures(13, List.of(Map.of(
+    assertFeatures(classZoom, List.of(Map.of(
       "_layer", "transportation",
-      "class", "trunk",
+      "class", expectedClass,
+      "_minzoom", expectedMinZoom
+    )), features);
+
+    features = process(lineFeatureWithLength(length, Map.of(
+      "highway", "construction",
+      "construction", highway
+    )));
+
+    assertFeatures(classZoom, List.of(Map.of(
+      "_layer", "transportation",
+      "class", expectedClass + "_construction",
       "_minzoom", expectedMinZoom
     )), features);
   }
 
   @Test
-  void testNetworkQualifiedTrunkGetsZ5() {
+  void testNetworkQualifiedTrunkGetsZ5ButNotMotorway() {
     // Test that network-qualified trunks get z5 (or z4 if they qualify for z4)
     // Network qualification should override length check
     var rel = new OsmElement.Relation(1);
@@ -2312,7 +2272,7 @@ class TransportationTest extends AbstractLayerTest {
     rel.setTag("network", "US:I");
     rel.setTag("ref", "95");
 
-    FeatureCollector features = process(lineFeatureWithRelation(
+    FeatureCollector features = process(lineFeatureWithRelation(400,
       profile.preprocessOsmRelation(rel),
       Map.of(
         "highway", "trunk",
@@ -2322,10 +2282,10 @@ class TransportationTest extends AbstractLayerTest {
 
     // US:I network qualifies for z4, not z5
     // Network-qualified trunks create both transportation and transportation_name features
-    assertFeatures(13, List.of(
+    assertFeatures(5, List.of(
       Map.of(
         "_layer", "transportation",
-        "class", "trunk",
+        "class", "trunk", // don't upgrade to motorway
         "network", "us-interstate",
         "_minzoom", 4 // US:I network qualifies for z4
       ),
@@ -2335,52 +2295,5 @@ class TransportationTest extends AbstractLayerTest {
         "network", "us-interstate"
       )
     ), features);
-  }
-
-  @Test
-  void testContiguousTrunksMergeAndUpgrade() throws GeometryException {
-    // Test that small individual trunk segments (< 1000m) are upgraded to motorway at z5
-    var layer = Transportation.LAYER_NAME;
-
-    // Create small individual trunk segment. This should upgrade to motorway at z5
-    var trunk = new VectorTile.Feature(
-      layer, 1, VectorTile.encodeGeometry(newLineString(0, 0, 0.1, 0)),
-      new HashMap<>(Map.of("class", "trunk")), 0
-    );
-
-    List<VectorTile.Feature> inputZ5 = List.of(trunk);
-    List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
-
-    // Trunk should be upgraded to motorway (small individual segment)
-    assertEquals(1, resultZ5.size(), "Should have 1 feature");
-    assertEquals("motorway", resultZ5.get(0).tags().get("class"),
-      "Small individual trunk segment should upgrade to motorway at z5");
-  }
-
-  @Test
-  void testDisconnectedTrunksStaySeparate() throws GeometryException {
-    // Test that disconnected small individual trunk segments upgrade independently
-    var layer = Transportation.LAYER_NAME;
-
-    // Two disconnected small individual segments
-    // Use different coordinates and add oneway tag to prevent merging
-    var trunk1 = new VectorTile.Feature(
-      layer, 1, VectorTile.encodeGeometry(newLineString(0, 0, 0.1, 0)),
-      new HashMap<>(Map.of("class", "trunk", "oneway", 1)), 0
-    );
-    var trunk2 = new VectorTile.Feature(
-      layer, 2, VectorTile.encodeGeometry(newLineString(0, 0.1, 0.1, 0.1)),
-      new HashMap<>(Map.of("class", "trunk", "oneway", 1)), 0
-    );
-
-    List<VectorTile.Feature> inputZ5 = List.of(trunk1, trunk2);
-    List<VectorTile.Feature> resultZ5 = profile.postProcessLayerFeatures(layer, 5, inputZ5);
-
-    // Both should upgrade to motorway (small individual segments, oneway prevents merging)
-    assertEquals(2, resultZ5.size(), "Both small individual segments should upgrade");
-    for (var feature : resultZ5) {
-      assertEquals("motorway", feature.tags().get("class"),
-        "Each small individual segment should upgrade to motorway");
-    }
   }
 }

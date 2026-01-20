@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.openmaptiles.OpenMapTilesProfile;
 
@@ -2226,5 +2227,73 @@ class TransportationTest extends AbstractLayerTest {
       "ref", "S7",
       "route_1_ref", "E 77"
     )), features);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "499, trunk, 5, 5, motorway",
+    "499, trunk, 5, 6, trunk",
+    "501, trunk, 6, 5, trunk",
+    "501, trunk, 6, 6, trunk",
+    "499, trunk_link, 9, 9, trunk", // Links have minzoom=9 regardless of length
+  })
+  void testShortTrunkGetsZ5(int length, String highway, int expectedMinZoom, int classZoom,
+    String expectedClass) {
+    // Test that a short trunk segment (< 500m) gets minzoom=5
+    FeatureCollector features = process(lineFeatureWithLength(length, Map.of(
+      "highway", highway
+    )));
+
+    assertFeatures(classZoom, List.of(Map.of(
+      "_layer", "transportation",
+      "class", expectedClass,
+      "_minzoom", expectedMinZoom
+    )), features);
+
+    features = process(lineFeatureWithLength(length, Map.of(
+      "highway", "construction",
+      "construction", highway
+    )));
+
+    assertFeatures(classZoom, List.of(Map.of(
+      "_layer", "transportation",
+      "class", expectedClass + "_construction",
+      "_minzoom", expectedMinZoom
+    )), features);
+  }
+
+  @Test
+  void testNetworkQualifiedTrunkGetsZ5ButNotMotorway() {
+    // Test that network-qualified trunks get z5 (or z4 if they qualify for z4)
+    // Network qualification should override length check
+    var rel = new OsmElement.Relation(1);
+    rel.setTag("type", "route");
+    rel.setTag("route", "road");
+    rel.setTag("network", "US:I");
+    rel.setTag("ref", "95");
+
+    FeatureCollector features = process(lineFeatureWithRelation(400,
+      profile.preprocessOsmRelation(rel),
+      Map.of(
+        "highway", "trunk",
+        "ref", "95"
+      )
+    ));
+
+    // US:I network qualifies for z4, not z5
+    // Network-qualified trunks create both transportation and transportation_name features
+    assertFeatures(5, List.of(
+      Map.of(
+        "_layer", "transportation",
+        "class", "trunk", // don't upgrade to motorway
+        "network", "us-interstate",
+        "_minzoom", 4 // US:I network qualifies for z4
+      ),
+      Map.of(
+        "_layer", "transportation_name",
+        "class", "trunk",
+        "network", "us-interstate"
+      )
+    ), features);
   }
 }

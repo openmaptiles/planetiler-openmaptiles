@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.StreamSupport;
+import org.locationtech.jts.geom.Geometry;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.util.Utils;
 
@@ -139,12 +140,16 @@ public abstract class AbstractLayerTest {
 
   SourceFeature lineFeatureWithLength(double length, Map<String, Object> props) {
     return SimpleFeature.create(
-      GeoUtils.worldToLatLonCoords(newLineString(0, 0, 0, length)),
+      latLonLineWithLength(length),
       new HashMap<>(props),
       OpenMapTilesProfile.OSM_SOURCE,
       null,
       0
     );
+  }
+
+  private static Geometry latLonLineWithLength(double length) {
+    return GeoUtils.worldToLatLonCoords(newLineString(0.5, 0.5, 0.5 + GeoUtils.metersToPixelAtEquator(0, length), 0.5));
   }
 
   SourceFeature closedWayFeature(Map<String, Object> props) {
@@ -172,6 +177,19 @@ public abstract class AbstractLayerTest {
     return polygonFeatureWithArea(1, props);
   }
 
+
+  protected SimpleFeature lineFeatureWithRelation(double length, List<OsmRelationInfo> relationInfos,
+    Map<String, Object> map) {
+    return SimpleFeature.createFakeOsmFeature(
+      latLonLineWithLength(length),
+      map,
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      0,
+      (relationInfos == null ? List.<OsmRelationInfo>of() : relationInfos).stream()
+        .map(r -> new OsmReader.RelationMember<>("", r)).toList()
+    );
+  }
 
   protected SimpleFeature lineFeatureWithRelation(List<OsmRelationInfo> relationInfos,
     Map<String, Object> map) {

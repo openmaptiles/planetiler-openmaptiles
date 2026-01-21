@@ -133,7 +133,7 @@ public class Generate {
   public static void main(String[] args) throws IOException {
     Arguments arguments = Arguments.fromArgsOrConfigFile(args);
     PlanetilerConfig planetilerConfig = PlanetilerConfig.from(arguments);
-    String tag = arguments.getString("tag", "openmaptiles tag to use", "v3.15.0");
+    String tag = arguments.getString("tag", "openmaptiles tag to use", "v3.16");
     String baseUrl = arguments.getString("base-url", "the url used to download the openmaptiles.yml",
       "https://raw.githubusercontent.com/openmaptiles/openmaptiles/");
     String base = baseUrl + tag + "/";

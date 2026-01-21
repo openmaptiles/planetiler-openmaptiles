@@ -151,7 +151,7 @@ script with the
 OpenMapTiles release tag:
 
 ```bash
-./scripts/regenerate-openmaptiles.sh v3.15
+./scripts/regenerate-openmaptiles.sh v3.16
 ```
 
 Then follow the instructions it prints for reformatting generated code.
@@ -159,7 +159,7 @@ Then follow the instructions it prints for reformatting generated code.
 If you want to regenerate from a different repository than the default openmaptiles, you can specify the url like this:
 
 ```bash
-./scripts/regenerate-openmaptiles.sh v3.15 https://raw.githubusercontent.com/openmaptiles/openmaptiles/
+./scripts/regenerate-openmaptiles.sh v3.16 https://raw.githubusercontent.com/openmaptiles/openmaptiles/
 ```
 
 ## License

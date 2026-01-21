@@ -4,8 +4,7 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-# TODO: change to "v3.16" once that is released
-TAG="${1:-"master"}"
+TAG="${1:-"v3.16"}"
 echo "tag=${TAG}"
 
 BASE_URL="${2:-"https://raw.githubusercontent.com/openmaptiles/openmaptiles/"}"

@@ -69,7 +69,7 @@ class WaterwayTest extends AbstractLayerTest {
     );
     var connected = new VectorTile.Feature(
       Waterway.LAYER_NAME,
-      1,
+      0,
       VectorTile.encodeGeometry(newLineString(0, 0, 20, 0)),
       mapOf("name", "river"),
       0
@@ -135,7 +135,7 @@ class WaterwayTest extends AbstractLayerTest {
     );
     var connected = new VectorTile.Feature(
       Waterway.LAYER_NAME,
-      1,
+      0,
       VectorTile.encodeGeometry(newLineString(0, 0, 20, 0)),
       Map.of("name", "river"),
       0

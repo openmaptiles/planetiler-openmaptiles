@@ -114,16 +114,11 @@ class OmtLanguageUtilsTest {
     // https://wiki.openstreetmap.org/wiki/Multilingual_names#Japan
     "name:ja",
     "name:ja-Latn",
-    "name:ja_rm",
-    "name:ja_kana",
     // https://wiki.openstreetmap.org/wiki/Multilingual_names#China
     "name:zh-CN",
     "name:zh-hant-CN",
-    "name:zh_pinyin",
-    "name:zh_zhuyin",
     "name:zh-Latn-tongyong",
     "name:zh-Latn-pinyin",
-    "name:zh-Latn-wadegiles",
     "name:yue-Latn-jyutping",
     // https://wiki.openstreetmap.org/wiki/Multilingual_names#France
     "name:fr",

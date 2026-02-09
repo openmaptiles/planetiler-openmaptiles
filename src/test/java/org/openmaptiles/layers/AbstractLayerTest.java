@@ -222,7 +222,7 @@ public abstract class AbstractLayerTest {
     );
     var connected = new VectorTile.Feature(
       layer,
-      1,
+      0,
       VectorTile.encodeGeometry(newLineString(0, 0, length, 0)),
       attrs,
       0

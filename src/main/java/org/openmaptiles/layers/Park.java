@@ -51,11 +51,9 @@ import com.onthegomap.planetiler.geo.GeoUtils;
 import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.geo.GeometryType;
 import com.onthegomap.planetiler.stats.Stats;
-import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.SortKey;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
@@ -103,9 +101,9 @@ public class Park implements
       return "national_park";
     } else if ("protected_area".equals(element.boundary())) {
       return coalesce(
-          nullIfEmpty(element.protectedArea()),
-          nullIfEmpty(element.protectClass()) == null ? null : PROTECT_CLASS_MAP.get(element.protectClass()),
-          nullIfEmpty(element.protectionTitle()),
+        nullIfEmpty(element.protectedArea()),
+        nullIfEmpty(element.protectClass()) == null ? null : PROTECT_CLASS_MAP.get(element.protectClass()),
+        nullIfEmpty(element.protectionTitle()),
         "protected_area"
       );
     } else if ("nature_reserve".equals(element.leisure())) {

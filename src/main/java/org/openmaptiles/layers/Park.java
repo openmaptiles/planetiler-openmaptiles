@@ -36,6 +36,7 @@ See https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md for deta
 package org.openmaptiles.layers;
 
 import static com.onthegomap.planetiler.collection.FeatureGroup.SORT_KEY_BITS;
+import static java.util.Map.entry;
 import static org.openmaptiles.util.Utils.coalesce;
 import static org.openmaptiles.util.Utils.nullIfEmpty;
 
@@ -50,10 +51,12 @@ import com.onthegomap.planetiler.geo.GeoUtils;
 import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.geo.GeometryType;
 import com.onthegomap.planetiler.stats.Stats;
+import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.SortKey;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 import org.openmaptiles.util.OmtLanguageUtils;
@@ -75,6 +78,15 @@ public class Park implements
     Math.pow(GeoUtils.metersToPixelAtEquator(0, Math.sqrt(70_000)) / 256d, 2);
   private static final double LOG2 = Math.log(2);
   private static final double SMALLEST_PARK_WORLD_AREA = Math.pow(4, -26); // 2^14 tiles, 2^12 pixels per tile
+  private static final Map<String, String> PROTECT_CLASS_MAP = Map.ofEntries(
+    entry("1a", "conservation"),
+    entry("1b", "wilderness_preserve"),
+    entry("2", "national_park"),
+    entry("3", "conservation"),
+    entry("4", "wildlife_refuge"),
+    entry("5", "conservation"),
+    entry("6", "sustainable")
+  );
 
   private final Translations translations;
   private final Stats stats;
@@ -84,17 +96,32 @@ public class Park implements
     this.translations = translations;
   }
 
+  private String parkClass(Tables.OsmParkPolygon element) {
+    if (element.maritime()) {
+      return "marine";
+    } else if ("national_park".equals(element.boundary())) {
+      return "national_park";
+    } else if ("protected_area".equals(element.boundary())) {
+      return coalesce(
+          nullIfEmpty(element.protectedArea()),
+          nullIfEmpty(element.protectClass()) == null ? null : PROTECT_CLASS_MAP.get(element.protectClass()),
+          nullIfEmpty(element.protectionTitle()),
+        "protected_area"
+      );
+    } else if ("nature_reserve".equals(element.leisure())) {
+      return "nature_reserve";
+    } else if ("recreation_ground".equals(element.leisure())) {
+      return "recreation_ground";
+    } else if (element.historic() != null && !element.historic().isEmpty()) {
+      return "historic";
+    } else {
+      return "nature_reserve";
+    }
+  }
+
   @Override
   public void process(Tables.OsmParkPolygon element, FeatureCollector features) {
-    String protectionTitle = element.protectionTitle();
-    if (protectionTitle != null) {
-      protectionTitle = protectionTitle.replace(' ', '_').toLowerCase(Locale.ROOT);
-    }
-    String clazz = coalesce(
-      nullIfEmpty(protectionTitle),
-      nullIfEmpty(element.boundary()),
-      nullIfEmpty(element.leisure())
-    );
+    String clazz = parkClass(element);
 
     // park shape
     var outline = features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)

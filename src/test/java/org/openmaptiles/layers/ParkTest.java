@@ -3,7 +3,11 @@ package org.openmaptiles.layers;
 import com.onthegomap.planetiler.geo.GeoUtils;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class ParkTest extends AbstractLayerTest {
 
@@ -131,5 +135,100 @@ class ParkTest extends AbstractLayerTest {
     var iter = process(polygonFeatureWithArea(area, tags)).iterator();
     iter.next();
     return iter.next().getSortKey();
+  }
+
+  static Stream<Arguments> testClassTags() {
+    return Stream.of(
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "boundary", "national_park",
+          "maritime", "yes"
+        ),
+        "marine"
+      ),
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "boundary", "national_park"
+        ),
+        "national_park"
+      ),
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "boundary", "aboriginal_lands",
+          "leisure", "nature_reserve"
+        ),
+        "nature_reserve"
+      ),
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "boundary", "aboriginal_lands",
+          "leisure", "recreation_ground"
+        ),
+        "recreation_ground"
+      ),
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "boundary", "aboriginal_lands",
+          "leisure", "some_other_leisure_value"
+        ),
+        "nature_reserve"
+      ),
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "historic", "archaeological_site"
+        ),
+        "historic"
+      ),
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "boundary", "aboriginal_lands"
+        ),
+        "nature_reserve"
+      ),
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "boundary", "protected_area",
+          "protected_area", "forest_reserve"
+        ),
+        "forest_reserve"
+      ),
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "boundary", "protected_area",
+          "protect_class", "1a"
+        ),
+        "conservation"
+      ),
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "boundary", "protected_area",
+          "protect_class", "some_other_protect_class_value"
+        ),
+        "protected_area"
+      ),
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "boundary", "protected_area",
+          "protection_title", "National Forest"
+        ),
+        "National Forest"
+      ),
+      org.junit.jupiter.params.provider.Arguments.of(
+        Map.of(
+          "boundary", "protected_area"
+        ),
+        "protected_area"
+      )
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("testClassTags")
+  void testClazz(Map<String, Object> props, String expectedClazz) {
+    assertFeatures(13, List.of(Map.of(
+      "_layer", "park",
+      "_type", "polygon",
+      "class", expectedClazz
+    )), process(polygonFeature(props)));
   }
 }

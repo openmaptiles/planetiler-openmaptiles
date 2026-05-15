@@ -806,6 +806,12 @@ class BoundaryTest extends AbstractLayerTest {
       "_type", "polygon",
       "_minzoom", 4
     ), Map.of(
+      "_layer", "park",
+      "_type", "polygon"
+    ), Map.of(
+      "_layer", "park",
+      "_type", "point"
+    ), Map.of(
       "_layer", "place"
     )), process(polygonFeatureWithArea(1,
       Map.of(

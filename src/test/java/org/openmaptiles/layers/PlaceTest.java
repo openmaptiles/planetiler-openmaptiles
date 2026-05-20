@@ -290,6 +290,14 @@ class PlaceTest extends AbstractLayerTest {
   @Test
   void testIndigenousLand() {
     assertFeatures(0, List.of(Map.of(
+      "_layer", "boundary"
+    ), Map.of(
+      "_layer", "park",
+      "_type", "polygon"
+    ), Map.of(
+      "_layer", "park",
+      "_type", "point"
+    ), Map.of(
       "_layer", "place",
       "class", "aboriginal_lands",
       "name", "Seminole Nation",
@@ -299,8 +307,6 @@ class PlaceTest extends AbstractLayerTest {
 
       "_type", "point",
       "_minzoom", 6
-    ), Map.of(
-      "_layer", "boundary"
     )), process(polygonFeatureWithArea(1,
       Map.of(
         "type", "boundary",
@@ -312,6 +318,14 @@ class PlaceTest extends AbstractLayerTest {
     double rank2area = Math.pow(GeoUtils.metersToPixelAtEquator(0, Math.sqrt(640_000_000 - 1)) / 256d, 2);
 
     assertFeatures(0, List.of(Map.of(
+      "_layer", "boundary"
+    ), Map.of(
+      "_layer", "park",
+      "_type", "polygon"
+    ), Map.of(
+      "_layer", "park",
+      "_type", "point"
+    ), Map.of(
       "_layer", "place",
       "class", "aboriginal_lands",
       "name", "Seminole Nation",
@@ -319,8 +333,6 @@ class PlaceTest extends AbstractLayerTest {
 
       "_type", "point",
       "_minzoom", 7
-    ), Map.of(
-      "_layer", "boundary"
     )), process(polygonFeatureWithArea(rank2area,
       Map.of(
         "type", "boundary",

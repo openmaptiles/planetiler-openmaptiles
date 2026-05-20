@@ -49,8 +49,8 @@ import org.openmaptiles.Layer;
 
 /**
  * All vector tile layer definitions, attributes, and allowed values generated from the
- * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.16/openmaptiles.yaml">OpenMapTiles vector tile schema
- * v3.16</a>.
+ * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/openmaptiles.yaml">OpenMapTiles vector tile schema
+ * master</a>.
  */
 @SuppressWarnings("unused")
 public class OpenMapTilesSchema {
@@ -96,7 +96,7 @@ public class OpenMapTilesSchema {
    * boundaries show up. So you might not be able to use border styling for ocean water features.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/water/water.yaml">water.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/water/water.yaml">water.yaml</a>
    */
   public interface Water extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -195,7 +195,7 @@ public class OpenMapTilesSchema {
    * field applied. Waterways do not have a <code>subclass</code> field.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/waterway/waterway.yaml">waterway.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/waterway/waterway.yaml">waterway.yaml</a>
    */
   public interface Waterway extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -287,7 +287,7 @@ public class OpenMapTilesSchema {
    * layer is to style wood (<code>class=wood</code>) and grass (<code>class=grass</code>) areas.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/landcover/landcover.yaml">landcover.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/landcover/landcover.yaml">landcover.yaml</a>
    */
   public interface Landcover extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -446,7 +446,7 @@ public class OpenMapTilesSchema {
    * residential (urban) areas and at higher zoom levels mostly OSM <code>landuse</code> tags.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/landuse/landuse.yaml">landuse.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/landuse/landuse.yaml">landuse.yaml</a>
    */
   public interface Landuse extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -542,7 +542,7 @@ public class OpenMapTilesSchema {
    * <a href="http://wiki.openstreetmap.org/wiki/Tag:natural%3Dpeak">Natural peaks</a>
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/mountain_peak/mountain_peak.yaml">mountain_peak.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/mountain_peak/mountain_peak.yaml">mountain_peak.yaml</a>
    */
   public interface MountainPeak extends Layer {
     double BUFFER_SIZE = 64.0;
@@ -619,14 +619,15 @@ public class OpenMapTilesSchema {
     }
   }
   /**
-   * The park layer in OpenMapTiles contains natural and protected areas from OpenStreetMap, such as parks tagged with
-   * <a href="https://wiki.openstreetmap.org/wiki/Tag:boundary%3Dnational_park"><code>boundary=national_park</code></a>,
+   * The park layer contains large area features from OpenStreetMap tagged with
+   * <a href="http://wiki.openstreetmap.org/wiki/Tag:boundary%3Dnational_park"><code>boundary=national_park</code></a>,
    * <a href=
-   * "https://wiki.openstreetmap.org/wiki/Tag:boundary%3Dprotected_area"><code>boundary=protected_area</code></a>, or
-   * <a href="https://wiki.openstreetmap.org/wiki/Tag:leisure%3Dnature_reserve"><code>leisure=nature_reserve</code></a>.
+   * "http://wiki.openstreetmap.org/wiki/Tag:boundary%3Dprotected_area"><code>boundary=protected_area</code></a>,
+   * <a href="http://wiki.openstreetmap.org/wiki/Tag:leisure%3Dnature_reserve"><code>leisure=nature_reserve</code></a>,
+   * or select values of <a href="http://wiki.openstreetmap.org/wiki/Key:historic"><code>historic= </code></a>.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/park/park.yaml">park.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/park/park.yaml">park.yaml</a>
    */
   public interface Park extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -641,10 +642,12 @@ public class OpenMapTilesSchema {
     final class Fields {
       /**
        * Use the <strong>class</strong> to differentiate between different kinds of features in the <code>parks</code>
-       * layer. The class for <code>boundary=protected_area</code> parks is the lower-case of the
-       * <a href="http://wiki.openstreetmap.org/wiki/key:protection_title"><code>protection_title</code></a> value with
-       * blanks replaced by <code>_</code>. <code>national_park</code> is the class of
-       * <code>protection_title=National Park</code> and <code>boundary=national_park</code>.
+       * layer. For <code>boundary=protected_area</code> parks, the class is determined by the
+       * <a href="http://wiki.openstreetmap.org/wiki/key:protected_area"><code>protected_area</code></a> tag value,
+       * falling back to the
+       * <a href="http://wiki.openstreetmap.org/wiki/key:protection_title"><code>protection_title</code></a> value if
+       * not present, and defaulting to <code>protected_area</code> if neither is available. <code>national_park</code>
+       * is the class of <code>protection_title=National Park</code> and <code>boundary=national_park</code>.
        * <code>nature_reserve</code> is the class of <code>protection_title=Nature Reserve</code> and
        * <code>leisure=nature_reserve</code>. The class for other
        * <a href="http://wiki.openstreetmap.org/wiki/key:protection_title"><code>protection_title</code></a> values is
@@ -689,7 +692,7 @@ public class OpenMapTilesSchema {
    * but for most styles it makes sense to just style <code>admin_level=2</code> and <code>admin_level=4</code>.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/boundary/boundary.yaml">boundary.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/boundary/boundary.yaml">boundary.yaml</a>
    */
   public interface Boundary extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -799,7 +802,7 @@ public class OpenMapTilesSchema {
    * in the <strong>aeroway</strong> layer.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/aeroway/aeroway.yaml">aeroway.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/aeroway/aeroway.yaml">aeroway.yaml</a>
    */
   public interface Aeroway extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -859,7 +862,7 @@ public class OpenMapTilesSchema {
    * features like plazas.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/transportation/transportation.yaml">transportation.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/transportation/transportation.yaml">transportation.yaml</a>
    */
   public interface Transportation extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -1215,7 +1218,7 @@ public class OpenMapTilesSchema {
    * location:underground are excluded.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/building/building.yaml">building.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/building/building.yaml">building.yaml</a>
    */
   public interface Building extends Layer {
     double BUFFER_SIZE = 4.0;
@@ -1257,7 +1260,7 @@ public class OpenMapTilesSchema {
    * from OSM water bodies. Only the most important lakes contain labels.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/water_name/water_name.yaml">water_name.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/water_name/water_name.yaml">water_name.yaml</a>
    */
   public interface WaterName extends Layer {
     double BUFFER_SIZE = 256.0;
@@ -1334,7 +1337,7 @@ public class OpenMapTilesSchema {
    * while for other roads you should use <code>name</code>.
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/transportation_name/transportation_name.yaml">transportation_name.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/transportation_name/transportation_name.yaml">transportation_name.yaml</a>
    */
   public interface TransportationName extends Layer {
     double BUFFER_SIZE = 8.0;
@@ -1606,7 +1609,7 @@ public class OpenMapTilesSchema {
    * create a text hierarchy.
    *
    * Generated from
-   * <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/place/place.yaml">place.yaml</a>
+   * <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/place/place.yaml">place.yaml</a>
    */
   public interface Place extends Layer {
     double BUFFER_SIZE = 256.0;
@@ -1730,7 +1733,7 @@ public class OpenMapTilesSchema {
    * tag are prioritized for preservation).
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/housenumber/housenumber.yaml">housenumber.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/housenumber/housenumber.yaml">housenumber.yaml</a>
    */
   public interface Housenumber extends Layer {
     double BUFFER_SIZE = 8.0;
@@ -1762,7 +1765,7 @@ public class OpenMapTilesSchema {
    * <a href="http://wiki.openstreetmap.org/wiki/Points_of_interest">Points of interests</a> containing a of a variety
    * of OpenStreetMap tags. Mostly contains amenities, sport, shop and tourist POIs.
    *
-   * Generated from <a href="https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/poi/poi.yaml">poi.yaml</a>
+   * Generated from <a href="https://github.com/openmaptiles/openmaptiles/blob/master/layers/poi/poi.yaml">poi.yaml</a>
    */
   public interface Poi extends Layer {
     double BUFFER_SIZE = 64.0;
@@ -1835,6 +1838,7 @@ public class OpenMapTilesSchema {
        * <li>castle
        * <li>atm
        * <li>fuel
+       * <li>zoo
        * </ul>
        */
       public static final String CLASS = "class";
@@ -1854,9 +1858,10 @@ public class OpenMapTilesSchema {
        * <a href="http://wiki.openstreetmap.org/wiki/Key:aerialway"><code>aerialway</code></a>,
        * <a href="http://wiki.openstreetmap.org/wiki/Key:building"><code>building</code></a>,
        * <a href="http://wiki.openstreetmap.org/wiki/Key:highway"><code>highway</code></a>,
-       * <a href="https://wiki.openstreetmap.org/wiki/Key:office"><code>office</code></a> or
-       * <a href="http://wiki.openstreetmap.org/wiki/Key:waterway"><code>waterway</code></a> tag. Use this to do more
-       * precise styling.
+       * <a href="https://wiki.openstreetmap.org/wiki/Key:office"><code>office</code></a>,
+       * <a href="http://wiki.openstreetmap.org/wiki/Key:waterway"><code>waterway</code></a> or
+       * <a href="http://wiki.openstreetmap.org/wiki/Key:zoo"><code>zoo</code></a> tag. Use this to do more precise
+       * styling.
        */
       public static final String SUBCLASS = "subclass";
       /**
@@ -1932,10 +1937,12 @@ public class OpenMapTilesSchema {
       public static final String CLASS_CASTLE = "castle";
       public static final String CLASS_ATM = "atm";
       public static final String CLASS_FUEL = "fuel";
-      public static final Set<String> CLASS_VALUES = Set.of("shop", "office", "town_hall", "golf", "fast_food", "park",
-        "bus", "railway", "aerialway", "entrance", "campsite", "laundry", "grocery", "library", "college", "lodging",
-        "ice_cream", "post", "cafe", "school", "alcohol_shop", "bar", "harbor", "car", "hospital", "cemetery",
-        "attraction", "beer", "music", "stadium", "art_gallery", "clothing_store", "swimming", "castle", "atm", "fuel");
+      public static final String CLASS_ZOO = "zoo";
+      public static final Set<String> CLASS_VALUES =
+        Set.of("shop", "office", "town_hall", "golf", "fast_food", "park", "bus", "railway", "aerialway", "entrance",
+          "campsite", "laundry", "grocery", "library", "college", "lodging", "ice_cream", "post", "cafe", "school",
+          "alcohol_shop", "bar", "harbor", "car", "hospital", "cemetery", "attraction", "beer", "music", "stadium",
+          "art_gallery", "clothing_store", "swimming", "castle", "atm", "fuel", "zoo");
     }
     /** Complex mappings to generate attribute values from OSM element tags in the poi layer. */
     final class FieldMappings {
@@ -1999,14 +2006,16 @@ public class OpenMapTilesSchema {
         MultiExpression.entry("swimming", matchAny("subclass", "swimming_area", "swimming")),
         MultiExpression.entry("castle", matchAny("subclass", "castle", "ruins")),
         MultiExpression.entry("atm", matchAny("subclass", "atm")),
-        MultiExpression.entry("fuel", matchAny("subclass", "fuel", "charging_station"))));
+        MultiExpression.entry("fuel", matchAny("subclass", "fuel", "charging_station")),
+        MultiExpression.entry("zoo", matchAny("subclass", "zoo", "enclosure'", "petting_zoo", "aviary", "wildlife_park",
+          "birds", "safari_park", "butterfly", "falconry", "reptile", "terrarium"))));
     }
   }
   /**
    * <a href="http://wiki.openstreetmap.org/wiki/Tag:aeroway%3Daerodrome">Aerodrome labels</a>
    *
    * Generated from <a href=
-   * "https://github.com/openmaptiles/openmaptiles/blob/v3.16/layers/aerodrome_label/aerodrome_label.yaml">aerodrome_label.yaml</a>
+   * "https://github.com/openmaptiles/openmaptiles/blob/master/layers/aerodrome_label/aerodrome_label.yaml">aerodrome_label.yaml</a>
    */
   public interface AerodromeLabel extends Layer {
     double BUFFER_SIZE = 64.0;

@@ -80,7 +80,7 @@ jobs:
       - name: 'Dump comment body'
         run: cat comment-body.txt
 
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - uses: marocchino/sticky-pull-request-comment@v3
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           path: comment-body.txt

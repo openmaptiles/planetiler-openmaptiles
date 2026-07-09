@@ -131,7 +131,7 @@ public class Transportation implements
   );
   private static final Set<String> SURFACE_UNPAVED_VALUES = Set.of(
     "unpaved", "compacted", "dirt", "earth", "fine_gravel", "grass", "grass_paver", "gravel", "gravel_turf", "ground",
-    "ice", "mud", "pebblestone", "salt", "sand", "snow", "woodchips"
+    "ice", "mud", "pebblestone", "salt", "sand", "snow", "woodchips", "rock", "clay", "laterite"
   );
   private static final Set<String> SURFACE_PAVED_VALUES = Set.of(
     "paved", "asphalt", "cobblestone", "concrete", "concrete:lanes", "concrete:plates", "metal",

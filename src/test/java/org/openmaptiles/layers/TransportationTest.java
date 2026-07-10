@@ -148,21 +148,20 @@ class TransportationTest extends AbstractLayerTest {
     ))));
   }
 
-  @Test
-  void testRockClayLateriteSurfaces() {
-    for (var surface : List.of("rock", "clay", "laterite")) {
-      assertFeatures(14, List.of(Map.of(
-        "_layer", "transportation",
-        "class", "path",
-        "subclass", "path",
-        "surface", "unpaved",
-        "oneway", "<null>",
-        "_minzoom", 14
-      )), process(lineFeature(Map.of(
-        "surface", surface,
-        "highway", "path"
-      ))));
-    }
+  @ParameterizedTest
+  @ValueSource(strings = {"rock", "clay", "laterite"})
+  void testRockClayLateriteSurfaces(String surface) {
+    assertFeatures(14, List.of(Map.of(
+      "_layer", "transportation",
+      "class", "path",
+      "subclass", "path",
+      "surface", "unpaved",
+      "oneway", "<null>",
+      "_minzoom", 14
+    )), process(lineFeature(Map.of(
+      "surface", surface,
+      "highway", "path"
+    ))));
   }
 
   @Test

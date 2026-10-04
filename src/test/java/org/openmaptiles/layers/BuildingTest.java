@@ -3,11 +3,15 @@ package org.openmaptiles.layers;
 import static com.onthegomap.planetiler.TestUtils.rectangle;
 
 import com.onthegomap.planetiler.VectorTile;
+import com.onthegomap.planetiler.config.Arguments;
+import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.geo.GeoUtils;
 import com.onthegomap.planetiler.geo.GeometryException;
 import com.onthegomap.planetiler.reader.SimpleFeature;
 import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmReader;
+import com.onthegomap.planetiler.stats.Stats;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
@@ -17,6 +21,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.openmaptiles.OpenMapTilesProfile;
 
 class BuildingTest extends AbstractLayerTest {
+
+  private final OpenMapTilesProfile profileHidingOutlinesWithParts = new OpenMapTilesProfile(translations,
+    PlanetilerConfig.from(Arguments.of(Map.of(
+      "building_hide_outlines_with_parts", "true"
+    ))), Stats.inMemory());
 
   @Test
   void testBuilding() {
@@ -143,6 +152,82 @@ class BuildingTest extends AbstractLayerTest {
       0,
       relationInfos
     )));
+  }
+
+  @Test
+  void testPartIsMarkedWhenHidingOutlinesWithParts() {
+    var part = polygonFeature(Map.of(
+      "building:part", "yes"
+    ));
+    var collector = featureCollectorFactory.get(part);
+    profileHidingOutlinesWithParts.processFeature(part, collector);
+
+    assertFeatures(14, List.of(Map.of(
+      "_part", true
+    )), collector);
+    assertFeatures(14, List.of(Map.of(
+      "_part", "<null>"
+    )), process(part));
+  }
+
+  @Test
+  void testOutlineMostlyCoveredByPartsHides3d() throws GeometryException {
+    var outline = new VectorTile.Feature(
+      Building.LAYER_NAME,
+      1,
+      VectorTile.encodeGeometry(rectangle(10, 20)),
+      new HashMap<>(Map.of("render_height", 30)),
+      0
+    );
+    var part = new VectorTile.Feature(
+      Building.LAYER_NAME,
+      2,
+      VectorTile.encodeGeometry(rectangle(10, 10, 20, 18)),
+      new HashMap<>(Map.of("render_height", 20, "_part", true)),
+      0
+    );
+    var neighbor = new VectorTile.Feature(
+      Building.LAYER_NAME,
+      3,
+      VectorTile.encodeGeometry(rectangle(20, 10, 30, 20)),
+      new HashMap<>(Map.of("render_height", 10)),
+      0
+    );
+
+    var result = profileHidingOutlinesWithParts.postProcessLayerFeatures(Building.LAYER_NAME, 14,
+      List.of(outline, part, neighbor));
+
+    Assertions.assertEquals(List.of(
+      Map.of("render_height", 30, "hide_3d", true),
+      Map.of("render_height", 20),
+      Map.of("render_height", 10)
+    ), result.stream().map(VectorTile.Feature::tags).toList());
+  }
+
+  @Test
+  void testOutlineWithSmallPartStaysVisible() throws GeometryException {
+    var outline = new VectorTile.Feature(
+      Building.LAYER_NAME,
+      1,
+      VectorTile.encodeGeometry(rectangle(10, 20)),
+      new HashMap<>(Map.of("render_height", 30)),
+      0
+    );
+    var part = new VectorTile.Feature(
+      Building.LAYER_NAME,
+      2,
+      VectorTile.encodeGeometry(rectangle(12, 14)),
+      new HashMap<>(Map.of("render_height", 40, "_part", true)),
+      0
+    );
+
+    var result = profileHidingOutlinesWithParts.postProcessLayerFeatures(Building.LAYER_NAME, 14,
+      List.of(outline, part));
+
+    Assertions.assertEquals(List.of(
+      Map.of("render_height", 30),
+      Map.of("render_height", 40)
+    ), result.stream().map(VectorTile.Feature::tags).toList());
   }
 
   @Test

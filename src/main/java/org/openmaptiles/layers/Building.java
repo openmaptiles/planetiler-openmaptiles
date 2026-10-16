@@ -53,9 +53,15 @@ import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.MemoryEstimator;
 import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.TopologyException;
+import org.locationtech.jts.index.strtree.STRtree;
+import org.locationtech.jts.operation.overlayng.OverlayNG;
+import org.locationtech.jts.operation.overlayng.OverlayNGRobust;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 
@@ -103,13 +109,22 @@ public class Building implements
     entry("sandstone", "#b4a995"), // same as stone
     entry("clay", "#9d8b75") // same as mud
   );
+  private static final String TEMP_PART = "_part";
+  /** Share of a building's area that its parts have to cover before the building is hidden in 3D. */
+  private static final double MIN_PART_COVERAGE = 0.5;
   private final boolean mergeZ13Buildings;
+  private final boolean hideOutlinesWithParts;
 
   public Building(Translations translations, PlanetilerConfig config, Stats stats) {
     this.mergeZ13Buildings = config.arguments().getBoolean(
       "building_merge_z13",
       "building layer: merge nearby buildings at z13",
       true
+    );
+    this.hideOutlinesWithParts = config.arguments().getBoolean(
+      "building_hide_outlines_with_parts",
+      "building layer: set hide_3d on buildings that are mostly covered by building parts",
+      false
     );
   }
 
@@ -168,6 +183,7 @@ public class Building implements
         .setAttrWithMinzoom(Fields.RENDER_MIN_HEIGHT, renderMinHeight, 14)
         .setAttrWithMinzoom(Fields.COLOUR, color, 14)
         .setAttrWithMinzoom(Fields.HIDE_3D, hide3d, 14)
+        .setAttrWithMinzoom(TEMP_PART, hideOutlinesWithParts && element.buildingpart() != null ? true : null, 14)
         .setSortKey(renderHeight);
       if (mergeZ13Buildings) {
         feature
@@ -180,10 +196,63 @@ public class Building implements
   @Override
   public List<VectorTile.Feature> postProcess(int zoom,
     List<VectorTile.Feature> items) throws GeometryException {
+    if (hideOutlinesWithParts && zoom >= 14) {
+      hideOutlinesCoveredByParts(items);
+    }
     return (mergeZ13Buildings && zoom == 13) ?
       FeatureMerge.mergeNearbyPolygons(items, 4, 4, 0.5, 0.5) :
       // reduces the size of some heavy z14 tiles with many small buildings by 60% or more
       FeatureMerge.mergeMultiPolygon(items);
+  }
+
+  /**
+   * Sets {@code hide_3d} on buildings that are mostly covered by {@code building:part}s, because
+   * <a href="https://wiki.openstreetmap.org/wiki/Simple_3D_Buildings">Simple 3D Buildings</a> does not use the outline
+   * of a building for 3D rendering when it has parts.
+   */
+  private static void hideOutlinesCoveredByParts(List<VectorTile.Feature> items) throws GeometryException {
+    List<VectorTile.Feature> outlines = new ArrayList<>();
+    STRtree parts = new STRtree();
+    for (var item : items) {
+      if (!item.tags().containsKey(TEMP_PART)) {
+        outlines.add(item);
+        continue;
+      }
+      item.tags().remove(TEMP_PART);
+      Geometry geometry = item.geometry().decode();
+      for (int i = 0; i < geometry.getNumGeometries(); i++) {
+        Geometry part = geometry.getGeometryN(i);
+        parts.insert(part.getEnvelopeInternal(), part);
+      }
+    }
+    if (parts.isEmpty()) {
+      return;
+    }
+    for (var outline : outlines) {
+      if (Boolean.TRUE.equals(outline.tags().get(Fields.HIDE_3D))) {
+        continue;
+      }
+      if (partCoverage(outline.geometry().decode(), parts) > MIN_PART_COVERAGE) {
+        outline.tags().put(Fields.HIDE_3D, true);
+      }
+    }
+  }
+
+  /** Returns the share of {@code outline}'s area that is covered by {@code parts}. */
+  private static double partCoverage(Geometry outline, STRtree parts) {
+    List<Geometry> nearby = new ArrayList<>();
+    for (Object part : parts.query(outline.getEnvelopeInternal())) {
+      nearby.add((Geometry) part);
+    }
+    if (nearby.isEmpty()) {
+      return 0;
+    }
+    try {
+      Geometry covered = OverlayNGRobust.overlay(outline, OverlayNGRobust.union(nearby), OverlayNG.INTERSECTION);
+      return covered.getArea() / outline.getArea();
+    } catch (TopologyException e) {
+      return 0;
+    }
   }
 
   private record BuildingRelationInfo(long id) implements OsmRelationInfo {

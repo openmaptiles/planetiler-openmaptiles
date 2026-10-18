@@ -58,6 +58,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFilter;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.TopologyException;
 import org.locationtech.jts.index.strtree.STRtree;
 import org.locationtech.jts.operation.overlayng.OverlayNG;
@@ -220,10 +222,11 @@ public class Building implements
       }
       item.tags().remove(TEMP_PART);
       Geometry geometry = item.geometry().decode();
-      for (int i = 0; i < geometry.getNumGeometries(); i++) {
-        Geometry part = geometry.getGeometryN(i);
-        parts.insert(part.getEnvelopeInternal(), part);
-      }
+      geometry.apply((GeometryFilter) (Geometry geom) -> {
+        if (geom instanceof Polygon part) {
+          parts.insert(part.getEnvelopeInternal(), part);
+        }
+      });
     }
     if (parts.isEmpty()) {
       return;
@@ -248,6 +251,7 @@ public class Building implements
       return 0;
     }
     try {
+      // the default intersection throws a TopologyException on some real buildings that OverlayNGRobust handles
       Geometry covered = OverlayNGRobust.overlay(outline, OverlayNGRobust.union(nearby), OverlayNG.INTERSECTION);
       return covered.getArea() / outline.getArea();
     } catch (TopologyException e) {

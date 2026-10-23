@@ -11,6 +11,7 @@ import com.onthegomap.planetiler.reader.SimpleFeature;
 import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmReader;
 import com.onthegomap.planetiler.stats.Stats;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import org.openmaptiles.OpenMapTilesProfile;
 
 class BuildingTest extends AbstractLayerTest {
@@ -228,6 +231,47 @@ class BuildingTest extends AbstractLayerTest {
       Map.of("render_height", 30),
       Map.of("render_height", 40)
     ), result.stream().map(VectorTile.Feature::tags).toList());
+  }
+
+  @Test
+  void testOutlineCoveredByPartsWhereDefaultIntersectionThrows() throws GeometryException, ParseException {
+    // 90 Washington Street, New York (way 278033632) and its parts, as they are in tile 14/4823/6160
+    var wkt = new WKTReader();
+    var outline = new VectorTile.Feature(
+      Building.LAYER_NAME,
+      1,
+      VectorTile.encodeGeometry(wkt.read(
+        "POLYGON ((131.6875 89.8125, 129.8125 94.1875, 124.625 91.75, 126.625 87.4375, 131.6875 89.8125))")),
+      new HashMap<>(Map.of("render_height", 30)),
+      0
+    );
+    List<VectorTile.Feature> items = new ArrayList<>(List.of(outline));
+    for (String part : List.of(
+      "POLYGON ((125.25 92.0625, 126.875 88.5, 127.8125 88.875, 126.1875 92.5, 125.25 92.0625))",
+      "POLYGON ((127.4375 89.75, 129.6875 90.8125, 129.25 91.75, 127 90.6875, 127.4375 89.75))",
+      "POLYGON ((129.8125 94.1875, 128.9375 93.8125, 130.625 90.1875, 126.875 88.5, 125.25 92.0625, 124.625 91.75, 126.625 87.4375, 131.6875 89.8125, 129.8125 94.1875))",
+      "POLYGON ((127.125 92.9375, 126.1875 92.5, 127.8125 88.875, 130.625 90.1875, 129.875 91.875, 129.4375 91.6875, 129.125 92.4375, 127.6875 91.8125, 127.125 92.9375))",
+      "POLYGON ((129.875 91.875, 128.9375 93.8125, 127.125 92.9375, 127.6875 91.8125, 129.125 92.4375, 129.4375 91.6875, 129.875 91.875))",
+      "POLYGON ((125.625 92.25, 125.4375 92.1875, 125.0625 92.4375, 124.5625 93.375, 124.25 94.1875, 123.5625 93.875, 124.25 91.625, 125.625 92.25))",
+      "POLYGON ((128.1875 96.0625, 127.875 96.375, 127.6875 96.5, 127.1875 96.4375, 125.375 95.625, 124.25 94.9375, 124.1875 94.75, 124.25 94.1875, 123.5625 93.875, 124.25 91.625, 129.8125 94.1875, 129.125 96.4375, 128.1875 96.0625))",
+      "POLYGON ((126.1875 92.5, 128.9375 93.8125, 129.0625 94, 129.125 94.375, 129 94.6875, 127.875 96.375, 127.5 96.5, 126.3125 96.125, 124.25 94.9375, 124.1875 94.75, 124.25 94.1875, 124.8125 92.875, 125.1875 92.3125, 125.625 92.25, 126.1875 92.5))",
+      "POLYGON ((128.9375 93.8125, 129.8125 94.1875, 129.125 96.4375, 128.1875 96.0625, 129.125 94.375, 129.0625 94, 128.9375 93.8125))"
+    )) {
+      items.add(new VectorTile.Feature(
+        Building.LAYER_NAME,
+        2,
+        VectorTile.encodeGeometry(wkt.read(part)),
+        new HashMap<>(Map.of("render_height", 20, "_part", true)),
+        0
+      ));
+    }
+
+    var result = profileHidingOutlinesWithParts.postProcessLayerFeatures(Building.LAYER_NAME, 14, items);
+
+    Assertions.assertEquals(
+      Map.of("render_height", 30, "hide_3d", true),
+      result.stream().filter(feature -> feature.id() == 1).findFirst().orElseThrow().tags()
+    );
   }
 
   @Test

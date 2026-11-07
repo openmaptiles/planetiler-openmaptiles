@@ -63,7 +63,12 @@ jobs:
       - name: 'Download data'
         run: |
           set -eo pipefail
-          cp base/target/*with-deps.jar run.jar && java -jar run.jar --only-download --area="${{ env.AREA }}"
+          # osmdata.openstreetmap.de is down, so a base that still reads water polygons from its shapefile zip gets the
+          # FAU mirror's copy instead. A base that reads GeoParquet needs nothing.
+          if grep -q water-polygons-split-3857.zip base/src/main/java/org/openmaptiles/OpenMapTilesMain.java; then
+            base_water=--water-polygons-url=https://ftp.fau.de/mirrors/openstreetmapdata.com-archive/2026-10-31/water-polygons-split-3857.zip
+          fi
+          cp base/target/*with-deps.jar run.jar && java -jar run.jar --only-download --area="${{ env.AREA }}" ${base_water:-}
           cp branch/target/*with-deps.jar run.jar && java -jar run.jar --only-download --area="${{ env.AREA }}"
 
       - name: 'Store build info'

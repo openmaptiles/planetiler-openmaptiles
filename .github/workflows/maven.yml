@@ -117,6 +117,11 @@ jobs:
           path: planetiler-openmaptiles
       - name: Move planetiler-openmaptiles into planetiler
         run: mv planetiler-openmaptiles planetiler
+      - name: Drop planetiler's water polygon zip override
+        # Planetiler's test-release.sh may still point water polygons at a shapefile zip, which this branch reads as
+        # GeoParquet. This does nothing once planetiler drops that override.
+        working-directory: planetiler
+        run: sed -i 's# --water-polygons-url=[^ ]*##' scripts/test-release.sh
       - name: Cache data/sources
         uses: ./planetiler/planetiler-openmaptiles/.github/cache-sources-action
       - name: Set up JDK

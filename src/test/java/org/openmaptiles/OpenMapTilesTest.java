@@ -11,7 +11,6 @@ import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.archive.Tile;
 import com.onthegomap.planetiler.config.Arguments;
 import com.onthegomap.planetiler.mbtiles.Mbtiles;
-import com.onthegomap.planetiler.util.FileUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
@@ -49,16 +48,14 @@ class OpenMapTilesTest {
     Path dbPath = tmpDir.resolve("output.mbtiles");
     var osmPath = TestUtils.extractPathToResource(tmpDir, "monaco-latest.osm.pbf");
     var naturalEarthPath = TestUtils.extractPathToResource(tmpDir, "natural_earth_vector.sqlite.zip");
-    var waterPath = tmpDir.resolve("water");
-    // windows seems to have trouble closing zip file after reading from it, so extract first instead
-    FileUtils.unzipResource("/water-polygons-split-3857.zip", waterPath);
+    var waterPath = TestUtils.extractPathToResource(tmpDir, "water_polygons.parquet");
+    var lakeCenterlinesPath = TestUtils.extractPathToResource(tmpDir, "lake_centerline.parquet");
     OpenMapTilesMain.run(Arguments.of(
       // Override input source locations
       "osm_path", osmPath,
       "natural_earth_path", naturalEarthPath,
       "water_polygons_path", waterPath,
-      // no centerlines in monaco - so fake it out with an empty source
-      "lake_centerlines_path", waterPath,
+      "lake_centerlines_path", lakeCenterlinesPath,
 
       // Override temp dir location
       "tmpdir", tmpDir.resolve("tmp"),

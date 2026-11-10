@@ -50,6 +50,30 @@ public class OpenMapTilesProfile extends ForwardingProfile {
   public static final String LAKE_CENTERLINE_SOURCE = "lake_centerlines";
   public static final String WATER_POLYGON_SOURCE = "water_polygons";
   public static final String NATURAL_EARTH_SOURCE = "natural_earth";
+  public static final List<String> NATURAL_EARTH_TABLES = List.of(
+    "10m/cultural/ne_10m_admin_0_boundary_lines_land",
+    "10m/cultural/ne_10m_admin_0_countries",
+    "10m/cultural/ne_10m_admin_1_states_provinces",
+    "10m/cultural/ne_10m_admin_1_states_provinces_lines",
+    "10m/cultural/ne_10m_populated_places",
+    "10m/physical/ne_10m_antarctic_ice_shelves_polys",
+    "10m/physical/ne_10m_geography_marine_polys",
+    "10m/physical/ne_10m_glaciated_areas",
+    "10m/physical/ne_10m_lakes",
+    "10m/physical/ne_10m_ocean",
+    "50m/cultural/ne_50m_admin_0_boundary_lines_land",
+    "50m/cultural/ne_50m_urban_areas",
+    "50m/physical/ne_50m_antarctic_ice_shelves_polys",
+    "50m/physical/ne_50m_glaciated_areas",
+    "50m/physical/ne_50m_lakes",
+    "50m/physical/ne_50m_ocean",
+    "50m/physical/ne_50m_rivers_lake_centerlines",
+    "110m/cultural/ne_110m_admin_0_boundary_lines_land",
+    "110m/physical/ne_110m_glaciated_areas",
+    "110m/physical/ne_110m_lakes",
+    "110m/physical/ne_110m_ocean",
+    "110m/physical/ne_110m_rivers_lake_centerlines"
+  );
   public static final String OSM_SOURCE = "osm";
   /** Index to efficiently find the imposm3 "table row" constructor from an OSM element based on its tags. */
   private final MultiExpression.Index<RowDispatch> osmMappings;

@@ -142,7 +142,7 @@ public class WaterName implements
           importantMarinePoints.put(name, new NaturalEarthRegion(feature.worldGeometry(), scalerank));
         } catch (GeometryException e) {
           e.log(stats, "ne_marine_polys",
-            "Error getting geometry for natural earth feature " + table + " " + feature.getTag("ogc_fid"));
+            "Error getting geometry for natural earth feature " + table + " " + feature.getTag("ne_id"));
         }
       }
     }

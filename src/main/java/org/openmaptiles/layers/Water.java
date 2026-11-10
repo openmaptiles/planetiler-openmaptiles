@@ -146,7 +146,7 @@ public class Water implements
         }
       } catch (GeometryException e) {
         e.log(stats, "omt_water_ne",
-          "Error getting geometry for natural earth feature " + table + " " + feature.getTag("ogc_fid"));
+          "Error getting geometry for natural earth feature " + table + " " + feature.getTag("ne_id"));
         // make sure we have this NE lake even if without OSM ID
         setupNeWaterFeature(features, lakeInfo.minZoom, lakeInfo.maxZoom, lakeInfo.clazz, null);
       }

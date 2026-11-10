@@ -196,7 +196,7 @@ public class Place implements
       }
     } catch (GeometryException e) {
       e.log(stats, "omt_place_ne",
-        "Error getting geometry for natural earth feature " + table + " " + feature.getTag("ogc_fid"));
+        "Error getting geometry for natural earth feature " + table + " " + feature.getTag("ne_id"));
     }
   }
 

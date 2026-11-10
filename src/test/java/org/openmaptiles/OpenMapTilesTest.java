@@ -13,7 +13,6 @@ import com.onthegomap.planetiler.archive.Tile;
 import com.onthegomap.planetiler.config.Arguments;
 import com.onthegomap.planetiler.mbtiles.Mbtiles;
 import com.onthegomap.planetiler.reader.FileFormatException;
-import com.onthegomap.planetiler.util.FileUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;

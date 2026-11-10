@@ -4,6 +4,7 @@ import static com.onthegomap.planetiler.TestUtils.assertContains;
 import static com.onthegomap.planetiler.TestUtils.assertFeatureNear;
 import static com.onthegomap.planetiler.util.Gzip.gunzip;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import com.onthegomap.planetiler.TestUtils;
@@ -11,6 +12,7 @@ import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.archive.Tile;
 import com.onthegomap.planetiler.config.Arguments;
 import com.onthegomap.planetiler.mbtiles.Mbtiles;
+import com.onthegomap.planetiler.reader.FileFormatException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
@@ -47,7 +49,9 @@ class OpenMapTilesTest {
   public static void runPlanetiler() throws Exception {
     Path dbPath = tmpDir.resolve("output.mbtiles");
     var osmPath = TestUtils.extractPathToResource(tmpDir, "monaco-latest.osm.pbf");
-    var naturalEarthPath = TestUtils.extractPathToResource(tmpDir, "natural_earth_vector.sqlite.zip");
+    // the Natural Earth tables clipped to Monaco (built with planetiler's scripts/natural-earth-test-shapefiles.sh),
+    // copied out of planetiler-core's test jar
+    var naturalEarthPath = TestUtils.extractPathToResource(tmpDir, "natural_earth_shapefiles.zip");
     var waterPath = TestUtils.extractPathToResource(tmpDir, "water_polygons.parquet");
     var lakeCenterlinesPath = TestUtils.extractPathToResource(tmpDir, "lake_centerline.parquet");
     OpenMapTilesMain.run(Arguments.of(
@@ -222,6 +226,16 @@ class OpenMapTilesTest {
       .map(check -> dynamicTest(check.name(), () -> {
         check.error().ifPresent(Assertions::fail);
       }));
+  }
+
+  @Test
+  void testOldNaturalEarthSqliteFailsWithHint() {
+    var sqlitePath = TestUtils.extractPathToResource(tmpDir, "natural_earth_vector.sqlite.zip");
+    var arguments = Arguments.of("natural_earth_path", sqlitePath, "osm_path", tmpDir.resolve("monaco-latest.osm.pbf"));
+
+    var exception = assertThrows(FileFormatException.class, () -> OpenMapTilesMain.run(arguments));
+    assertContains("natural_earth_vector.sqlite.zip is missing 22 of the 22 shapefiles needed", exception.getMessage());
+    assertContains("set --natural-earth-path to a directory to download them into", exception.getMessage());
   }
 
   private static void assertNumFeatures(String layer, Map<String, Object> attrs, int zoom,

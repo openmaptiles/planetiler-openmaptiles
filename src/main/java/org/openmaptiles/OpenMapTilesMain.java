@@ -2,6 +2,7 @@ package org.openmaptiles;
 
 import com.onthegomap.planetiler.Planetiler;
 import com.onthegomap.planetiler.config.Arguments;
+import com.onthegomap.planetiler.reader.ShapefileOptions;
 import java.nio.file.Path;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.slf4j.Logger;
@@ -47,11 +48,15 @@ public class OpenMapTilesMain {
       .addParquetSource(OpenMapTilesProfile.WATER_POLYGON_SOURCE,
         sourcesDir.resolve("water_polygons.parquet"),
         "https://planetiler.onthegomap.com/water_polygons.parquet")
-      .addNaturalEarthSource(OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
-        sourcesDir.resolve("natural_earth_vector.sqlite.zip"),
-        // upstream is at https://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip ,
-        // following is same URL as used in the OpenMapTiles, a mirror maintained by MapTiler
-        "https://dev.maptiler.download/geodata/omt/natural_earth_vector.sqlite.zip")
+      // Upstream: https://www.naturalearthdata.com/downloads/
+      // --natural_earth_path can also point to the full zip file containing every table, downloaded manually from
+      // https://naciscdn.org/naturalearth/packages/natural_earth_vector.zip
+      .addShapefileMultiUrlSource(OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+        sourcesDir.resolve("natural_earth"),
+        OpenMapTilesProfile.NATURAL_EARTH_TABLES.stream()
+          .map(table -> "https://naciscdn.org/naturalearth/" + table + ".zip").toList(),
+        // match natural earth sqlite attribute names/values
+        ShapefileOptions.builder().lowercaseAttributeNames(true).emptyStringsAsNull(true).build())
       .addOsmSource(OpenMapTilesProfile.OSM_SOURCE,
         sourcesDir.resolve(area.replaceAll("[^a-zA-Z]+", "_") + ".osm.pbf"),
         "planet".equalsIgnoreCase(area) ? ("aws:latest") : ("geofabrik:" + area))

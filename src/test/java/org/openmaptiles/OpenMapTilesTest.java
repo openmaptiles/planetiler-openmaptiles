@@ -53,16 +53,14 @@ class OpenMapTilesTest {
     // the Natural Earth tables clipped to Monaco (built with planetiler's scripts/natural-earth-test-shapefiles.sh),
     // copied out of planetiler-core's test jar
     var naturalEarthPath = TestUtils.extractPathToResource(tmpDir, "natural_earth_shapefiles.zip");
-    var waterPath = tmpDir.resolve("water");
-    // windows seems to have trouble closing zip file after reading from it, so extract first instead
-    FileUtils.unzipResource("/water-polygons-split-3857.zip", waterPath);
+    var waterPath = TestUtils.extractPathToResource(tmpDir, "water_polygons.parquet");
+    var lakeCenterlinesPath = TestUtils.extractPathToResource(tmpDir, "lake_centerline.parquet");
     OpenMapTilesMain.run(Arguments.of(
       // Override input source locations
       "osm_path", osmPath,
       "natural_earth_path", naturalEarthPath,
       "water_polygons_path", waterPath,
-      // no centerlines in monaco - so fake it out with an empty source
-      "lake_centerlines_path", waterPath,
+      "lake_centerlines_path", lakeCenterlinesPath,
 
       // Override temp dir location
       "tmpdir", tmpDir.resolve("tmp"),

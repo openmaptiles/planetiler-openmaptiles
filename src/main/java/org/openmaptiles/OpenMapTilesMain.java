@@ -38,14 +38,16 @@ public class OpenMapTilesMain {
       // override any of these with arguments: --osm_path=... or --osm_url=...
       // or OSM_PATH=... OSM_URL=... environmental argument
       // or osm_path=... osm_url=... in a config file
-      .addShapefileSource("EPSG:3857", OpenMapTilesProfile.LAKE_CENTERLINE_SOURCE,
-        sourcesDir.resolve("lake_centerline.shp.zip"),
-        // upstream is at https://github.com/acalcutt/osm-lakelines/releases/download/latest/lake_centerline.shp.zip ,
-        // following is same URL as used in the OpenMapTiles (but SHP format), a mirror maintained by MapTiler
-        "https://dev.maptiler.download/geodata/omt/lake_centerline.shp.zip")
-      .addShapefileSource(OpenMapTilesProfile.WATER_POLYGON_SOURCE,
-        sourcesDir.resolve("water-polygons-split-3857.zip"),
-        "https://osmdata.openstreetmap.de/download/water-polygons-split-3857.zip")
+      // Only download the bytes needed from these geoparquet source based on bounds,
+      // Converted by: https://github.com/onthegomap/planetiler/blob/main/scripts/shp2parquet.py
+      // Upstream: https://github.com/acalcutt/osm-lakelines
+      .addParquetSource(OpenMapTilesProfile.LAKE_CENTERLINE_SOURCE,
+        sourcesDir.resolve("lake_centerline.parquet"),
+        "https://planetiler.onthegomap.com/lake_centerline.parquet")
+      // Upstream: https://osmdata.openstreetmap.de/data/water-polygons.html
+      .addParquetSource(OpenMapTilesProfile.WATER_POLYGON_SOURCE,
+        sourcesDir.resolve("water_polygons.parquet"),
+        "https://planetiler.onthegomap.com/water_polygons.parquet")
       // Upstream: https://www.naturalearthdata.com/downloads/
       // --natural_earth_path can also point to the full zip file containing every table, downloaded manually from
       // https://naciscdn.org/naturalearth/packages/natural_earth_vector.zip

@@ -27,6 +27,18 @@
   <name>OpenMapTiles Vector Tile Schema implementation for Planetiler tool</name>
 
   <repositories>
+    <!-- Planetiler snapshots, for features that are not released yet -->
+    <repository>
+      <id>central-snapshots</id>
+      <name>Maven Central Snapshots</name>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
     <!-- Planetiler depends on geotools for shapefile processing, which is not in maven central. Add here: -->
     <repository>
       <id>osgeo</id>

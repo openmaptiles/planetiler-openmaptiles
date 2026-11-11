@@ -60,17 +60,6 @@ jobs:
         run: ./scripts/build.sh
         working-directory: base
 
-      - name: 'Download data'
-        run: |
-          set -eo pipefail
-          # osmdata.openstreetmap.de is down, so a base that still reads water polygons from its shapefile zip gets the
-          # FAU mirror's copy instead. A base that reads GeoParquet needs nothing.
-          if grep -q water-polygons-split-3857.zip base/src/main/java/org/openmaptiles/OpenMapTilesMain.java; then
-            base_water=--water-polygons-url=https://ftp.fau.de/mirrors/openstreetmapdata.com-archive/2026-10-31/water-polygons-split-3857.zip
-          fi
-          cp base/target/*with-deps.jar run.jar && java -jar run.jar --only-download --area="${{ env.AREA }}" ${base_water:-}
-          cp branch/target/*with-deps.jar run.jar && java -jar run.jar --only-download --area="${{ env.AREA }}"
-
       - name: 'Store build info'
         run: |
           mkdir build-info
@@ -82,14 +71,14 @@ jobs:
         run: |
           rm -rf data/out.mbtiles data/tmp
           cp branch/target/*with-deps.jar run.jar
-          java -Xms${{ env.RAM }} -Xmx${{ env.RAM }} -jar run.jar --area="${{ env.AREA }}" "${{ env.BOUNDS_ARG }}" --mbtiles=data/out.mbtiles 2>&1 | tee log
+          java -Xms${{ env.RAM }} -Xmx${{ env.RAM }} -jar run.jar --area="${{ env.AREA }}" "${{ env.BOUNDS_ARG }}" --mbtiles=data/out.mbtiles --download=streaming 2>&1 | tee log
           ls -alh run.jar | tee -a log
           cat log | strip-ansi > build-info/branchlogs.txt
       - name: 'Run base'
         run: |
           rm -rf data/out.mbtiles data/tmp
           cp base/target/*with-deps.jar run.jar
-          java -Xms${{ env.RAM }} -Xmx${{ env.RAM }} -jar run.jar --area="${{ env.AREA }}" "${{ env.BOUNDS_ARG }}" --mbtiles=data/out.mbtiles 2>&1 | tee log
+          java -Xms${{ env.RAM }} -Xmx${{ env.RAM }} -jar run.jar --area="${{ env.AREA }}" "${{ env.BOUNDS_ARG }}" --mbtiles=data/out.mbtiles --download=streaming 2>&1 | tee log
           ls -alh run.jar | tee -a log
           cat log | strip-ansi > build-info/baselogs.txt
 

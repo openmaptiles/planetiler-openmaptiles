@@ -1,5 +1,6 @@
 package org.openmaptiles.layers;
 
+import static com.onthegomap.planetiler.TestUtils.newPoint;
 import static com.onthegomap.planetiler.TestUtils.rectangle;
 
 import com.onthegomap.planetiler.VectorTile;
@@ -99,6 +100,58 @@ class LanduseTest extends AbstractLayerTest {
     )), process(polygonFeature(Map.of(
       "landuse", "residential"
     ))));
+  }
+
+  @Test
+  void testNamedResidentialGetsLabelPoint() {
+    assertFeatures(10, List.of(
+      Map.of(
+        "_layer", "landuse",
+        "class", "residential",
+        "_type", "polygon"
+      ),
+      Map.of(
+        "_layer", "landuse",
+        "class", "residential",
+        "name", "Arera Colony",
+        "_type", "point",
+        "_minzoom", 10
+      )), process(polygonFeature(Map.of(
+        "landuse", "residential",
+        "name", "Arera Colony"
+      ))));
+  }
+
+  @Test
+  void testUnnamedResidentialHasNoLabelPoint() {
+    assertFeatures(10, List.of(Map.of(
+      "_layer", "landuse",
+      "class", "residential",
+      "_type", "polygon"
+    )), process(polygonFeature(Map.of(
+      "landuse", "residential"
+    ))));
+  }
+
+  @Test
+  void testNamedResidentialLabelNotMerged() throws GeometryException {
+    var poly = new VectorTile.Feature(
+      Landuse.LAYER_NAME,
+      1,
+      VectorTile.encodeGeometry(rectangle(10, 20)),
+      Map.of("class", "residential"),
+      0
+    );
+    var label = new VectorTile.Feature(
+      Landuse.LAYER_NAME,
+      2,
+      VectorTile.encodeGeometry(newPoint(15, 15)),
+      Map.of("class", "residential", "name", "Arera Colony"),
+      0
+    );
+    var result = profile.postProcessLayerFeatures(Landuse.LAYER_NAME, 12, List.of(poly, label));
+    Assertions.assertEquals(2, result.size());
+    Assertions.assertEquals(1, result.stream().filter(f -> f.tags().containsKey("name")).count());
   }
 
   @Test

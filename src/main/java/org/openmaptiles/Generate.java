@@ -57,7 +57,6 @@ public class Generate {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Generate.class);
   private static final ObjectMapper mapper = new ObjectMapper();
-  private static final Yaml yaml;
   private static final String LINE_SEPARATOR = System.lineSeparator();
   private static final String GENERATED_FILE_HEADER = """
     /*
@@ -100,13 +99,14 @@ public class Generate {
   private static final Parser parser = Parser.builder().build();
   private static final HtmlRenderer renderer = HtmlRenderer.builder().build();
 
-  static {
+  // Yaml instances are not thread-safe, so create a new one for each use.
+  private static Yaml newYaml() {
     var loadOptions = new LoaderOptions();
     // bump the default limit of 50
     loadOptions.setMaxAliasesForCollections(1_000);
     var dumpOptions = new DumperOptions();
     // SafeConstructor restricts types which can be instantiated during deserialization (CVE-2022-1471)
-    yaml = new Yaml(new SafeConstructor(loadOptions), new Representer(dumpOptions), dumpOptions, loadOptions);
+    return new Yaml(new SafeConstructor(loadOptions), new Representer(dumpOptions), dumpOptions, loadOptions);
   }
 
   private static <T> T loadAndParseYaml(String url, PlanetilerConfig config, Class<T> clazz) throws IOException {
@@ -114,7 +114,7 @@ public class Generate {
     try (var stream = Downloader.openStream(url, config)) {
       // Jackson yaml parsing does not handle anchors and references, so first parse the input
       // using SnakeYAML, then parse SnakeYAML's output using Jackson to get it into our records.
-      Map<String, Object> parsed = yaml.load(stream);
+      Map<String, Object> parsed = newYaml().load(stream);
       return mapper.convertValue(parsed, clazz);
     }
   }
@@ -122,7 +122,7 @@ public class Generate {
   static <T> T parseYaml(String string, Class<T> clazz) {
     // Jackson yaml parsing does not handle anchors and references, so first parse the input
     // using SnakeYAML, then parse SnakeYAML's output using Jackson to get it into our records.
-    Map<String, Object> parsed = yaml.load(string);
+    Map<String, Object> parsed = newYaml().load(string);
     return mapper.convertValue(parsed, clazz);
   }
 

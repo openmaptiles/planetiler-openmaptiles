@@ -22,13 +22,6 @@ public class OpenMapTilesMain {
   static void run(Arguments arguments) {
     Path dataDir = Path.of("data");
     Path sourcesDir = arguments.file("download_dir", "download directory", dataDir.resolve("sources"));
-    // use --area=... argument, AREA=... env var or area=... in config to set the region of the world to use
-    // will be ignored if osm_path or osm_url are set
-    String area = arguments.getString(
-      "area",
-      "name of the extract to download if osm_url/osm_path not specified (i.e. 'monaco' 'rhode island' 'australia' or 'planet')",
-      "monaco"
-    );
 
     Planetiler.create(arguments)
       .setDefaultLanguages(OpenMapTilesSchema.LANGUAGES)
@@ -59,9 +52,8 @@ public class OpenMapTilesMain {
           .map(table -> "https://naciscdn.org/naturalearth/" + table + ".zip").toList(),
         // match natural earth sqlite attribute names/values
         ShapefileOptions.builder().lowercaseAttributeNames(true).emptyStringsAsNull(true).build())
-      .addOsmSource(OpenMapTilesProfile.OSM_SOURCE,
-        sourcesDir.resolve(area.replaceAll("[^a-zA-Z]+", "_") + ".osm.pbf"),
-        "planet".equalsIgnoreCase(area) ? ("aws:latest") : ("geofabrik:" + area))
+      // use --area=... argument, to set the region of the world to use if osm_path/osm_url are not set explicitly
+      .addOsmSourceForArea(OpenMapTilesProfile.OSM_SOURCE, sourcesDir, "monaco")
       // override with --mbtiles=... argument or MBTILES=... env var or mbtiles=... in a config file
       .setOutput("mbtiles", dataDir.resolve("output.mbtiles"))
       .run();

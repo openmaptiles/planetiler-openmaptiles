@@ -19,7 +19,7 @@ public class OpenMapTilesMain {
     run(Arguments.fromArgsOrConfigFile(args));
   }
 
-  static void run(Arguments arguments) throws Exception {
+  static void run(Arguments arguments) {
     Path dataDir = Path.of("data");
     Path sourcesDir = arguments.file("download_dir", "download directory", dataDir.resolve("sources"));
     // use --area=... argument, AREA=... env var or area=... in config to set the region of the world to use
@@ -35,6 +35,8 @@ public class OpenMapTilesMain {
       .fetchWikidataNameTranslations(sourcesDir.resolve("wikidata_names.json"))
       // defer creation of the profile because it depends on data from the runner
       .setProfile(OpenMapTilesProfile::new)
+      // read small sources together in a shared pool of workers before OSM starts
+      .readSourcesTogether()
       // override any of these with arguments: --osm_path=... or --osm_url=...
       // or OSM_PATH=... OSM_URL=... environmental argument
       // or osm_path=... osm_url=... in a config file

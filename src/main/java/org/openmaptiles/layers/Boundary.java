@@ -139,12 +139,12 @@ public class Boundary implements
     this.config = config;
     this.addCountryNames = config.arguments().getBoolean(
       "boundary_country_names",
-      "boundary layer: add left/right codes of neighboring countries",
+      "boundary: add codes of the countries on each side",
       true
     );
     this.onlyOsmBoundaries = config.arguments().getBoolean(
       "boundary_osm_only",
-      "boundary layer: only use OSM, even at low zoom levels",
+      "boundary: only use OSM, even at low zooms",
       false
     );
     this.stats = stats;

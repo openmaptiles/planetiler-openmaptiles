@@ -21,7 +21,7 @@ public class OpenMapTilesMain {
 
   static void run(Arguments arguments) {
     Path dataDir = Path.of("data");
-    Path sourcesDir = arguments.file("download_dir", "download directory", dataDir.resolve("sources"));
+    Path sourcesDir = arguments.file("download_dir", "where downloaded sources go", dataDir.resolve("sources"));
 
     Planetiler.create(arguments)
       .setDefaultLanguages(OpenMapTilesSchema.LANGUAGES)

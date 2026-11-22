@@ -120,12 +120,12 @@ public class Building implements
   public Building(Translations translations, PlanetilerConfig config, Stats stats) {
     this.mergeZ13Buildings = config.arguments().getBoolean(
       "building_merge_z13",
-      "building layer: merge nearby buildings at z13",
+      "building: merge nearby buildings at z13",
       true
     );
     this.hideOutlinesWithParts = config.arguments().getBoolean(
       "building_hide_outlines_with_parts",
-      "building layer: set hide_3d on buildings that are mostly covered by building parts",
+      "building: set hide_3d on buildings mostly covered by building parts",
       false
     );
   }

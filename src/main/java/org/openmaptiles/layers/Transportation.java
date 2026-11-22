@@ -191,7 +191,7 @@ public class Transportation implements
     this.stats = stats;
     z13Paths = config.arguments().getBoolean(
       "transportation_z13_paths",
-      "transportation(_name) layer: show all paths on z13",
+      "transportation: show all paths at z13",
       false
     );
     MINZOOMS = Map.ofEntries(

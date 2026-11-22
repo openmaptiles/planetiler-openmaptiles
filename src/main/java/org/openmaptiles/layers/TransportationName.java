@@ -128,22 +128,22 @@ public class TransportationName implements
     this.translations = translations;
     this.brunnel = config.arguments().getBoolean(
       "transportation_name_brunnel",
-      "transportation_name layer: set to false to omit brunnel and help merge long highways",
+      "transportation_name: keep brunnel (false helps merge long highways)",
       false
     );
     this.sizeForShield = config.arguments().getBoolean(
       "transportation_name_size_for_shield",
-      "transportation_name layer: allow road names on shorter segments (ie. they will have a shield)",
+      "transportation_name: allow names on shorter segments (with a shield)",
       false
     );
     this.limitMerge = config.arguments().getBoolean(
       "transportation_name_limit_merge",
-      "transportation_name layer: limit merge so we don't combine different relations to help merge long highways",
+      "transportation_name: don't merge across different relations",
       false
     );
     this.minorRefs = config.arguments().getBoolean(
       "transportation_name_minor_refs",
-      "transportation_name layer: include name and refs from minor road networks if not present on a way",
+      "transportation_name: names and refs from minor road networks",
       false
     );
   }

@@ -57,6 +57,7 @@ import java.util.TreeMap;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
+import org.openmaptiles.util.OmtLanguageUtils;
 
 /**
  * Defines the logic for generating map elements for man-made land use polygons like cemeteries, zoos, and hospitals in
@@ -91,7 +92,11 @@ public class Landuse implements
     FieldValues.CLASS_NEIGHBOURHOOD
   );
 
-  public Landuse(Translations translations, PlanetilerConfig config, Stats stats) {}
+  private final Translations translations;
+
+  public Landuse(Translations translations, PlanetilerConfig config, Stats stats) {
+    this.translations = translations;
+  }
 
   @Override
   public void processNaturalEarth(String table, SourceFeature feature, FeatureCollector features) {
@@ -125,6 +130,13 @@ public class Landuse implements
         feature
           .setMinPixelSize(0.1)
           .setPixelTolerance(0.25);
+        // residential polygons get merged in postProcess, so emit a separate label point to keep the name
+        if (nullIfEmpty(element.source().getString("name")) != null) {
+          features.pointOnSurface(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
+            .setAttr(Fields.CLASS, clazz)
+            .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
+            .setMinZoom(10);
+        }
       } else {
         feature
           .setMinPixelSizeOverrides(MIN_PIXEL_SIZE_THRESHOLDS);
@@ -138,7 +150,7 @@ public class Landuse implements
     List<VectorTile.Feature> toMerge = new ArrayList<>();
     List<VectorTile.Feature> result = new ArrayList<>();
     for (var item : items) {
-      if (FieldValues.CLASS_RESIDENTIAL.equals(item.tags().get(Fields.CLASS))) {
+      if (FieldValues.CLASS_RESIDENTIAL.equals(item.tags().get(Fields.CLASS)) && !item.tags().containsKey("name")) {
         toMerge.add(item);
       } else {
         result.add(item);

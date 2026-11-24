@@ -84,6 +84,7 @@ import org.openmaptiles.generated.Tables;
 import org.openmaptiles.util.OmtLanguageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 /**
  * Defines the logic for generating map elements for country, state, and town boundaries in the {@code boundary} layer
@@ -440,7 +441,7 @@ public class Boundary implements
 
   /** Returns a map from region ID to prepared geometry optimized for {@code contains} queries. */
   private LongObjectMap<PreparedGeometry> prepareRegionPolygons() {
-    LOGGER.info("Creating polygons for " + regionGeometries.size() + " boundaries");
+    LOGGER.debug("Creating polygons for {} boundaries", regionGeometries.size());
     LongObjectMap<PreparedGeometry> countryBoundaries = Hppc.newLongObjectHashMap();
     for (var entry : regionGeometries.entrySet()) {
       Long regionId = entry.getKey();
@@ -449,7 +450,9 @@ public class Boundary implements
       try {
         Geometry combined = polygonizer.getGeometry().union();
         if (combined.isEmpty()) {
-          LOGGER.warn("Unable to form closed polygon for OSM relation " + regionId + " (likely missing edges)");
+          // In an extract, relations that cross its edge can't form a closed polygon, so only the planet warns.
+          LOGGER.atLevel(config.bounds().isWorld() ? Level.WARN : Level.DEBUG)
+            .log("Unable to form closed polygon for OSM relation {} (likely missing edges)", regionId);
         } else {
           countryBoundaries.put(regionId, PreparedGeometryFactory.prepare(combined));
         }
@@ -458,7 +461,7 @@ public class Boundary implements
           .warn("Unable to build boundary polygon for OSM relation " + regionId + ": " + e.getMessage());
       }
     }
-    LOGGER.info("Finished creating " + countryBoundaries.size() + " country polygons");
+    LOGGER.debug("Finished creating {} country polygons", countryBoundaries.size());
     return countryBoundaries;
   }
 

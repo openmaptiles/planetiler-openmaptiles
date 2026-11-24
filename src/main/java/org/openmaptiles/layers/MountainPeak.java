@@ -158,7 +158,7 @@ public class MountainPeak implements
   private boolean peakInAreaUsingFeet(Tables.OsmPeakPoint element) {
     if (unitedStates == null) {
       if (!loggedNoUS.get() && loggedNoUS.compareAndSet(false, true)) {
-        LOGGER.warn("No US polygon for inferring mountain_peak customary_ft tag");
+        LOGGER.debug("No US polygon for inferring mountain_peak customary_ft tag");
       }
     } else {
       try {

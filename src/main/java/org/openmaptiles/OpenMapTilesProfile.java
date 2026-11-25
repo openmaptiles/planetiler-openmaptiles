@@ -220,8 +220,8 @@ public class OpenMapTilesProfile extends ForwardingProfile {
 
   @Override
   public long estimateOutputBytes(long osmFileSize) {
-    // in late 2021, a 60gb OSM file generated a 100GB output file
-    return osmFileSize * 100 / 60;
+    // in late 2026, a 100GB planet OSM file generated an 86GB output file
+    return osmFileSize;
   }
 
   @Override

@@ -208,7 +208,7 @@ public class Poi implements
     Consumer<FeatureCollector.Feature> emit) {
     if (OpenMapTilesProfile.OSM_SOURCE.equals(sourceName)) {
       var timer = stats.startStage("agg_stop");
-      LOGGER.info("Processing {} agg_stop sets", aggStops.size());
+      LOGGER.debug("Processing {} agg_stop sets", aggStops.size());
 
       for (var aggStopSet : aggStops.values()) {
         if (aggStopSet.size() == 1) {

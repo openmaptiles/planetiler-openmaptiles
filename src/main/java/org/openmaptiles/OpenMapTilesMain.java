@@ -5,15 +5,11 @@ import com.onthegomap.planetiler.config.Arguments;
 import com.onthegomap.planetiler.reader.ShapefileOptions;
 import java.nio.file.Path;
 import org.openmaptiles.generated.OpenMapTilesSchema;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Main entrypoint for generating a map using the OpenMapTiles schema.
  */
 public class OpenMapTilesMain {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(OpenMapTilesMain.class);
 
   public static void main(String[] args) throws Exception {
     run(Arguments.fromArgsOrConfigFile(args));
@@ -56,16 +52,15 @@ public class OpenMapTilesMain {
       .addOsmSourceForArea(OpenMapTilesProfile.OSM_SOURCE, sourcesDir, "monaco")
       // override with --mbtiles=... argument or MBTILES=... env var or mbtiles=... in a config file
       .setOutput("mbtiles", dataDir.resolve("output.mbtiles"))
+      .setAcknowledgments("""
+        Acknowledgments
+        Generated vector tiles are produced work of OpenStreetMap data.
+        Such tiles are reusable under CC-BY license granted by OpenMapTiles team:
+        - https://github.com/openmaptiles/openmaptiles/#license
+        Maps made with these vector tiles must display a visible credit:
+        - © OpenMapTiles © OpenStreetMap contributors
+        Thanks to all free, open source software developers and Open Data Contributors!
+        """)
       .run();
-
-    LOGGER.info("""
-      Acknowledgments
-      Generated vector tiles are produced work of OpenStreetMap data.
-      Such tiles are reusable under CC-BY license granted by OpenMapTiles team:
-      - https://github.com/openmaptiles/openmaptiles/#license
-      Maps made with these vector tiles must display a visible credit:
-      - © OpenMapTiles © OpenStreetMap contributors
-      Thanks to all free, open source software developers and Open Data Contributors!
-      """);
   }
 }

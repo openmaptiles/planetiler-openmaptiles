@@ -220,14 +220,15 @@ public class OpenMapTilesProfile extends ForwardingProfile {
 
   @Override
   public long estimateOutputBytes(long osmFileSize) {
-    // in late 2021, a 60gb OSM file generated a 100GB output file
-    return osmFileSize * 100 / 60;
+    // in late 2026, a 100GB planet OSM file generated an 86GB output file
+    return osmFileSize;
   }
 
   @Override
   public long estimateRamRequired(long osmFileSize) {
-    // 20gb for a 67gb OSM file is safe, although less might be OK too
-    return osmFileSize * 20 / 67;
+    // The planet (~100GB OSM file) runs in about 6GB of heap with the node map in a memory-mapped file. Keep this
+    // low enough that the check still passes with a 3GB heap on a 4GB machine, since it is only an estimate.
+    return osmFileSize * 4 / 100;
   }
 
   /**

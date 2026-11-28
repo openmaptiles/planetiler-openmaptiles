@@ -31,9 +31,9 @@ jobs:
         run: echo "::set-output name=pr_number::$(cat build-info/pull_request_number)"
       - name: 'Build comment-body'
         run: |
-          cat build-info/branchlogs.txt | sed -n '/^.*Tile stats/,$p' > branchsummary.txt
+          cat build-info/branchlogs.txt | sed -n '/^.*Tile stats/,/^Wrote /p' > branchsummary.txt
           cat build-info/branchlogs.txt | sed -n '/^.*Exception in thread/,$p' >> branchsummary.txt
-          cat build-info/baselogs.txt | sed -n '/^.*Tile stats:/,$p' > basesummary.txt
+          cat build-info/baselogs.txt | sed -n '/^.*Tile stats:/,/^Wrote /p' > basesummary.txt
           cat build-info/baselogs.txt | sed -n '/^.*Exception in thread/,$p' >> basesummary.txt
 
           cat << EOF > comment-body.txt
@@ -54,7 +54,7 @@ jobs:
           <td>
 
           \`\`\`
-          $(cat build-info/branchlogs.txt | sed -n '/^.*Tile stats:/,$p')
+          $(cat build-info/branchlogs.txt | sed -n '/^.*Tile stats:/,/^Wrote /p')
           \`\`\`
           </td>
           </tr>

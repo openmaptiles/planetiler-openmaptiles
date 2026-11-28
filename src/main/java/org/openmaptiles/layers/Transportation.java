@@ -421,7 +421,7 @@ public class Transportation implements
       if (refMatcher.find()) {
         if (greatBritain == null) {
           if (!loggedNoGb.get() && loggedNoGb.compareAndSet(false, true)) {
-            LOGGER.warn("No GB polygon for inferring route network types");
+            LOGGER.debug("No GB polygon for inferring route network types");
           }
         } else {
           try {
@@ -449,7 +449,7 @@ public class Transportation implements
       if (refMatcher.find()) {
         if (ireland == null) {
           if (!loggedNoIreland.get() && loggedNoIreland.compareAndSet(false, true)) {
-            LOGGER.warn("No IE polygon for inferring route network types");
+            LOGGER.debug("No IE polygon for inferring route network types");
           }
         } else {
           try {
